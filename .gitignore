@@ -1,5 +1,9 @@
 log/*.log
 tmp/**/*
+
+flowclient
+flowserver
+
 *.a
 *.o
 
