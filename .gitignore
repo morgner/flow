@@ -4,11 +4,9 @@ tmp/**/*
 flowclient
 flowserver
 
-*.a
-*.o
+*.[ao]
 
 .hg
 .hgignore
-
 .DS_Store
 
