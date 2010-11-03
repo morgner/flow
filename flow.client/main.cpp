@@ -35,7 +35,7 @@ $Id: main.cpp,v 1.6 2010/10/29 17:15:44 morgner Exp $
 
 #include <iostream>
 
-int main()
+int main( int argc, char* argv[] )
   {
   CDomain oDomain;
   CPulex* poPulex;
@@ -55,9 +55,15 @@ int main()
   *p << "additional data";
 */
 
+  std::string sHost = "localhost";
+  if ( argc > 1 )
+    {
+    sHost = argv[1];
+    }
+
   try
     {
-    CSocketClient oConnection( "localhost", 30000 );
+    CSocketClient oConnection( sHost, 30000 );
     
     std::string sData;
     std::string sInput;
