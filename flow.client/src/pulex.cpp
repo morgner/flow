@@ -66,12 +66,10 @@ CSocket& operator << (CSocket& oStream, CPulex& oPulex )
   oStream << scn_local_id      << ":" << oPulex.LocalIdGet()     << "\n";
   oStream << scn_local_id_time << ":" << oPulex.LocalIdTimeGet() << "\n";
   oStream << scn_remote_id     << ":" << oPulex.RemoteIdGet()    << "\n";
-  oStream << "===data-begin===\n";
   for ( CPulex::iterator it=oPulex.begin(); it != oPulex.end(); ++it )
     {
     oStream << scn_content_text << ":" << *it << "\n";
     }
-  oStream << "===data-end===\n";
   return oStream;
   }
 
