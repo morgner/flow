@@ -1,0 +1,10 @@
+log/*.log
+tmp/**/*
+*.a
+*.o
+
+.hg
+.hgignore
+
+.DS_Store
+

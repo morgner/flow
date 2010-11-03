@@ -1,0 +1,57 @@
+/***************************************************************************
+ socketexception.h
+ -----------------------
+ begin                 : Fri Oct 29 2010
+ copyright             : Copyright (C) 2010 by Manfred Morgner
+ email                 : manfred@morgner.com
+ 
+$Id: socketexception.h,v 1.6 2010/10/29 17:15:44 morgner Exp $
+ ***************************************************************************/
+
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *                                                                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place Suite 330,                                            *
+ *   Boston, MA  02111-1307, USA.                                          *
+ *                                                                         *
+ ***************************************************************************/
+
+#ifndef _SOCKET_EXCEPTION_H
+#define _SOCKET_EXCEPTION_H
+
+#include <string>
+
+#pragma GCC visibility push(default)
+
+class CSocketException
+  {
+  protected:
+             CSocketException();
+  public:
+             CSocketException( const std::string& s );
+    virtual ~CSocketException();
+
+  public:
+    const std::string& Info();
+
+  private:
+    std::string m_sDescription;
+
+  }; // class CSocketException
+
+#pragma GCC visibility pop
+
+#endif // _SOCKET_EXCEPTION_H
