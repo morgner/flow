@@ -30,9 +30,9 @@ $Id: container.h,v 1.6 2010/10/29 17:15:44 morgner Exp $
  ***************************************************************************/
 
 
-#include <string>
 #include <map>
 #include <list>
+#include <string>
 
 typedef std::list<std::string> CData;         // x:*
 typedef std::list<std::string> CReceiverList; // d:*
@@ -65,3 +65,4 @@ class CContainer : public std::map<char, std::string>
     const std::string& operator += ( const std::string& rsElement );
 
   }; // class CContainer
+

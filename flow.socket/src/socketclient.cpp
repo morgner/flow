@@ -43,3 +43,4 @@ CSocketClient::CSocketClient( const std::string& sHost, int nPort )
 CSocketClient::~CSocketClient()
   {
   }
+

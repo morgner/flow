@@ -49,3 +49,4 @@ const std::string& CSocketException::Info()
   {
   return m_sDescription;
   }
+

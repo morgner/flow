@@ -65,7 +65,7 @@ void* threadReadSocket(void* pParam);
  
  */
 
-int main ( int argc, int argv[] )
+int main ( int argc, char* argv[] )
   {
   try // server bind ...
     {

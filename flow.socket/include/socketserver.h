@@ -48,3 +48,4 @@ class CSocketServer : public CSocket
 #pragma GCC visibility pop
 
 #endif // _SOCKET_SERVER_H
+

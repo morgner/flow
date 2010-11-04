@@ -280,3 +280,4 @@ bool CSocket::isValid() const
   {
   return m_nSock != -1;
   }
+

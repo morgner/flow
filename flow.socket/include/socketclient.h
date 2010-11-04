@@ -49,3 +49,4 @@ class CSocketClient : public CSocket
 #pragma GCC visibility pop
 
 #endif // _SOCKET_CLIENT_H
+

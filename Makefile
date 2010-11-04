@@ -1,9 +1,9 @@
 
-CC = g++
+CC = clang
 
 # SOCKET_LIBS = -lnsl
-SERVER_LIBS = -lflowsocket -lpthread
-CLIENT_LIBS = -lflowsocket
+SERVER_LIBS = -lflowsocket -lstdc++ -lpthread
+CLIENT_LIBS = -lflowsocket -lstdc++
 
 SOCKET_PATH = flow.socket
 SERVER_PATH = flow.server
@@ -13,10 +13,7 @@ SOCKET_INC = -I$(SOCKET_PATH)/include
 SERVER_INC = -I$(SERVER_PATH)/include -I$(SOCKET_PATH)/include
 CLIENT_INC = -I$(CLIENT_PATH)/include -I$(SOCKET_PATH)/include
 
-SOCKET_CFLAGS = -c -Wall $(SOCKET_INC)
-SERVER_CFLAGS = -c -Wall $(SERVER_INC)
-CLIENT_CFLAGS = -c -Wall $(CLIENT_INC)
-CFLAGS = -c -O2 -Wall $(SOCKET_INC) $(SERVER_INC) $(CLIENT_INC) -pedantic
+CFLAGS = -c -O3 -Wall -pedantic
 
 LDFLAGS  = -L.
 
@@ -46,8 +43,8 @@ $(CLIENT): $(CLIENT_OBJ) $(SOCKET)
 	$(CC) $(CLIENT_OBJ) $(LDFLAGS) $(CLIENT_LIBS) -o $@
 
 .cpp.o:
-	$(CC) $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $< -o $@ $(SOCKET_INC) $(SERVER_INC) $(CLIENT_INC)
 
 clean: 
-	rm $(SOCKET_OBJ) $(SERVER_OBJ) $(CLIENT_OBJ) $(SOCKET) $(SERVER) $(CLIENT)
+	rm -f $(SOCKET_OBJ) $(SERVER_OBJ) $(CLIENT_OBJ) $(SOCKET) $(SERVER) $(CLIENT)
 

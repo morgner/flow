@@ -96,3 +96,4 @@ const std::string& CContainer::operator += ( const std::string& rsElement )
 
   return rsElement;
   }
+

@@ -51,3 +51,4 @@ class CSession : public std::list<CContainer*>
     operator CSocket* ();
   
   }; // class CSession
+

@@ -55,3 +55,4 @@ class CSocketException
 #pragma GCC visibility pop
 
 #endif // _SOCKET_EXCEPTION_H
+
