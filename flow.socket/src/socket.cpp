@@ -50,6 +50,7 @@ CSocket::~CSocket()
   if ( isValid() )
     {
     ::close(m_nSock);
+    m_nSock = INVALID_SOCKET;
     }
   }
 
@@ -172,7 +173,7 @@ void CSocket::Close( )
     throw CSocketException( "Could not 'close' in CSocket::Close()." );
     }
 
-  m_nSock = -1;
+  m_nSock = INVALID_SOCKET;
   }
 
 
@@ -278,6 +279,6 @@ void CSocket::Connect(const std::string sHost,
 
 bool CSocket::isValid() const
   {
-  return m_nSock != -1;
+  return m_nSock != INVALID_SOCKET;
   }
 

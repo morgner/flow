@@ -107,10 +107,10 @@ int main ( int argc, char* argv[] )
  
    ------------------------------------------------------------------------- */
 void* threadReadSocket(void* pParam)
-{
+  {
   CSession* poSession = (CSession*) pParam;
   CSocket*  poSocket  = (CSocket*)*poSession;
-  
+
   std::string sData;
   std::string sInput;
   do
@@ -124,7 +124,7 @@ void* threadReadSocket(void* pParam)
       std::cout << "Exception: " << e.Info() << std::endl;
       }
     sData += sInput;
-    } while ( sData.find("\r") == std::string::npos );
+    } while ( sData.rfind("\r") == std::string::npos );
 
   /// a list to collect containers
   typedef std::list<CContainer*> CContainerList;
@@ -166,17 +166,20 @@ void* threadReadSocket(void* pParam)
       }
     g_oContainerMapByCLUID[ sKey ] = *it;
     }
-  
+
+  std::cout << oContainerList.size() << " elements received ";
+  std::cout << g_oContainerMapByCLUID.size() << " elements total here." << std::endl;
+/*  
   for ( CContainerMapByCLUID::iterator it = g_oContainerMapByCLUID.begin(); 
        it != g_oContainerMapByCLUID.end(); 
        ++it )
     {
-    *poSocket << (*it).second->RGUIDGet() << "\n";
-    *poSocket << (*it).second->CLUIDGet() << "\n";
+    *poSocket << it->second->RGUIDGet() << "\n";
+    *poSocket << it->second->CLUIDGet() << "\n";
     }
-  
+ */
   *poSocket << ".\r";
-  //  delete poSession;
+  delete poSession;
 
   pthread_exit( NULL );
 } // threadReadSocket

@@ -43,13 +43,16 @@ int main( int argc, char* argv[] )
   oDomain += poPulex = new CPulex();
   *poPulex << "Daten";
 
-  oDomain += poPulex = new CPulex();
-  *poPulex << "Senden";
-
+  for ( int i=0; i < 2; i++)
+    {
+    oDomain += poPulex = new CPulex();
+    *poPulex << "Senden";
+    }
+/*
   oDomain += poPulex = new CPulex();
   *poPulex << "und";
   *poPulex << "Empfangen";
-  
+*/
 /*
   CPulex* p = *(--oDomain.end());
   *p << "additional data";

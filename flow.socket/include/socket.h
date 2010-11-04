@@ -54,9 +54,9 @@ template <typename T>
     return sout.str();
     }
 
-
-const int CLIENT_BACKLOG      = 3;
-const int RECEIVE_BUFFER_SIZE = 1025;
+const int INVALID_SOCKET      = -1;
+const int CLIENT_BACKLOG      =  3;
+const int RECEIVE_BUFFER_SIZE =  1025;
 
 #pragma GCC visibility push(default)
 
@@ -93,7 +93,7 @@ class CSocket
     CAddrInet m_tAddr;
 
   public:
-             CSocket( const int nSock = -1 );
+             CSocket( const int nSock = INVALID_SOCKET );
     virtual ~CSocket();
   
     void     Create ();
