@@ -69,10 +69,7 @@ int main ( int argc, char* argv[] )
       {
       try // accept 
         {
-        CSocket* poSocket = server.Accept();
-        
-        (new CPartner())->Communicate( poSocket );
-
+        (new CPartner())->Communicate( server.Accept() );
         } // try  -  accept
       catch ( CSocketException& e )
         {
