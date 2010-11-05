@@ -1,11 +1,11 @@
 /***************************************************************************
- main.cpp
+ partner.h - description
  -----------------------
- begin                 : Fri Oct 29 2010
+ begin                 : Fri Nov 05 2010
  copyright             : Copyright (C) 2010 by Manfred Morgner
  email                 : manfred@morgner.com
  
-$Id: main.cpp,v 1.6 2010/10/29 17:15:44 morgner Exp $
+$Id: partner.h,v 1.6 2010/11/05 00:15:44 morgner Exp $
  ***************************************************************************/
 
 /***************************************************************************
@@ -30,61 +30,30 @@ $Id: main.cpp,v 1.6 2010/10/29 17:15:44 morgner Exp $
  ***************************************************************************/
 
 
-#include <string>
-#include <list>
-#include <map>
+#include "socket.h"
 
-#include <iostream>
+#include <pthread.h>
 
-#include "socketserver.h"
-#include "socketexception.h"
-
-#include "session.h"
-
-#include "partner.h"
-
-
-
-long                 g_lLastRemoteId = 100;
-CContainerMapByCLUID g_oContainerMapByCLUID;
-
-/*
- 
- get next|all
- 
- from     sender/key
- since    client-timeval/cluid
- for      user/key
- elements new|updates|all
- 
- */
-
-int main ( int argc, char* argv[] )
+class CPartner
   {
-  try // server bind ...
-    {
-    CSocketServer server( 30000 );
-    std::cout << "Waiting for clients..." << std::endl;
-    while ( true )
-      {
-      try // accept 
-        {
-        CSocket* poSocket = server.Accept();
-        
-        (new CPartner())->Communicate( poSocket );
+  protected:
+    volatile bool   m_bStopRequested;
+    volatile bool   m_bRunning;
+    pthread_mutex_t m_tMutex;
+    pthread_t       m_tThread;
 
-        } // try  -  accept
-      catch ( CSocketException& e )
-        {
-        std::cout << "Exception: " << e.Info() << "\nExiting.\n";
-        } // catch  -  accept
-      } // while ( true )
-    } // try  -  server bind ...
-  catch ( CSocketException& e )
-    {
-    std::cout << "Exception: " << e.Info() << "\nExiting.\n";
-    } // catch  -  server bind ...
+    CSocket*        m_poSocket;  
   
-  return 0;
-  } // main
+  public:
+    CPartner();
+   ~CPartner();
+  
+    void Communicate( CSocket* poSocket );
+    void Stop();
 
+  protected:
+    static void* thread( void* );
+
+    void Action();
+
+  }; // class CPartner

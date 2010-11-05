@@ -43,7 +43,7 @@ int main( int argc, char* argv[] )
   oDomain += poPulex = new CPulex();
   *poPulex << "Daten";
 
-  for ( int i=0; i < 2; i++)
+  for ( int i=0; i < 2000; i++)
     {
     oDomain += poPulex = new CPulex();
     *poPulex << "Senden";

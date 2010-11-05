@@ -37,6 +37,9 @@ $Id: container.h,v 1.6 2010/10/29 17:15:44 morgner Exp $
 typedef std::list<std::string> CData;         // x:*
 typedef std::list<std::string> CReceiverList; // d:*
 
+class CContainer;
+typedef std::map <std::string, CContainer*> CContainerMapByCLUID;
+
 class CContainer : public std::map<char, std::string>
   {
   protected:
