@@ -4,8 +4,6 @@
  begin                 : Fri Oct 29 2010
  copyright             : Copyright (C) 2010 by Manfred Morgner
  email                 : manfred@morgner.com
- 
-$Id: socketserver.h,v 1.6 2010/10/29 17:15:44 morgner Exp $
  ***************************************************************************/
 
 /***************************************************************************
@@ -35,7 +33,6 @@ $Id: socketserver.h,v 1.6 2010/10/29 17:15:44 morgner Exp $
 
 #include "socket.h"
 
-#pragma GCC visibility push(default)
 
 class CSocketServer : public CSocket
   {
@@ -44,8 +41,6 @@ class CSocketServer : public CSocket
              CSocketServer( const int nPort );
     virtual ~CSocketServer();
 };
-
-#pragma GCC visibility pop
 
 #endif // _SOCKET_SERVER_H
 

@@ -4,8 +4,6 @@
  begin                 : Fri Oct 29 2010
  copyright             : Copyright (C) 2010 by Manfred Morgner
  email                 : manfred@morgner.com
- 
-$Id: socket.h,v 1.6 2010/10/29 17:15:44 morgner Exp $
  ***************************************************************************/
 
 /***************************************************************************
@@ -29,13 +27,6 @@ $Id: socket.h,v 1.6 2010/10/29 17:15:44 morgner Exp $
  *                                                                         *
  ***************************************************************************/
 
-/*
- *  don't forget:
- *
- *   export DYLD_LIBRARY_PATH="/.../flow.sock/build/Debug/"
- *
- */
-
 
 #ifndef _SOCKET_H
 #define _SOCKET_H
@@ -58,7 +49,6 @@ const int INVALID_SOCKET      = -1;
 const int CLIENT_BACKLOG      =  3;
 const int RECEIVE_BUFFER_SIZE =  1025;
 
-#pragma GCC visibility push(default)
 
 class CSocket
   {
@@ -116,8 +106,6 @@ class CSocket
     bool isValid() const;
 
   }; // class CSocket
-
-#pragma GCC visibility pop
 
 #endif // _SOCKET_H
 

@@ -4,8 +4,6 @@
  begin                 : Fri Nov 05 2010
  copyright             : Copyright (C) 2010 by Manfred Morgner
  email                 : manfred@morgner.com
- 
-$Id: partner.cpp,v 1.6 2010/11/05 17:15:44 morgner Exp $
  ***************************************************************************/
 
 /***************************************************************************

@@ -4,8 +4,6 @@
  begin                 : Fri Oct 29 2010
  copyright             : Copyright (C) 2010 by Manfred Morgner
  email                 : manfred@morgner.com
- 
-$Id: socketexception.h,v 1.6 2010/10/29 17:15:44 morgner Exp $
  ***************************************************************************/
 
 /***************************************************************************
@@ -34,7 +32,6 @@ $Id: socketexception.h,v 1.6 2010/10/29 17:15:44 morgner Exp $
 
 #include <string>
 
-#pragma GCC visibility push(default)
 
 class CSocketException
   {
@@ -51,8 +48,6 @@ class CSocketException
     std::string m_sDescription;
 
   }; // class CSocketException
-
-#pragma GCC visibility pop
 
 #endif // _SOCKET_EXCEPTION_H
 
