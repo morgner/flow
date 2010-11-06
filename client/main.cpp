@@ -110,7 +110,7 @@ int main( int argc, char* argv[] )
     {
     if ( bVerbose ) std::cout << " * HOST: " << g_oEnvironment["host"] << std::endl;
     if ( bVerbose ) std::cout << " * PORT: " << g_oEnvironment["port"] << std::endl;
-    CSocketClient oConnection( g_oEnvironment["host"], g_oEnvironment["port"].c_str() );
+    CSocketClient oConnection( g_oEnvironment["host"], g_oEnvironment["port"] );
 
     /// iterate over all Pulexes in our Domain and let them jump
     std::string sServerReply;
@@ -128,7 +128,7 @@ int main( int argc, char* argv[] )
         {
         oConnection >> sInput;
         sServerReply += sInput;
-        } while ( sServerReply.find(".\r") == std::string::npos );
+        } while ( sInput.rfind("\r") == std::string::npos );
       }
     catch ( CSocketException& e )
       {

@@ -79,3 +79,45 @@ appending: CLUID:PULEX:username:1 as RGUID:PULEX:username:1:1289062499:101
  *** Hello Word, this is I, a lonley pulex
 1 elements received 1 elements total here.
 
+
+
+EXAMPLE 3
+
+client command
+~~~~~~~~~~~~~~
+cat examples.txt | uuencode -m example.txt | ./flowclient
+
+server output
+~~~~~~~~~~~~~
+appending: CLUID:PULEX:username:1 as RGUID:PULEX:username:1:1289065407:101
+ *** begin-base64 644 example.txt
+ *** c2VydmVyIHN0YXJ0Cn5+fn5+fn5+fn5+fgokIC4vZmxvd3NlcnZlciAKV2Fp
+ *** dGluZyBmb3IgY2xpZW50cy4uLgoKCgpFWEFNUExFIDEKCmNsaWVudCBjb21t
+ *** YW5kCn5+fn5+fn5+fn5+fn5+CiQgLi9mbG93Y2xpZW50IC12IC11IHVuIC1p
+ *** IDIgLW0gJ2RhdGEgbXVzdCBmbG93IScgLWggbG9jYWxob3N0Cj09PXBpcGUt
+ *** YmVnaW49PT0KPT09cGlwZS1lbmQ9PT0KCnU6dW4KcDpwYXNzd29yZApjOlBV
+ *** TEVYCmw6Mgp0OjEyODkwNjIxMjcKcjowCj09PWRhdGEtYmVnaW49PT0KeDpk
+ *** YXRhIG11c3QgZmxvdyEKPT09ZGF0YS1lbmQ9PT0KCiAqIEhPU1Q6IGxvY2Fs
+ *** aG9zdAogKiBQT1JUOiAzMDAwMApSZXNwb25zZSBmcm9tIHNlcnZlcjoKLgoK
+ *** c2VydmVyIG91dHB1dAp+fn5+fn5+fn5+fn5+CmFwcGVuZGluZzogQ0xVSUQ6
+ *** UFVMRVg6dW46MiBhcyBSR1VJRDpQVUxFWDp1bjoyOjEyODkwNjIxMjc6MTAx
+ *** CiAqKiogZGF0YSBtdXN0IGZsb3chCjEgZWxlbWVudHMgcmVjZWl2ZWQgMSBl
+ *** bGVtZW50cyB0b3RhbCBoZXJlLgoKCgpFWEFNUExFIDIKCmNsaWVudCBjb21t
+ *** YW5kCn5+fn5+fn5+fn5+fn5+Cj09PXBpcGUtYmVnaW49PT0KMSBhIHNpbXBs
+ *** ZSBsaW5lCjIgYW4gYW5vdGhlciBsaW5lCjMgZXZlbiBhbm90aGVyIGxpbmUK
+ *** CjkgdGhlIGxhc3QgbGluZQo9PT1waXBlLWVuZD09PQoKdTp1c2VybmFtZQpw
+ *** OnBhc3N3b3JkCmM6UFVMRVgKbDoxCnQ6MTI4OTA2MjQ5OQpyOjAKPT09ZGF0
+ *** YS1iZWdpbj09PQp4OjEgYSBzaW1wbGUgbGluZQp4OjIgYW4gYW5vdGhlciBs
+ *** aW5lCng6MyBldmVuIGFub3RoZXIgbGluZQp4Ogp4OjkgdGhlIGxhc3QgbGlu
+ *** ZQp4OkhlbGxvIFdvcmQsIHRoaXMgaXMgSSwgYSBsb25sZXkgcHVsZXgKPT09
+ *** ZGF0YS1lbmQ9PT0KCiAqIEhPU1Q6IGxvY2FsaG9zdAogKiBQT1JUOiAzMDAw
+ *** MApSZXNwb25zZSBmcm9tIHNlcnZlcjoKLgoKc2VydmVyIG91dHB1dAp+fn5+
+ *** fn5+fn5+fn5+CmFwcGVuZGluZzogQ0xVSUQ6UFVMRVg6dXNlcm5hbWU6MSBh
+ *** cyBSR1VJRDpQVUxFWDp1c2VybmFtZToxOjEyODkwNjI0OTk6MTAxCiAqKiog
+ *** MSBhIHNpbXBsZSBsaW5lCiAqKiogMiBhbiBhbm90aGVyIGxpbmUKICoqKiAz
+ *** IGV2ZW4gYW5vdGhlciBsaW5lCiAqKiogCiAqKiogOSB0aGUgbGFzdCBsaW5l
+ *** CiAqKiogSGVsbG8gV29yZCwgdGhpcyBpcyBJLCBhIGxvbmxleSBwdWxleAox
+ *** IGVsZW1lbnRzIHJlY2VpdmVkIDEgZWxlbWVudHMgdG90YWwgaGVyZS4KCg==
+ *** ====
+ *** Hello Word, this is I, a lonley pulex
+

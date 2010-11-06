@@ -65,10 +65,12 @@ int main ( int argc, char* argv[] )
     std::cout << "Waiting for clients..." << std::endl;
     while ( true )
       {
-      try // accept 
+      /// wait for a client
+      try
         {
+        /// don't panic! this threaded object terminates itself after doing its mission
         (new CPartner())->Communicate( server.Accept() );
-        } // try  -  accept
+        } // try  -  wait for a client
       catch ( CSocketException& e )
         {
         std::cout << "Exception: " << e.Info() << "\nExiting.\n";

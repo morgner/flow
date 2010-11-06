@@ -90,7 +90,7 @@ extern long                 g_lLastRemoteId;
 
 void CPartner::Action()
   {
-  std::string sData;
+  std::string sClientData;
   std::string sInput;
   do
     {
@@ -102,8 +102,8 @@ void CPartner::Action()
       {
       std::cout << "Exception: " << e.Info() << std::endl;
       }
-    sData += sInput;
-    } while ( sData.rfind("\r") == std::string::npos ); // m_bStopRequested
+    sClientData += sInput;
+    } while ( sInput.rfind("\r") == std::string::npos ); // m_bStopRequested
   
   /// a list to collect containers
   typedef std::list<CContainer*> CContainerList;
@@ -111,10 +111,10 @@ void CPartner::Action()
   CContainerList oContainerList;  // temporary list to collect what we got
   CContainer*    poContainer = 0; // a potential container for if we get someting
   for (std::string::size_type p1=0, p2=0;
-       std::string::npos != ( p2 = sData.find('\n', p1) );
+       std::string::npos != ( p2 = sClientData.find('\n', p1) );
        p1 = p2+1)
     {
-    std::string s = sData.substr(p1, p2-p1);
+    std::string s = sClientData.substr(p1, p2-p1);
     if ( s.find("u:") != std::string::npos )
       {
       poContainer = new CContainer;
