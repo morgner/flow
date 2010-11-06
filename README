@@ -1,1 +1,56 @@
 'flow' is a communication system
+
+goal:
+-----
+it will move your messages in protected mode
+
+'your messages' means messages from your + message for you
+
+using certificates for transport security (TLS) and content encryption, flow
+will enable you to exchange messages securely not only using insecure networks
+but also using untrusted message exchange servers.
+
+the system will give you realtime and asynchronous message exchange and
+message distribution capability
+
+because all 'flow' data are secure, they may be stored anywhere for unlimited
+time. so, if you lose your message history or dialog history, you should be able
+to recall all of them from the 'flow' server you used, given, the server stores
+youe data
+
+DATA MUST FLOW!
+
+it will
+-------
+enable you to exchange messages even through smartphones and tablet computers
+enalbe you to build protected groups to communicate with
+
+
+for security reason it may never
+--------------------------------
+enalbe unsafe message exchange
+get an official MS Windows version
+become an official HTTP(S) interface
+
+
+it is not 
+---------
+a public social community system
+a system to exchange data with public social community systems
+
+
+current status:
+---------------
+the server is able to receive data from the client and keeps them in his memory
+the client is able to connect to a remote server and send a message there
+
+next steps:
+-----------
+the client should remember some important command line information
+the client should be able to request messages from the server and recontruct
+
+a development CA and certificates are to create
+
+TLS on all your ways
+data compression
+data encryption
