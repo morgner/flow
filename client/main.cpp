@@ -37,7 +37,6 @@ $Id: main.cpp,v 1.6 2010/10/29 17:15:44 morgner Exp $
 
 #include <map>
 #include <iostream>
-#include <sstream>  // for stringbuf
 
 
 #define VERSION "0.1"
@@ -49,6 +48,7 @@ $Id: main.cpp,v 1.6 2010/10/29 17:15:44 morgner Exp $
 
 int main( int argc, char* argv[] )
   {
+  /// these are the command line options
   static struct option const tOptions[] =
     {
       { "help",      no_argument,       0, 'H'},
@@ -62,17 +62,25 @@ int main( int argc, char* argv[] )
       { "cluid",     required_argument, 0, 'i'},
       {  0,          0,                 0,  0 }
     }; // struct tOptions
-
+  /// we need to read the command line parameters
   g_oEnvironment.CommandlineRead( argc, argv, tOptions );
-
+  /// for convienice we create a local shortcut to the environment value of 'isVerbose()'
   bool bVerbose = g_oEnvironment.isVerbose();
 
-
+  /// the real operation starts here
   CDomain oDomain;
   CPulex* poPulex;
-
+  /// our domain starts with only one Pulex
   oDomain += poPulex = new CPulex();
 
+
+  /// reading the (potentially given) piped input'directly' into the pulex object
+  /// the operation is a bit tricky because of a little problem with std::cin
+  /// we need to read unblocked for several reanson. one of the is the fact that
+  /// we can't be certain, tha piped input is presented anyway
+  /// possibly importand is the operation to set the file control flags back to
+  /// the patter from before out manipulation to ensure normal behavior of  std::cin
+  /// after the unblocked operation
   int flags = fcntl(0, F_GETFL, 0);
   fcntl(0, F_SETFL, flags | O_NONBLOCK);
     std::string s;
@@ -85,6 +93,7 @@ int main( int argc, char* argv[] )
     if ( bVerbose ) std::cout << "===pipe-end===" << std::endl << std::endl;
     fcntl(0, F_SETFL, flags);
 
+  /// putting together defaults and command line input for the Pulex and the server parameters
   if ( g_oEnvironment.find("user")     != g_oEnvironment.end() )  poPulex->UsernameSet( g_oEnvironment["user"] );
   if ( g_oEnvironment.find("cluid")    != g_oEnvironment.end() )  poPulex->LocalIdSet ( atoi(g_oEnvironment["cluid"].c_str()) );
   if ( g_oEnvironment.find("message")  != g_oEnvironment.end() ) 
@@ -94,30 +103,17 @@ int main( int argc, char* argv[] )
   if ( g_oEnvironment.find("host")     == g_oEnvironment.end() )  g_oEnvironment["host"] = "localhost";
   if ( g_oEnvironment.find("port")     == g_oEnvironment.end() )  g_oEnvironment["port"] = "30000";
 
-/*
-  oDomain += poPulex = new CPulex();
-  *poPulex << "Daten";
-
-  oDomain += poPulex = new CPulex();
-  *poPulex << "Senden";
-  *poPulex << "und";
-  *poPulex << "Empfangen";
-
-  CPulex* p = *(--oDomain.end());
-  *p << "additional data";
-*/
-
   if ( bVerbose ) std::cout << *poPulex << std::endl;
 
+  /// try to let all Pulexes jump to the server
   try
     {
     if ( bVerbose ) std::cout << " * HOST: " << g_oEnvironment["host"] << std::endl;
     if ( bVerbose ) std::cout << " * PORT: " << g_oEnvironment["port"] << std::endl;
     CSocketClient oConnection( g_oEnvironment["host"], g_oEnvironment["port"].c_str() );
-    
-    std::string sData;
-    std::string sInput;
-    
+
+    /// iterate over all Pulexes in our Domain and let them jump
+    std::string sServerReply;
     try
       {
       for (CDomain::iterator it=oDomain.begin(); it != oDomain.end(); ++it)
@@ -125,17 +121,20 @@ int main( int argc, char* argv[] )
         oConnection << **it ;
         }
       oConnection << ".\r";
+
+      /// collect the answer from the server (regarding ALL jumped Pulexes)
+      std::string sInput;
       do
         {
         oConnection >> sInput;
-        sData += sInput;
-        } while ( sData.find(".\r") == std::string::npos );
+        sServerReply += sInput;
+        } while ( sServerReply.find(".\r") == std::string::npos );
       }
     catch ( CSocketException& e )
       {
       std::cout << "Exception: " << e.Info() << "\n";
       }
-    if ( bVerbose ) std::cout << "Response from server:\n" << sData << "\n";;
+    if ( bVerbose ) std::cout << "Response from server:\n" << sServerReply << "\n";;
     }
   catch ( CSocketException& e )
     {
@@ -143,9 +142,9 @@ int main( int argc, char* argv[] )
     }
 
   return 0;
-  }
+  } // int main( int argc, char* argv[] )
 
-
+/// print the normal console usage text to the console
 void CEnvironment::Usage( int nStatus )
   {
   std::cout << g_oEnvironment.ProgramNameGet() << " - carries your messages in protected mode" << std::endl;
