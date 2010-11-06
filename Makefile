@@ -4,9 +4,9 @@ CC = g++
 SERVER_LIBS = -lflowsocket -lc -lstdc++ -lpthread
 CLIENT_LIBS = -lflowsocket -lc -lstdc++
 
-SOCKET_PATH = flow.socket
-SERVER_PATH = flow.server
-CLIENT_PATH = flow.client
+SOCKET_PATH = socket
+SERVER_PATH = server
+CLIENT_PATH = client
 
 SOCKET_INC = -I$(SOCKET_PATH)/include
 SERVER_INC = -I$(SERVER_PATH)/include -I$(SOCKET_PATH)/include
