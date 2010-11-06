@@ -34,6 +34,8 @@ $Id: main.cpp,v 1.6 2010/10/29 17:15:44 morgner Exp $
 #include "socketexception.h"
 
 #include <getopt.h>
+#include <stdlib.h> // for atoi()
+#include <stdio.h>  // for EOF
 
 #include <map>
 #include <iostream>
@@ -174,17 +176,17 @@ static int decode_switches (int argc, char* argv[])
         // If this option set a flag, do nothing else now
         if (g_tLongOptions[option_index].flag != 0)
           break;
-        printf ("option %s", g_tLongOptions[option_index].name);
+        std::cout << "option " << g_tLongOptions[option_index].name;
         if (optarg)
-          printf (" with arg %s", optarg);
-        printf ("\n");
+          std::cout << " with arg " << optarg;
+        std::cout << std::endl;
         break;
 
       case 'V':
-        exit (0);
+        exit(0);
 
       case 'H':
-        usage (0);
+        usage(0);
 
       case 'v':
         g_bVerbose = true;

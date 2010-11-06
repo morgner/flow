@@ -39,10 +39,8 @@ $Id: main.cpp,v 1.6 2010/10/29 17:15:44 morgner Exp $
 #include "socketserver.h"
 #include "socketexception.h"
 
-#include "session.h"
-
 #include "partner.h"
-
+#include "container.h"
 
 
 long                 g_lLastRemoteId = 100;
