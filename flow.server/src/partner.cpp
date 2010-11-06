@@ -119,6 +119,7 @@ void CPartner::Action()
       {
       poContainer = new CContainer;
       oContainerList.push_back( poContainer );
+      continue;
       }
     if ( poContainer )
       {
@@ -145,6 +146,12 @@ void CPartner::Action()
       std::cout << (*it)->RGUIDGet() << "\n";
       }
     g_oContainerMapByCLUID[ sKey ] = *it;
+
+    for ( CData::iterator its=(*it)->begin(); its != (*it)->end(); ++its )
+      {
+      std::cout << " *** " << *its << std::endl;
+      }
+
     pthread_mutex_unlock( &m_tMutex );
     }
   

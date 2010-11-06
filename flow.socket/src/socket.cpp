@@ -37,6 +37,10 @@ $Id: socket.cpp,v 1.6 2010/10/29 17:15:44 morgner Exp $
 #include <fcntl.h>
 #include <errno.h>
 
+//#include <sys/types.h>
+//#include <sys/socket.h>
+#include <netdb.h>
+
 #include <iostream>
 
 
@@ -246,13 +250,55 @@ const std::string& CSocket::Receive( std::string& s ) const
   }
 
 
-void CSocket::Connect(const std::string sHost,
-                      const int         nPort )
+void CSocket::Connect(const std::string& rsHost,
+                      const std::string& rsPort )
   {
+  addrinfo  hints;
+  addrinfo* servinfo;
+
+  memset(&hints, 0, sizeof hints);
+  hints.ai_family   = AF_UNSPEC;   // use AF_INET6 to force IPv6
+  hints.ai_socktype = SOCK_STREAM;
+
+  int rv;
+  if ( (rv = getaddrinfo(rsHost.c_str(), rsPort.c_str(), &hints, &servinfo)) != 0 )
+    {
+    // if ( g_bVerbose ) std::cerr << "getaddrinfo: " << gai_strerror(rv) << std::endl;
+    throw CSocketException( "Could not find out host IP in CSocket::Connect()." );
+    }
+
+  // loop through all the results and connect to the first we can
+  for( addrinfo* p = servinfo; p != NULL; p = p->ai_next)
+    {
+    if ( (m_nSock = ::socket(p->ai_family,
+                             p->ai_socktype,
+                             p->ai_protocol)) == -1 )
+      {
+      // if ( g_bVerbose ) std::cout << "socket fail" << std::endl;
+      continue;
+      }
+    // if ( g_bVerbose ) std::cout << "socket ok" << std::endl;
+
+    if ( ::connect(m_nSock, p->ai_addr, p->ai_addrlen) == -1 )
+      {
+      ::close( m_nSock );
+      m_nSock = -1;
+      // if ( g_bVerbose ) std::cout << "connect fail" << std::endl;
+      continue;
+      }
+    // if ( g_bVerbose ) std::cout << "connect ok" << std::endl;
+
+    break; // if we get here, we must have connected successfully
+    }
+
+  freeaddrinfo(servinfo);
+
   if ( ! isValid() )
     {
-    throw CSocketException( "Socket is invalid in CSocket::Connect()." );
+    throw CSocketException( "Could not connect to host in CSocket::Connect()." );
     }
+
+/*
 
   m_tAddr.sin_family = AF_INET;
   m_tAddr.sin_port   = htons(nPort);
@@ -274,6 +320,7 @@ void CSocket::Connect(const std::string sHost,
     {
     throw CSocketException( "Could not connect to host in CSocket::Connect()." );
     }
+*/
   }
 
 

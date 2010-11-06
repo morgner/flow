@@ -34,10 +34,10 @@ $Id: socketclient.cpp,v 1.6 2010/10/29 17:15:44 morgner Exp $
 #include "socketexception.h"
 
 
-CSocketClient::CSocketClient( const std::string& sHost, int nPort )
+CSocketClient::CSocketClient( const std::string& rsHost, const std::string& rsPort )
   {
   Create();
-  Connect( sHost, nPort );
+  Connect( rsHost, rsPort );
   }
 
 CSocketClient::~CSocketClient()

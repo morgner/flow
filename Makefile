@@ -1,9 +1,8 @@
 
 CC = g++
 
-# SOCKET_LIBS = -lnsl
-SERVER_LIBS = -lflowsocket -lstdc++ -lpthread
-CLIENT_LIBS = -lflowsocket -lstdc++
+SERVER_LIBS = -lflowsocket -lc -lstdc++ -lpthread
+CLIENT_LIBS = -lflowsocket -lc -lstdc++
 
 SOCKET_PATH = flow.socket
 SERVER_PATH = flow.server
@@ -21,7 +20,7 @@ SOCKET_SRC=$(SOCKET_PATH)/src/socket.cpp $(SOCKET_PATH)/src/socketclient.cpp $(S
 SOCKET_OBJ=$(SOCKET_SRC:.cpp=.o)
 SOCKET=libflowsocket.a
 
-SERVER_SRC=$(SERVER_PATH)/src/container.cpp $(SERVER_PATH)/src/session.cpp $(SERVER_PATH)/src/partner.cpp $(SERVER_PATH)/main.cpp
+SERVER_SRC=$(SERVER_PATH)/src/container.cpp $(SERVER_PATH)/src/partner.cpp $(SERVER_PATH)/main.cpp
 SERVER_OBJ=$(SERVER_SRC:.cpp=.o)
 SERVER=flowserver
 

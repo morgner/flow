@@ -62,7 +62,7 @@ class CPulex : public CHome, public std::list<std::string>
 
     virtual const std::string& ClassNameGet() const;
   
-            const std::string& operator << ( const std::string&  oString );
+            const std::string& operator << ( const std::string& rsData );
 
   }; // class CPulex
 

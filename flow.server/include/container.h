@@ -40,11 +40,9 @@ typedef std::list<std::string> CReceiverList; // d:*
 class CContainer;
 typedef std::map <std::string, CContainer*> CContainerMapByCLUID;
 
-class CContainer : public std::map<char, std::string>
+class CContainer : public std::list<std::string>
   {
   protected:
-    CData         m_lsData;
-
     std::string   m_sSender;
     CReceiverList m_lsReceivers;
     std::string   m_sClass;

@@ -83,15 +83,16 @@ const std::string& CContainer::operator += ( const std::string& rsElement )
   if ( rsElement[1] == ':' )
     switch (rsElement[0])
       {
-      case 'u': m_sSender            = rsElement.substr(2); break;
-      case 'p':                                             break;
+      case 'u': m_sSender              = rsElement.substr(2);   break;
+      case 'p':                                                 break;
       case 'd': m_lsReceivers.push_back( rsElement.substr(2) ); break;
-      case 'c': m_sClass             = rsElement.substr(2); break;
-      case 'l': m_sClientLocalId     = rsElement.substr(2); break;
-      case 't': m_sClientLocalIdTime = rsElement.substr(2); break;
-      case 'r': m_sServerId          = rsElement.substr(2); break;
+      case 'c': m_sClass               = rsElement.substr(2);   break;
+      case 'l': m_sClientLocalId       = rsElement.substr(2);   break;
+      case 't': m_sClientLocalIdTime   = rsElement.substr(2);   break;
+      case 'r': m_sServerId            = rsElement.substr(2);   break;
 
-      default:  m_lsData.push_back( rsElement );
+      case 'x':
+      case 'b': push_back( rsElement.substr(2) );
       }
 
   return rsElement;

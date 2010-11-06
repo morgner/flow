@@ -40,8 +40,8 @@ $Id: socketclient.h,v 1.6 2010/10/29 17:15:44 morgner Exp $
 class CSocketClient : public CSocket
   {
   public:  
-             CSocketClient( const std::string& sHost = "localhost",
-                                  int          nPort =  8000 );
+             CSocketClient( const std::string& rsHost = "localhost",
+                            const std::string& rsPort = "8000" );
     virtual ~CSocketClient();
 
   }; // class CSocketClient

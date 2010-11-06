@@ -62,6 +62,7 @@ class CHome
     virtual const std::string& ClassNameGet() const;
 
             long LocalIdGet();
+            long LocalIdSet( long lid );
             long LocalIdTimeGet();
 
             long RemoteIdSet( long lid );

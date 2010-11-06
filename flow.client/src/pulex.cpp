@@ -91,8 +91,8 @@ const std::string& CPulex::ClassNameGet() const
   return s_sClassName;
   }
 
-const std::string& CPulex::operator << ( const std::string& oString )
+const std::string& CPulex::operator << ( const std::string& rsData )
   {
-  push_back(oString);
-  return oString;
+  push_back(rsData);
+  return rsData;
   }

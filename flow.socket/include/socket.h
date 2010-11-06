@@ -101,8 +101,8 @@ class CSocket
     void     Listen ()                            const;
     void     Accept (       CSocket&    roSocket) const;
     CSocket* Accept ()                            const;
-    void     Connect( const std::string sHost,
-                      const int         nPort );
+    void     Connect( const std::string& rsHost,
+                      const std::string& rsPort );
     void     Close  ();
 
   

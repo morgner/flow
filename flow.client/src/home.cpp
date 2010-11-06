@@ -60,6 +60,15 @@ long CHome::LocalIdGet()
   return m_nLocalId;
   }
 
+long CHome::LocalIdSet( long lid )
+  {
+  if ( lid > 0 )
+    {
+    m_nLocalId = lid;
+    }
+  return m_nLocalId;
+  }
+
 long CHome::LocalIdTimeGet()
   {
   return m_tLocalId;
