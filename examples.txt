@@ -1,0 +1,83 @@
+server start
+~~~~~~~~~~~~
+$ ./flowserver 
+Waiting for clients...
+
+
+
+EXAMPLE 1
+
+client command
+~~~~~~~~~~~~~~
+$ ./flowclient -v -u un -i 2 -m 'data must flow!' -h localhost
+===pipe-begin===
+===pipe-end===
+
+u:un
+p:password
+c:PULEX
+l:2
+t:1289062127
+r:0
+===data-begin===
+x:data must flow!
+===data-end===
+
+ * HOST: localhost
+ * PORT: 30000
+Response from server:
+.
+
+server output
+~~~~~~~~~~~~~
+appending: CLUID:PULEX:un:2 as RGUID:PULEX:un:2:1289062127:101
+ *** data must flow!
+1 elements received 1 elements total here.
+
+
+
+EXAMPLE 2
+
+client command
+~~~~~~~~~~~~~~
+$ cat test.file | ./flowclient -v
+===pipe-begin===
+1 a simple line
+2 an another line
+3 even another line
+
+9 the last line
+===pipe-end===
+
+u:username
+p:password
+c:PULEX
+l:1
+t:1289061569
+r:0
+===data-begin===
+x:1 a simple line
+x:2 an another line
+x:3 even another line
+x:
+x:9 the last line
+x:Hello Word, this is I, a lonley pulex
+===data-end===
+
+ * HOST: localhost
+ * PORT: 30000
+Response from server:
+.
+
+
+server output
+~~~~~~~~~~~~~
+appending: CLUID:PULEX::1 as RGUID:PULEX::1:1289061111:101
+ *** 1 a simple line
+ *** 2 an another line
+ *** 3 even another line
+ *** 
+ *** 9 the last line
+ *** Hello Word, this is I, a lonley pulex
+1 elements received 1 elements total here.
+

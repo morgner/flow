@@ -37,13 +37,15 @@ $Id: main.cpp,v 1.6 2010/10/29 17:15:44 morgner Exp $
 
 #include <map>
 #include <iostream>
+#include <sstream>  // for stringbuf
 
 
 #define VERSION "0.1"
 
 #include <getopt.h> // for static struct option
 #include <stdlib.h> // for atoi(), exit()
-
+#include <stdio.h>  // for EOF
+#include <fcntl.h>  // for fnctl()
 
 int main( int argc, char* argv[] )
   {
@@ -65,10 +67,23 @@ int main( int argc, char* argv[] )
 
   bool bVerbose = g_oEnvironment.isVerbose();
 
+
   CDomain oDomain;
   CPulex* poPulex;
 
   oDomain += poPulex = new CPulex();
+
+  int flags = fcntl(0, F_GETFL, 0);
+  fcntl(0, F_SETFL, flags | O_NONBLOCK);
+    std::string s;
+    if ( bVerbose ) std::cout << "===pipe-begin===" << std::endl;
+    for ( getline( std::cin, s ); std::cin.good(); getline( std::cin, s ) )
+      {
+      if ( bVerbose ) std::cout << s << std::endl;
+      *poPulex << s;
+      }
+    if ( bVerbose ) std::cout << "===pipe-end===" << std::endl << std::endl;
+    fcntl(0, F_SETFL, flags);
 
   if ( g_oEnvironment.find("user")     != g_oEnvironment.end() )  poPulex->UsernameSet( g_oEnvironment["user"] );
   if ( g_oEnvironment.find("cluid")    != g_oEnvironment.end() )  poPulex->LocalIdSet ( atoi(g_oEnvironment["cluid"].c_str()) );
@@ -91,6 +106,8 @@ int main( int argc, char* argv[] )
   CPulex* p = *(--oDomain.end());
   *p << "additional data";
 */
+
+  if ( bVerbose ) std::cout << *poPulex << std::endl;
 
   try
     {

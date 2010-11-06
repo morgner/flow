@@ -119,7 +119,6 @@ void CPartner::Action()
       {
       poContainer = new CContainer;
       oContainerList.push_back( poContainer );
-      continue;
       }
     if ( poContainer )
       {
