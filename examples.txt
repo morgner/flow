@@ -40,7 +40,6 @@ EXAMPLE 2
 
 client command
 ~~~~~~~~~~~~~~
-$ cat test.file | ./flowclient -v
 ===pipe-begin===
 1 a simple line
 2 an another line
@@ -53,7 +52,7 @@ u:username
 p:password
 c:PULEX
 l:1
-t:1289061569
+t:1289062499
 r:0
 ===data-begin===
 x:1 a simple line
@@ -69,10 +68,9 @@ x:Hello Word, this is I, a lonley pulex
 Response from server:
 .
 
-
 server output
 ~~~~~~~~~~~~~
-appending: CLUID:PULEX::1 as RGUID:PULEX::1:1289061111:101
+appending: CLUID:PULEX:username:1 as RGUID:PULEX:username:1:1289062499:101
  *** 1 a simple line
  *** 2 an another line
  *** 3 even another line
