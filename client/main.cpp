@@ -29,13 +29,11 @@ $Id: main.cpp,v 1.6 2010/10/29 17:15:44 morgner Exp $
  *                                                                         *
  ***************************************************************************/
 
+#include "environment.h"
+
 #include "domain.h"
 #include "socketclient.h"
 #include "socketexception.h"
-
-#include <getopt.h>
-#include <stdlib.h> // for atoi()
-#include <stdio.h>  // for EOF
 
 #include <map>
 #include <iostream>
@@ -43,16 +41,29 @@ $Id: main.cpp,v 1.6 2010/10/29 17:15:44 morgner Exp $
 
 #define VERSION "0.1"
 
-static int decode_switches (int argc, char **argv);
+#include <getopt.h> // for static struct option
+#include <stdlib.h> // for atoi(), exit()
 
-typedef std::map<std::string, std::string> CEnvironment;
-
-bool         g_bVerbose = false;
-CEnvironment g_oEnvironment;
 
 int main( int argc, char* argv[] )
   {
-  decode_switches (argc, argv);
+  static struct option const tOptions[] =
+    {
+      { "help",      no_argument,       0, 'H'},
+      { "version",   no_argument,       0, 'V'},
+      { "verbose",   no_argument,       0, 'v'},
+      { "host",      required_argument, 0, 'h'},
+      { "port",      required_argument, 0, 'p'},
+      { "user",      required_argument, 0, 'u'},
+      { "recipient", required_argument, 0, 'r'},
+      { "message",   required_argument, 0, 'm'},
+      { "cluid",     required_argument, 0, 'i'},
+      {  0,          0,                 0,  0 }
+    }; // struct tOptions
+
+  g_oEnvironment.CommandlineRead( argc, argv, tOptions );
+
+  bool bVerbose = g_oEnvironment.isVerbose();
 
   CDomain oDomain;
   CPulex* poPulex;
@@ -83,8 +94,8 @@ int main( int argc, char* argv[] )
 
   try
     {
-    if ( g_bVerbose ) std::cout << " * HOST: " << g_oEnvironment["host"] << std::endl;
-    if ( g_bVerbose ) std::cout << " * PORT: " << g_oEnvironment["port"] << std::endl;
+    if ( bVerbose ) std::cout << " * HOST: " << g_oEnvironment["host"] << std::endl;
+    if ( bVerbose ) std::cout << " * PORT: " << g_oEnvironment["port"] << std::endl;
     CSocketClient oConnection( g_oEnvironment["host"], g_oEnvironment["port"].c_str() );
     
     std::string sData;
@@ -107,7 +118,7 @@ int main( int argc, char* argv[] )
       {
       std::cout << "Exception: " << e.Info() << "\n";
       }
-    if ( g_bVerbose ) std::cout << "Response from server:\n" << sData << "\n";;
+    if ( bVerbose ) std::cout << "Response from server:\n" << sData << "\n";;
     }
   catch ( CSocketException& e )
     {
@@ -118,29 +129,10 @@ int main( int argc, char* argv[] )
   }
 
 
-
-std::string g_sProgramName;
-
-static struct option const g_tLongOptions[] =
+void CEnvironment::Usage( int nStatus )
   {
-    { "help",     no_argument, 0, 'H'},
-    { "version",  no_argument, 0, 'V'},
-    { "verbose",  no_argument, 0, 'v'},
-
-    { "host",      required_argument, 0, 'h'},
-    { "port",      required_argument, 0, 'p'},
-    { "user",      required_argument, 0, 'u'},
-    { "recipient", required_argument, 0, 'r'},
-    { "message",   required_argument, 0, 'm'},
-    { "cluid",     required_argument, 0, 'i'},
-
-    { NULL, 0, NULL, 0}
-  };
-
-static void usage (int status)
-  {
-  std::cout << g_sProgramName << " - carries your messages in protected mode" << std::endl;
-  std::cout << "Usage: " <<  g_sProgramName << " [OPTION]... [FILE]..." << std::endl;
+  std::cout << g_oEnvironment.ProgramNameGet() << " - carries your messages in protected mode" << std::endl;
+  std::cout << "Usage: " <<  g_oEnvironment.ProgramNameGet() << " [OPTION]... [FILE]..." << std::endl;
   std::cout << "Options:\n"
             << "  -H, --help           display this help and exit" << std::endl
             << "  -V, --version        output version information and exit" << std::endl
@@ -158,82 +150,7 @@ static void usage (int status)
             << "  -i, --cluid          force the use a specific client unique identifier" << std::endl
             << "                       default: <automatic>" << std::endl << std::endl
             ;
-  exit (status);
-  } // void usage (int status)
+  exit( nStatus );
+  } // void CEnvironment::Usage( int nStatus )
 
-static int decode_switches (int argc, char* argv[])
-  {
-  g_sProgramName = argv[0];
-  g_sProgramName = g_sProgramName.substr( g_sProgramName.rfind('/')+1 );
 
-  int c;
-  int option_index = 0;
-  while ( (c = getopt_long (argc, argv, "HVvh:p:u:r:m:i:", g_tLongOptions, &option_index)) != EOF )
-    {
-    switch (c)
-      {
-      case 0:
-        // If this option set a flag, do nothing else now
-        if (g_tLongOptions[option_index].flag != 0)
-          break;
-        std::cout << "option " << g_tLongOptions[option_index].name;
-        if (optarg)
-          std::cout << " with arg " << optarg;
-        std::cout << std::endl;
-        break;
-
-      case 'V':
-        exit(0);
-
-      case 'H':
-        usage(0);
-
-      case 'v':
-        g_bVerbose = true;
-        break;
-
-      case 'h':
-        g_oEnvironment["host"] = optarg;
-        break;
-
-      case 'p':
-        g_oEnvironment["port"] = optarg;
-        break;
-
-      case 'u':
-        g_oEnvironment["user"] = optarg;
-        break;
-
-      case 'r':
-        g_oEnvironment["recipient"] = optarg;
-        break;
-
-      case 'm':
-        g_oEnvironment["message"] = optarg;
-        break;
-
-      case 'i':
-        if ( atoi( optarg ) )
-          {
-          g_oEnvironment["cluid"] = optarg;
-          }
-        else
-          {
-          std::cout << "ERROR: --cluid (-i) has to be a numeric value greater than 0" << std::endl;
-          exit(EXIT_FAILURE);
-          }
-        break;
-
-//      default:
-//        usage (EXIT_FAILURE);
-      }
-    }
-
-  if ( g_bVerbose )
-    for ( CEnvironment::iterator it=g_oEnvironment.begin(); it != g_oEnvironment.end(); ++it )
-      {
-      std::cout << it->first << ": " << it->second << std::endl;
-      }
-
-  return optind;
-  } // int decode_switches (int argc, char* argv[])
