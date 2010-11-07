@@ -79,17 +79,23 @@ int main( int argc, char* argv[] )
   /// possibly importand is the operation to set the file control flags back to
   /// the patter from before out manipulation to ensure normal behavior of  std::cin
   /// after the unblocked operation
-  int flags = fcntl(0, F_GETFL, 0);
-  fcntl(0, F_SETFL, flags | O_NONBLOCK);
+  /// -- this methode (?) of deblocking std::cin not reliable for pipe input -- have to work on it !
+  if ( bVerbose ) std::cout << "===pipe-begin===" << std::endl;
+  int flags = fcntl(fileno(stdin), F_GETFL, 0);
+  fcntl(fileno(stdin), F_SETFL, flags | O_NONBLOCK);
     std::string s;
-    if ( bVerbose ) std::cout << "===pipe-begin===" << std::endl;
-    for ( getline( std::cin, s ); std::cin.good(); getline( std::cin, s ) )
+    std::cin.clear();
+//    for ( getline( std::cin, s ); std::cin.good(); getline( std::cin, s ) )
+//    while ( getline( std::cin, s ) )
+    for ( getline( std::cin, s ); !std::cin.eof(); getline( std::cin, s ) )
       {
       if ( bVerbose ) std::cout << s << std::endl;
       *poPulex << s;
+//      if ( !std::cin.good() ) break;
       }
-    if ( bVerbose ) std::cout << "===pipe-end===" << std::endl << std::endl;
-    fcntl(0, F_SETFL, flags);
+    fcntl(fileno(stdin), F_SETFL, flags);
+  std::cin.clear();
+  if ( bVerbose ) std::cout << "===pipe-end===" << std::endl << std::endl;
 
   /// putting together defaults and command line input for the Pulex and the server parameters
   if ( g_oEnvironment.find("user")     != g_oEnvironment.end() )  poPulex->UsernameSet( g_oEnvironment["user"] );
@@ -166,5 +172,3 @@ void CEnvironment::Usage( int nStatus )
             ;
   exit( nStatus );
   } // void CEnvironment::Usage( int nStatus )
-
-
