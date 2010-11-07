@@ -13,15 +13,15 @@ Server Certificate: server/localhost.crt
 
 
 'flow' uses certificates by their names. So if a users name
-(name ist alias) is 'username', his/here certificate has to be
+(name it alias) is 'username', his/here certificate has to be
 named 'username.crt' and it has to be issued for a
 "Common Name (CN)=username" by the intermediate client CA 'CA/imc.crt'
 
-'flowclient' will use certificate this way
-'flowserver' will check certificate this way
+'flowclient' will use certificates this way
+'flowserver' will check certificatse this way
 
 'flowclient' will not check the CN of the server certificate nor
-will it check for the chain. The client trusts 'trusted
+will it force a check of the chain. The client trusts 'trusted
 server certificates' which means certificates set to be trustet
 for the flowclient by the user.
 
@@ -30,10 +30,19 @@ Further 'flowclient' trusts user certificates the same way.
 
 The overhead of producing and managing openly trusted certificates
 is proofen too demanding to do even business, let alone fun
-communication.
+communication. It is too expensive, too complicated and is a
+risc in itself because you will not get an anonymous certificate
+with our personal alias from any official provider without linking
+these to your real identity. Which means official certificates
+may undermine your security interests. Imagine you'r political
+religiouse ideas do not match those of your environment ...
 
-Nevertheless, if clients are strict, the mechanism provides the
-same security than professional certificates.
+Nevertheless, if clients are strict, the mechanism of 'flow'
+provides the same or more security than professional certificates.
+Given the fact that you will communicate over an open network,
+it naturally provides the same risc regarding the identity of
+your partner. But in difference to officially issued certificates
+you know it!
 
 
 You need the certificates in this package to play with the

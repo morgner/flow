@@ -22,6 +22,13 @@ messages are stored encrypted at any time anywhere as long as 'flow' stores
 them. so even on your system they are secure. as secure as you treat
 your systems security of course.
 
+because of the basic mechanisms of 'flow' it is not a good idea to bind it
+to other social networks or similar. 'flow' is for secure and trusted 
+message exchange, social networks are for fast and open message exchange.
+if you use 'flow', your are interested in privacy. I can not see any  reason
+to compromise your and your messaging partners privacy by open a hole in
+the system.
+
 you're in command about your messages. you dictate who will be able to
 read your messages and so ensure who is going to receive them.
 this way, even if the 'flow' server(s) you will use is not trustworthy,
@@ -39,9 +46,10 @@ enalbe you to build protected groups to communicate with
 
 for security reason 'flow' may never
 ------------------------------------
-enalbe unsafe message exchange
-get an official MS Windows version
+enable unsafe message exchange
+have an official MS Windows version
 become an official HTTP(S) interface
+become able to exchange data with other social networks
 
 
 'flow' is not 
