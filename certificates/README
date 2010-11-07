@@ -29,7 +29,7 @@ Further 'flowclient' trusts user certificates the same way.
 
 
 The overhead of producing and managing openly trusted certificates
-is proofen to demanding too do even business, let alone fun
+is proofen too demanding to do even business, let alone fun
 communication.
 
 Nevertheless, if clients are strict, the mechanism provides the
