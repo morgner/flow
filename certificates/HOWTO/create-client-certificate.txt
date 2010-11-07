@@ -1,0 +1,16 @@
+
+
+NEW="username"
+openssl genrsa -des3 -out ${NEW}.key 4096
+
+NEW="username"
+openssl req -new -key ${NEW}.key -out ${NEW}.csr
+
+SER="200"
+CA="imc"
+NEW="username"
+openssl x509 -req -days 7300 -in ${NEW}.csr -CA ${CA}.crt -CAkey ${CA}.key -set_serial ${SER} -out ${NEW}.crt
+
+[password]
+ca, imc, ims: flow
+other: there name

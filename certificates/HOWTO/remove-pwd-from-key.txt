@@ -1,0 +1,5 @@
+
+
+NAME="server"
+cp ${NAME}.key ${NAME}.key.enc
+openssl rsa -in ${NAME}.key.enc -out ${NAME}.key

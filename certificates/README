@@ -1,0 +1,42 @@
+Simple test certificate
+
+Don't use them in real life!
+
+
+Root CA: CA/CA.crt
+Intermediate Client CA: CA/imc.crt
+Intermediate Server CA: CA/ims.crt
+
+Client Certificate: client/username.crt
+Server Certificate: server/localhost.crt
+
+
+
+'flow' uses certificates by their names. So if a users name
+(name ist alias) is 'username', his/here certificate has to be
+named 'username.crt' and it has to be issued for a
+"Common Name (CN)=username" by the intermediate client CA 'CA/imc.crt'
+
+'flowclient' will use certificate this way
+'flowserver' will check certificate this way
+
+'flowclient' will not check the CN of the server certificate nor
+will it check for the chain. The client trusts 'trusted
+server certificates' which means certificates set to be trustet
+for the flowclient by the user.
+
+Further 'flowclient' trusts user certificates the same way.
+
+
+The overhead of producing and managing openly trusted certificates
+is proofen to demanding to do even business, let allone fun
+communication.
+
+Nevertheless, if clients are strict, the mechanism provides the
+same security than professional certificates.
+
+
+You need the certificates in this package to play with the
+examples and have an easy go if you wish to contribute. These
+certificate do not provide any security at all, given that
+their private components are accessible for everyone.
