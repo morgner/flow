@@ -2,21 +2,31 @@
 
 goal:
 -----
-it will move your messages in protected mode
+'flow' will move your messages in protected mode
 
-'your messages' means messages from your + message for you
+'your messages' means messages from you + message for you
 
-using certificates for transport security (TLS) and content encryption, flow
+using certificates for transport security (TLS) and content encryption, 'flow'
 will enable you to exchange messages securely not only using insecure networks
 but also using untrusted message exchange servers.
 
-the system will give you realtime and asynchronous message exchange and
+the system will give you near realtime and asynchronous message exchange and
 message distribution capability
 
 because all 'flow' data are secure, they may be stored anywhere for unlimited
 time. so, if you lose your message history or dialog history, you should be able
 to recall all of them from the 'flow' server you used, given, the server stores
-youe data
+your messages
+
+messages are stored encrypted at any time anywhere as long as 'flow' stores
+them. so even on your system they are secure. as secure as you treat
+your systems security of course.
+
+you're in command about your messages. you dictate who will be able to
+read your messages and so ensure who is going to receive them.
+this way, even if the 'flow' server(s) you will use is not trustworthy,
+it is able to supress deliveries, but not to read your messages as long
+as you and your message recievers stay trustworthy (keep their secrets)
 
 DATA MUST FLOW!
 
@@ -47,10 +57,8 @@ the client is able to connect to a remote server and send a message there
 
 next steps
 ----------
-the client should remember some important command line information
 the client should be able to request messages from the server and recontruct
-
-a development CA and certificates are to create
+the client should remember some important command line information
 
 TLS on all your ways
 data compression
