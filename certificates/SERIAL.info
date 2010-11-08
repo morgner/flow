@@ -1,2 +1,2 @@
-server cert: last serial 100
-client cert: last serial 200
+server cert: next serial 101
+client cert: next serial 202
