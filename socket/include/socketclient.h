@@ -31,17 +31,21 @@
 #ifndef _SOCKET_CLIENT_H
 #define _SOCKET_CLIENT_H
 
-#include "socket.h"
+#include "socketssl.h"
 
 
-class CSocketClient : public CSocket
+class CSocketClient : public CSocketSSL
   {
   private:
-    typedef CSocket inhertited;
+    typedef CSocketSSL inhertited;
 
   public:  
-             CSocketClient( const std::string& rsHost = "localhost",
-                            const std::string& rsPort = "8000" );
+             CSocketClient( const std::string& rsHost,
+                            const std::string& rsPort );
+             CSocketClient( const std::string& rsCertificate,
+                            const std::string& rsCA,
+                            const std::string& rsHost,
+                            const std::string& rsPort);
     virtual ~CSocketClient();
 
   }; // class CSocketClient

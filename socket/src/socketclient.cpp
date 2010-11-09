@@ -32,10 +32,20 @@
 #include "socketexception.h"
 
 
-CSocketClient::CSocketClient( const std::string& rsHost, const std::string& rsPort )
+CSocketClient::CSocketClient( const std::string& rsHost,
+                              const std::string& rsPort )
   {
   Create();
   Connect( rsHost, rsPort );
+  }
+
+CSocketClient::CSocketClient( const std::string& rsCertificate,
+                              const std::string& rsCA,
+                              const std::string& rsHost,
+                              const std::string& rsPort )
+  {
+  Create();
+  ConnectSSL( rsCertificate, rsCA, rsHost, rsPort );
   }
 
 CSocketClient::~CSocketClient()

@@ -45,4 +45,3 @@ CSocketServer::CSocketServer( int nPort )
 CSocketServer::~CSocketServer()
   {
   }
-

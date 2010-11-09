@@ -1,7 +1,7 @@
 /***************************************************************************
- socketserver.h
+ socketssl.cpp
  -----------------------
- begin                 : Fri Oct 29 2010
+ begin                 : Thu Nocv 09 2010
  copyright             : Copyright (C) 2010 by Manfred Morgner
  email                 : manfred@morgner.com
  ***************************************************************************/
@@ -28,22 +28,41 @@
  ***************************************************************************/
 
 
-#ifndef _SOCKET_SERVER_H
-#define _SOCKET_SERVER_H
-
 #include "socketssl.h"
+#include "socketexception.h"
 
-
-class CSocketServer : public CSocketSSL
+CSocketSSL::CSocketSSL( const int nSock )
+  : inherited( nSock )
   {
-  private:
-    typedef CSocketSSL inhertited;
+  }
 
-  public:
-             CSocketServer();
-             CSocketServer( const int nPort );
-    virtual ~CSocketServer();
-};
+CSocketSSL::CSocketSSL( const std::string& rsCertificate,
+                        const std::string& rsCA,
+                        const int          nSock )
+  : inherited( nSock ),
+    m_sCertificate( rsCertificate ),
+    m_sCA( rsCA )
+  {
+  }
 
-#endif // _SOCKET_SERVER_H
+CSocketSSL::~CSocketSSL()
+  {
 
+  }
+
+
+void CSocketSSL::ConnectSSL( const std::string& rsCertificate,
+                             const std::string& rsCA,
+                             const std::string& rsHost,
+                             const std::string& rsPort )
+  {
+  inherited::Connect( rsHost, rsPort );
+
+  if ( !isValid() ) return;
+
+  /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   *
+   *   start opening the Secure Layer over the Socket
+   *
+   * ++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
+  }

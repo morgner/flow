@@ -1,7 +1,7 @@
 /***************************************************************************
- socketserver.h
+ socketssl.h  description
  -----------------------
- begin                 : Fri Oct 29 2010
+ begin                 : Thu Nov 09 2010
  copyright             : Copyright (C) 2010 by Manfred Morgner
  email                 : manfred@morgner.com
  ***************************************************************************/
@@ -28,22 +28,35 @@
  ***************************************************************************/
 
 
-#ifndef _SOCKET_SERVER_H
-#define _SOCKET_SERVER_H
+#ifndef _SOCKET_SSL_H
+#define _SOCKET_SSL_H
 
-#include "socketssl.h"
+#include "socket.h"
+
+#include <string>
 
 
-class CSocketServer : public CSocketSSL
+class CSocketSSL : public CSocket
   {
   private:
-    typedef CSocketSSL inhertited;
+    typedef CSocket inherited;
+
+  protected:
+    std::string m_sCertificate;
+    std::string m_sCA;
 
   public:
-             CSocketServer();
-             CSocketServer( const int nPort );
-    virtual ~CSocketServer();
-};
+             CSocketSSL( const int          nSock           = INVALID_SOCKET );
+             CSocketSSL( const std::string& rsCertificate,
+                         const std::string& rsCA,
+                         const int          nSock           = INVALID_SOCKET );
+    virtual ~CSocketSSL();
 
-#endif // _SOCKET_SERVER_H
+    void     ConnectSSL( const std::string& rsCertificate,
+                         const std::string& rsCA,
+                         const std::string& rsHost,
+                         const std::string& rsPort );
 
+  }; // class SocketSSL
+
+#endif // _SOCKET_SSL_H
