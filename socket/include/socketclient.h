@@ -36,6 +36,9 @@
 
 class CSocketClient : public CSocket
   {
+  private:
+    typedef CSocket inhertited;
+
   public:  
              CSocketClient( const std::string& rsHost = "localhost",
                             const std::string& rsPort = "8000" );
