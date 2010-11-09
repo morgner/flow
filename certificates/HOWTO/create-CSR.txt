@@ -1,0 +1,4 @@
+
+NAME="Intermediate-Server-CA"
+CN="Intermediate Server CA"
+openssl req -new -newkey rsa:2048 -nodes -subj "/CN=${CN}" -keyout ${NAME}.key -out ${NAME}.csr

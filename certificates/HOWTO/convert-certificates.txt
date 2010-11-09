@@ -1,0 +1,24 @@
+
+Certificate from DER to PEM:
+
+NAME="username"
+openssl x509 -inform DER -in ${NAME}.crt -outform PEM -out ${NAME}.pem
+
+
+Certificate from PEM to DER:
+
+NAME="username"
+openssl x509 -inform PEM -in ${NAME}.pem -outform DER -out ${NAME}.crt
+
+
+Key from PEM to DER:
+
+NAME="username"
+openssl rsa -in ${NAME}.key.pem -inform PEM -out ${NAME}.key -outform DER
+
+
+Key from DER to PEM:
+
+NAME="username"
+openssl rsa -in ${NAME}.key -inform DER -out ${NAME}.key.pem -outform PEM
+

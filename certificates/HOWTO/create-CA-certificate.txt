@@ -1,0 +1,20 @@
+
+simple
+~~~~~~
+
+NAME="www.überflüssig.ch"
+openssl req -new -utf8 -x509 -days 7301 -newkey rsa:4096 -nodes -subj "/CN=${NAME}" -keyout ${NAME}.key -out ${NAME}.crt
+
+
+more complete
+~~~~~~~~~~~~~
+
+NAME="www.überfluß.de"
+ORGANISATION="Great Privacy Commitee"
+COUNTRY="DE"
+STATE="Thüringen"
+LOCATION="Weimar"
+openssl req -new -utf8 -x509 -days 7301 \
+            -newkey rsa:4096 -nodes \
+            -subj "/CN=${NAME}/O=${ORGANISATION}/C=${COUNTRY}/ST=${STATE}/L=${LOCATION}" \
+            -keyout ${NAME}.key -out ${NAME}.crt
