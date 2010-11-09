@@ -1,0 +1,21 @@
+Some scripts to create certificates
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+create-set-of-certificates-hierarchical.sh
+
+Create a complete tree of certificates:
+
+ * CA
+ * Intermediate Server CA
+ * Intermediate Client CA
+ * 1 Server Certificate
+ * 2 Client Certificates
+
+
+create-certificates-selfsigned.sh
+
+Creates self-signed certificates. You simply have to list
+the name of the certificates (user names) as parameter like:
+
+create-certificates-selfsigned.sh name1 name2 name3
