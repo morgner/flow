@@ -1,0 +1,35 @@
+'flow' -- how to build the binaries
+
+Copyright (C) 2010 Manfred Morgner manfred@morgner.com
+
+destination systems
+-------------------
+
+'flow' is intended to run on as much systems as possible using compilers as
+GCC or CLANG. 
+
+'flow' is CPU independend. Testers were able to run the binaries local and
+remote, merging operating systems and CPUs from this list:
+
+ * Linux, MacOS
+ * x86, ppc
+ * 32bit, 64bit
+
+build process
+-------------
+
+To build the whole project simply run 'make' in the base directory of the
+project.
+
+You may change the compiler setting the CC value at the start of the Makefile
+to either g++ or clang. Using clang may produce better results.
+
+As far as the compiler supports it, the resulting binaries are
+
+dependencies
+------------
+
+ * libc
+ * libstdc++
+ * libpthread
+ * libssl
