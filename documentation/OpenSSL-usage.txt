@@ -1,0 +1,37 @@
+== some test snippets for OpenSSL applications and credentials
+
+to chain CAs together for a CA chain file
+-----------------------------------------
+
+ for i in cert.flow-ca.info.crt Intermediate-Server-CA.crt
+   do
+   openssl x509 -in $i -text >> ../server/server-CA-chain.pem
+   cat $i >> ../server/cachain.pem
+   done
+
+ for i in cert.flow-ca.info.crt Intermediate-Client-CA.crt
+   do
+   openssl x509 -in $i -text >> ../client/client-CA-chain.pem
+   cat $i >> ../client/cachain.pem
+   done
+
+
+check certificate
+-----------------
+openssl verify -issuer_checks -CAfile server/cachain.pem server/localhost.crt
+
+
+start an OpenSSL server to commnicate with (client development)
+---------------------------------------------------------------
+openssl s_server -accept 30000 \
+                 -cert certificates/server/localhost.crt -key certificates/server/localhost.key \
+                 -CAfile certificates/server/server-CA-chain.pem \
+                 -tls1
+
+start an OpenSSL client to commnicate with (server development)
+---------------------------------------------------------------
+openssl s_client -connect localhost:30000 \
+                 -cert certificates/client/username.crt -key certificates/client/username.key \
+                 -CAfile certificates/client/client-CA-chain.pem \
+                 -tls1 -verify 3
+

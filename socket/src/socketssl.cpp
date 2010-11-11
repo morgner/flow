@@ -34,28 +34,6 @@
 #define CRTFILE  "certificates/client/username.crt"
 #define PASSWORD ""
 
-/*
- for i in ca.crt ims.crt
-   do
-   openssl x509 -in $i -text >> server-CA-chain.pem
-   done
-
- for i in ca.crt imc.crt
-   do
-   openssl x509 -in $i -text >> client-CA-chain.pem
-   done
-
-openssl s_server -accept 30000 \
-                 -cert certificates/server/localhost.crt -key certificates/server/localhost.key \
-                 -CAfile certificates/server/server-CA-chain.pem \
-                 -tls1
-
-openssl s_client -connect localhost:30000 \
-                 -cert certificates/client/username.crt -key certificates/client/username.key \
-                 -CAfile certificates/client/client-CA-chain.pem \
-                 -tls1 -verify 3
-
-*/
 
 #include "socketssl.h"
 #include "socketexception.h"
