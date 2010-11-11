@@ -75,7 +75,7 @@ EXP-DES-CBC-SHA:EXP-RC2-CBC-MD5:EXP-RC2-CBC-MD5:EXP-RC4-MD5:EXP-RC4-MD5
 // The password code is not thread safe
 int CSocketSSL::PasswordCallback( char *pszBuffer, int nBufferSize, int nRWFlag, void* pUserData )
   {
-  std::cout << "PasswordCallback called" << std::endl;
+//  std::cout << "PasswordCallback called" << std::endl;
 
   int nPwdLength = CSocketSSL::s_sPassword.length();
   if ( nBufferSize < nPwdLength+1 )
@@ -120,7 +120,7 @@ void CSocketSSL::ConnectSSL( const std::string& rsCertificate,
                              const std::string& rsPort )
   {
   inherited::Connect( rsHost, rsPort );
-  std::cout << "Socket connected" << std::endl;
+//  std::cout << "Socket connected" << std::endl;
 
   if ( !isValid() ) return;
 
@@ -167,21 +167,21 @@ void CSocketSSL::ConnectSSL( const std::string& rsCertificate,
 
 const CSocketSSL& CSocketSSL::operator << ( const std::string& s ) const
   {
-  std::cout << "CSocketSSL::operator << (s)" << std::endl;
+//  std::cout << "CSocketSSL::operator << (s)" << std::endl;
   Send( s );
   return *this;
   }
 
 const CSocketSSL& CSocketSSL::operator << ( long n ) const
   {
-  std::cout << "CSocketSSL::operator << (n)" << std::endl;
+//  std::cout << "CSocketSSL::operator << (n)" << std::endl;
   Send( to_string(n) );
   return *this;
   }
 
 void CSocketSSL::Send( const std::string& s ) const
   {
-  std::cout << "CSocketSSL::Send(s)" << std::endl;
+//  std::cout << "CSocketSSL::Send(s)" << std::endl;
   unsigned int nResult = ::SSL_write( m_ptSsl,
                                       s.c_str(),
                                       s.length() );
@@ -252,7 +252,7 @@ SSL_CTX* CSocketSSL::InitializeSslCtx( const std::string rsKeyfile,
 
 
 // Check that the common name matches the host name
-bool CSocketSSL::CertificateCheck( SSL* ptSsl, const std::string& rsHost)
+bool CSocketSSL::CertificateCheck( SSL* ptSsl, const std::string& rsHost )
   {
   X509  *ptPeer;
   char   acPeer_CN[256];
@@ -260,6 +260,7 @@ bool CSocketSSL::CertificateCheck( SSL* ptSsl, const std::string& rsHost)
   ptPeer = SSL_get_peer_certificate( ptSsl );
 
 /* ?? verifies against the system CAs? ??
+ */
   int nResult = 0; // SSL_get_verify_result( ptSsl );
   if ( nResult != X509_V_OK )
     {
@@ -402,7 +403,7 @@ bool CSocketSSL::CertificateCheck( SSL* ptSsl, const std::string& rsHost)
     throw CSocketException( "Certificate verification: " + sError );
     }
   std::cout << "Certificate issued for host " + rsHost << std::endl;
-*/
+/* */
 
   // Check the common name
   X509_NAME_get_text_by_NID( X509_get_subject_name(ptPeer),
