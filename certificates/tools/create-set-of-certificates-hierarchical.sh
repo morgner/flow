@@ -88,7 +88,7 @@ openssl req -new -utf8 -days 7301 \
             -keyout ${NAME}.key -out ${NAME}.csr
 SER="100"
 CA=${RTCA}
-openssl x509 -req -days 7300 -extensions v3_ca -in ${NAME}.csr -CA ${CA}.crt -CAkey ${CA}.key -set_serial ${SER} -out ${NAME}.crt
+openssl x509 -req -days 7300 -extfile ${WORKDIR}/v3_ca.conf -extensions v3_ca -in ${NAME}.csr -CA ${CA}.crt -CAkey ${CA}.key -set_serial ${SER} -out ${NAME}.crt
 echo "Intermediate Server CA Certificate is: `pwd`/${NAME}.crt" | tee -a ${README}
 
 
@@ -106,7 +106,7 @@ openssl req -new -utf8 -days 7301 \
             -keyout ${NAME}.key -out ${NAME}.csr
 SER="200"
 CA=${RTCA}
-openssl x509 -req -days 7300 -extensions v3_ca -in ${NAME}.csr -CA ${CA}.crt -CAkey ${CA}.key -set_serial ${SER} -out ${NAME}.crt
+openssl x509 -req -days 7300 -extfile ${WORKDIR}/v3_ca.conf -extensions v3_ca -in ${NAME}.csr -CA ${CA}.crt -CAkey ${CA}.key -set_serial ${SER} -out ${NAME}.crt
 echo "Intermediate Client CA Certificate is: `pwd`/${NAME}.crt" | tee -a ${README}
 
 

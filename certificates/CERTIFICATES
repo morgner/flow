@@ -1,0 +1,11 @@
+Root CA Certificate is: CA/cert.flow-ca.info.crt
+Intermediate Server CA Certificate is: CA/Intermediate-Server-CA.crt
+Intermediate Client CA Certificate is: CA/Intermediate-Client-CA.crt
+Server CA Chain is: server/server-CA-chain.pem
+Client CA Chain is: client/client-CA-chain.pem
+Server Certificate for localhost is: localhost.crt
+localhost.crt: OK
+User Certificate for username is: client/username.crt
+username.crt: OK
+User Certificate for recipient is: client/recipient.crt
+recipient.crt: OK
