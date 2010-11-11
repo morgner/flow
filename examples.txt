@@ -40,6 +40,7 @@ EXAMPLE 2
 
 client command
 ~~~~~~~~~~~~~~
+$ cat test.txt | ./flowclient -v
 ===pipe-begin===
 1 a simple line
 2 an another line
