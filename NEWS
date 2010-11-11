@@ -1,7 +1,44 @@
-'flow' -- History of versions
+== 'flow' -- History of versions
 
 Copyright (C) 2010 Manfred Morgner manfred@morgner.com
 
 See the LICENSE file for copying conditions.
 
-= no version yet =
+
+--- Client works with SSL against OpenSSL 0.9.8. ---
+
+=- Serverlog
+
+Using default temp DH parameters
+Using default temp ECDH parameters
+ACCEPT
+-----BEGIN SSL SESSION PARAMETERS-----
+MFUCAQECAgMBBAIAOQQABDAjVRqN4tcSr6Yv/K/SYR33oLSD5BLiz0nCtmec4CbF
+FiP46Cim6bRcHHjrpbMjRMOhBgIETNw94qIEAgIcIKQGBAQBAAAA
+-----END SSL SESSION PARAMETERS-----
+Shared ciphers:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA
+CIPHER is DHE-RSA-AES256-SHA
+Secure Renegotiation IS supported
+u:username
+p:password
+c:PULEX
+l:1
+t:1289502178
+r:1818636078
+x:Hello Word, this is I, a lonley pulex
+.
+
+=- Clientlog
+
+Initialized SSL
+SSL Context created
+Read certificate file
+Read key file
+Checked CA list
+Initialized SSL Context
+Selected cipher list
+Connected with SSL
+Certificate issued for host localhost
+Common name matches host name: localhost
+Host is ok
+
