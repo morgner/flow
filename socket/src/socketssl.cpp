@@ -165,6 +165,7 @@ void CSocketSSL::ConnectSSL( const std::string& rsCertificate,
   std::cout << "Host is ok" << std::endl;
   }
 
+
 const CSocketSSL& CSocketSSL::operator << ( const std::string& s ) const
   {
 //  std::cout << "CSocketSSL::operator << (s)" << std::endl;
@@ -178,6 +179,14 @@ const CSocketSSL& CSocketSSL::operator << ( long n ) const
   Send( to_string(n) );
   return *this;
   }
+
+
+const CSocketSSL& CSocketSSL::operator >> ( std::string& s ) const
+  {
+  Receive( s );
+  return *this;
+  }
+
 
 void CSocketSSL::Send( const std::string& s ) const
   {
@@ -199,6 +208,33 @@ void CSocketSSL::Send( const std::string& s ) const
     throw CSocketException("SSL write problem");
     }
   }
+
+
+const std::string& CSocketSSL::Receive( std::string& s ) const
+  {
+  std::cout << "CSocketSSL::Receive(s)" << std::endl;
+
+  static char aszBuffer[RECEIVE_BUFFER_SIZE];
+
+  unsigned int nResult = SSL_read( m_ptSsl, aszBuffer, RECEIVE_BUFFER_SIZE-1 );
+  switch( SSL_get_error(m_ptSsl, nResult) )
+    {
+    case SSL_ERROR_NONE:
+      std::cout << "SSL Read Data: " << aszBuffer << std::endl;
+      break;
+    case SSL_ERROR_ZERO_RETURN:
+      throw CSocketException( "SSL_ERROR_ZERO_RETURN" );
+    case SSL_ERROR_SYSCALL:
+      throw CSocketException( "SSL_ERROR_SYSCALL" );
+    default:
+      throw CSocketException( "Unknown SSL Error - Read problem" );
+    }
+
+  aszBuffer[nResult+1] = 0;
+  s += aszBuffer;
+  return s;
+  }
+
 
 SSL_CTX* CSocketSSL::InitializeSslCtx( const std::string rsKeyfile,
                                        const std::string rsPassword )
@@ -259,151 +295,114 @@ bool CSocketSSL::CertificateCheck( SSL* ptSsl, const std::string& rsHost )
 
   ptPeer = SSL_get_peer_certificate( ptSsl );
 
-/* ?? verifies against the system CAs? ??
- */
+// ?? verifies against the system CAs? ??
   int nResult = 0; // SSL_get_verify_result( ptSsl );
   if ( nResult != X509_V_OK )
     {
-    //- berr_exit("Certificate doesn't verify");
-
     std::string sError;
     switch ( nResult )
       {
       case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT:
         sError = "Unable to get or find issuer certificate";
         break;
-
       case X509_V_ERR_UNABLE_TO_GET_CRL:
          sError = "Unable to get certificate CRL";
          break;
-
       case X509_V_ERR_UNABLE_TO_DECRYPT_CERT_SIGNATURE:
          sError = "Unable to decrypt certificate's signature";
          break;
-
       case X509_V_ERR_UNABLE_TO_DECRYPT_CRL_SIGNATURE:
          sError = "Unable to decrypt CRL's signature";
          break;
-
       case X509_V_ERR_UNABLE_TO_DECODE_ISSUER_PUBLIC_KEY:
          sError = "Unable to decode issuer public key";
          break;
-
       case X509_V_ERR_CERT_SIGNATURE_FAILURE:
          sError = "Certificate signature failure";
          break;
-
       case X509_V_ERR_CRL_SIGNATURE_FAILURE:
         sError = "CRL signature failure";
         break;
-
       case X509_V_ERR_CERT_NOT_YET_VALID:
         sError = "Certificate is not yet valid";
         break;
-
       case X509_V_ERR_CERT_HAS_EXPIRED:
         sError = "Certificate has expired";
         break;
-
       case X509_V_ERR_CRL_NOT_YET_VALID:
         sError = "CRL is not yet valid";
         break;
-
       case X509_V_ERR_CRL_HAS_EXPIRED:
         sError = "CRL has expired";
         break;
-
       case X509_V_ERR_ERROR_IN_CERT_NOT_BEFORE_FIELD:
         sError = "Format error in certificate's notBefore field";
         break;
-
       case X509_V_ERR_ERROR_IN_CERT_NOT_AFTER_FIELD:
         sError = "Format error in certificate's notAfter field";
         break;
-
       case X509_V_ERR_ERROR_IN_CRL_LAST_UPDATE_FIELD:
          sError = "Format error in CRL's lastUpdate field";
          break;
-
       case X509_V_ERR_ERROR_IN_CRL_NEXT_UPDATE_FIELD:
         sError = "Format error in CRL's nextUpdate field";
         break;
-
       case X509_V_ERR_OUT_OF_MEM:
         sError = "Out of memory";
         break;
-
       case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
         sError = "Self signed certificate and the certificate cannot be found in the list of trusted certificates";
         break;
-
       case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN:
         sError = "Self signed certificate in certificate chain";
         break;
-
       case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY:
         sError = "Unable to get local issuer certificate";
         break;
-
       case X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE:
         sError = "Unable to verify the first certificate";
         break;
-
       case X509_V_ERR_CERT_CHAIN_TOO_LONG:
         sError = "Certificate chain too long";
         break;
-
       case X509_V_ERR_CERT_REVOKED:
         sError = "Certificate revoked";
         break;
-
       case X509_V_ERR_INVALID_CA:
         sError = "Invalid CA certificate";
         break;
-
       case X509_V_ERR_PATH_LENGTH_EXCEEDED:
         sError = "Path length constraint exceeded";
         break;
-
       case X509_V_ERR_INVALID_PURPOSE:
         sError = "Unsupported certificate purpose";
         break;
-
       case X509_V_ERR_CERT_UNTRUSTED:
         sError = "Certificate not trusted";
         break;
-
       case X509_V_ERR_CERT_REJECTED:
         sError = "Certificate rejected (the root CA is marked to reject the specified purpose)";
         break;
-
       case X509_V_ERR_SUBJECT_ISSUER_MISMATCH:
         sError = "Subject issuer mismatch";
         break;
-
       case X509_V_ERR_AKID_SKID_MISMATCH:
         sError = "Authority and subject key identifier mismatch";
         break;
-
       case X509_V_ERR_AKID_ISSUER_SERIAL_MISMATCH:
         sError = "Authority and issuer serial number mismatch";
         break;
-
       case X509_V_ERR_KEYUSAGE_NO_CERTSIGN:
         sError = "Key usage does not include certificate signing";
         break;
-
       case X509_V_ERR_APPLICATION_VERIFICATION:
         sError = "Application verification failure";
         break;
-
       default: sError = "Unknown Error #" + to_string(nResult);
-      }
-
+      } // switch ( nResult )
     throw CSocketException( "Certificate verification: " + sError );
-    }
-  std::cout << "Certificate issued for host " + rsHost << std::endl;
-/* */
+    } // if ( nResult != X509_V_OK )
+//  std::cout << "Certificate issued for host " + rsHost << std::endl;
 
   // Check the common name
   X509_NAME_get_text_by_NID( X509_get_subject_name(ptPeer),

@@ -195,7 +195,7 @@ const CSocket& CSocket::operator << ( long n ) const
 
 const CSocket& CSocket::operator >> ( std::string& s ) const
   {
-  Receive(s);
+  Receive( s );
   return *this;
   }
 

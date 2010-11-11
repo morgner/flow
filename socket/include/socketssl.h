@@ -66,10 +66,14 @@ class CSocketSSL : public CSocket
                          const std::string& rsHost,
                          const std::string& rsPort );
 
+    virtual       void         Send    ( const std::string& s ) const;
+    virtual const std::string& Receive (       std::string& s ) const;
+
+  public:
     const CSocketSSL& operator << ( const std::string& s ) const;
     const CSocketSSL& operator << (       long         n ) const;
+    const CSocketSSL& operator >> (       std::string& s ) const;
 
-    virtual void Send( const std::string& s ) const;
 
 
 
