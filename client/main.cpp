@@ -114,7 +114,10 @@ int main( int argc, char* argv[] )
     {
     if ( bVerbose ) std::cout << " * HOST: " << g_oEnvironment["host"] << std::endl;
     if ( bVerbose ) std::cout << " * PORT: " << g_oEnvironment["port"] << std::endl;
-    CSocketClient oConnection( g_oEnvironment["host"], g_oEnvironment["port"] );
+    CSocketClient oConnection( "certificates/client/username",
+                               "",
+                               g_oEnvironment["host"],
+                               g_oEnvironment["port"] );
 
     /// iterate over all Pulexes in our Domain and let them jump
     std::string sServerReply;

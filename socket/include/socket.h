@@ -34,6 +34,7 @@
 #include <string>
 #include <arpa/inet.h>
 
+
 #include <memory.h>
 
 #include <sstream>
@@ -86,22 +87,22 @@ class CSocket
              CSocket( const int nSock = INVALID_SOCKET );
     virtual ~CSocket();
   
-    void     Create ();
-    void     Bind   ( const int         nPort );
-    void     Listen ()                            const;
-    void     Accept (       CSocket&    roSocket) const;
-    CSocket* Accept ()                            const;
-    void     Connect( const std::string& rsHost,
-                      const std::string& rsPort );
-    void     Close  ();
+    virtual       void         Create ();
+    virtual       void         Bind   ( const int         nPort );
+    virtual       void         Listen ()                            const;
+    virtual       void         Accept (       CSocket&    roSocket) const;
+    virtual       CSocket*     Accept ()                            const;
+    virtual       void         Connect( const std::string& rsHost,
+                                        const std::string& rsPort );
+    virtual       void         Close  ();
 
-  
+    virtual       void         Send    ( const std::string& s )     const;
+    virtual const std::string& Receive (       std::string& s )     const;
+
+  public:
     const CSocket& operator << ( const std::string& s ) const;
     const CSocket& operator << (       long         n ) const;
     const CSocket& operator >> (       std::string& s ) const;
-
-          void         Send    ( const std::string& s ) const;
-    const std::string& Receive (       std::string& s ) const;
 
     bool isValid() const;
 

@@ -60,8 +60,9 @@ void CEnvironment::CommandlineRead( int argc, char* argv[], const struct option*
   m_sProgramName = argv[0];
   m_sProgramName = m_sProgramName.substr( m_sProgramName.rfind('/')+1 );
 
-  int c;
-  int option_index = 0;
+  extern char* optarg;
+  int          c;
+  int          option_index = 0;
   while ( (c = getopt_long (argc, argv, "HVvh:p:u:r:m:i:", ptOption, &option_index)) != EOF )
     {
     switch (c)

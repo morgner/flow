@@ -36,14 +36,23 @@
 #include <string>
 
 
+#include <openssl/ssl.h>
+
 class CSocketSSL : public CSocket
   {
   private:
     typedef CSocket inherited;
 
+    static std::string s_sPassword;
+    static std::string s_sCiphers;
+
+
   protected:
     std::string m_sCertificate;
     std::string m_sCA;
+    SSL_CTX*    m_ptSslCtx;
+	SSL*        m_ptSsl;
+	BIO*        m_ptBioError;
 
   public:
              CSocketSSL( const int          nSock           = INVALID_SOCKET );
@@ -56,6 +65,22 @@ class CSocketSSL : public CSocket
                          const std::string& rsCA,
                          const std::string& rsHost,
                          const std::string& rsPort );
+
+    const CSocketSSL& operator << ( const std::string& s ) const;
+    const CSocketSSL& operator << (       long         n ) const;
+
+    virtual void Send( const std::string& s ) const;
+
+
+
+    SSL_CTX* InitializeSslCtx( const std::string rsKeyfile,
+                               const std::string rsPassword  = "" );
+
+    bool CertificateCheck(       SSL*         ptSsl,
+                           const std::string& rsHost);
+
+  protected:
+	static int PasswordCallback( char* pszBuffer, int nBufferSize, int nRWFlag, void* pUserData );
 
   }; // class SocketSSL
 

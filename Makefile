@@ -1,8 +1,8 @@
 
 CC = g++
 
-SERVER_LIBS = -lflowsocket              -lc -lstdc++ -lpthread
-CLIENT_LIBS = -lflowsocket -lflowsystem -lc -lstdc++
+SERVER_LIBS = -lflowsocket              -lc -lstdc++ -lpthread -lssl -lcrypto
+CLIENT_LIBS = -lflowsocket -lflowsystem -lc -lstdc++           -lssl -lcrypto
 
 SOCKET_PATH = socket
 SERVER_PATH = server
