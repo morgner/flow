@@ -65,7 +65,7 @@ cd ${DIR_CA}
 
 NAME=${RTCA}
 ORGANISATION="Great Privacy Commitee"
-COUNTRY="DE"
+COUNTRY="CH"
 STATE="Bern"
 LOCATION="Stadt Bern"
 openssl req -new -utf8 -x509 -days 7302 \
