@@ -1,0 +1,1 @@
+openssl verify -issuer_checks -CAfile cachain.pem username.crt
