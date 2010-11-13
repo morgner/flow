@@ -45,7 +45,7 @@ CSocketClient::CSocketClient( const std::string& rsCertificate,
                               const std::string& rsPort )
   {
   Create();
-  ConnectSSL( rsCertificate, rsCA, rsHost, rsPort );
+  Connect( rsCertificate, rsCA, rsHost, rsPort );
   }
 
 CSocketClient::~CSocketClient()

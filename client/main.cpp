@@ -115,12 +115,12 @@ int main( int argc, char* argv[] )
     if ( bVerbose ) std::cout << " * HOST: " << g_oEnvironment["host"] << std::endl;
     if ( bVerbose ) std::cout << " * PORT: " << g_oEnvironment["port"] << std::endl;
     CSocketClient oConnection( "certificates/client/username",
-                               "",
+                               "certificates/client/client-CA-chain.pem",
                                g_oEnvironment["host"],
                                g_oEnvironment["port"] );
 
-    /// iterate over all Pulexes in our Domain and let them jump
     std::string sServerReply;
+    /// iterate over all Pulexes in our Domain and let them jump
     try
       {
       for (CDomain::iterator it=oDomain.begin(); it != oDomain.end(); ++it)

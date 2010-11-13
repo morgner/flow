@@ -51,8 +51,10 @@ class CSocketSSL : public CSocket
     std::string m_sCertificate;
     std::string m_sCA;
     SSL_CTX*    m_ptSslCtx;
-	SSL*        m_ptSsl;
-	BIO*        m_ptBioError;
+    SSL*        m_ptSsl;
+    BIO*        m_ptBio;
+    BIO*        m_ptSslBio;
+    BIO*        m_ptBioError;
 
   public:
              CSocketSSL( const int          nSock           = INVALID_SOCKET );
@@ -61,10 +63,18 @@ class CSocketSSL : public CSocket
                          const int          nSock           = INVALID_SOCKET );
     virtual ~CSocketSSL();
 
-    void     ConnectSSL( const std::string& rsCertificate,
-                         const std::string& rsCA,
-                         const std::string& rsHost,
-                         const std::string& rsPort );
+    virtual       void         Accept (       CSocketSSL& roSocket );
+    virtual       CSocket*     Accept ();
+    virtual       void         Connect( const std::string& rsHost,
+                                        const std::string& rsPort );
+
+    virtual       void         Connect( const std::string& rsCertificate,
+                                        const std::string& rsCA,
+                                        const std::string& rsHost,
+                                        const std::string& rsPort );
+
+
+    virtual       void         Close   ();
 
     virtual       void         Send    ( const std::string& s ) const;
     virtual const std::string& Receive (       std::string& s ) const;
@@ -84,7 +94,13 @@ class CSocketSSL : public CSocket
                            const std::string& rsHost);
 
   protected:
-	static int PasswordCallback( char* pszBuffer, int nBufferSize, int nRWFlag, void* pUserData );
+    static int PasswordCallback( char* pszBuffer, int nBufferSize, int nRWFlag, void* pUserData );
+
+  // server specific
+
+    void LoadDHParameters ( const std::string& sParamsFile );
+    void GenerateEphRsaKey();
+
 
   }; // class SocketSSL
 

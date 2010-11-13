@@ -33,7 +33,7 @@
 #define KEYFILE  "certificates/client/username.key"
 #define CRTFILE  "certificates/client/username.crt"
 #define PASSWORD ""
-
+#define DHFILE   "dh1024.pem"
 
 #include "socketssl.h"
 #include "socketexception.h"
@@ -41,7 +41,7 @@
 #include <iostream>
 
 std::string CSocketSSL::s_sPassword;
-std::string CSocketSSL::s_sCiphers  = "DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA";
+std::string CSocketSSL::s_sCiphers  = ""; // "DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA";
 
 /* openssl ciphers
 DHE-RSA-AES256-SHA:DHE-DSS-AES256-SHA:AES256-SHA:EDH-RSA-DES-CBC3-SHA:EDH-DSS-DES-CBC3-SHA:DES-CBC3-SHA:DES-CBC3-MD5:
@@ -70,6 +70,8 @@ CSocketSSL::CSocketSSL( const int nSock )
   : inherited( nSock ),
     m_ptSslCtx( 0 ),
     m_ptSsl( 0 ),
+    m_ptBio( 0 ),
+    m_ptSslBio( 0 ),
     m_ptBioError( 0 )
   {
   }
@@ -82,20 +84,84 @@ CSocketSSL::CSocketSSL( const std::string& rsCertificate,
     m_sCA( rsCA ),
     m_ptSslCtx( 0 ),
     m_ptSsl( 0 ),
+    m_ptBio( 0 ),
+    m_ptSslBio( 0 ),
     m_ptBioError( 0 )
   {
   }
 
 CSocketSSL::~CSocketSSL()
   {
-  SSL_CTX_free( m_ptSslCtx );
+  Close();
   }
 
 
-void CSocketSSL::ConnectSSL( const std::string& rsCertificate,
-                             const std::string& rsCA,
-                             const std::string& rsHost,
-                             const std::string& rsPort )
+CSocket* CSocketSSL::Accept ()
+  {
+  CSocketSSL* poSocket = new CSocketSSL;
+  Accept( *poSocket );
+  return poSocket;
+  }
+
+
+void CSocketSSL::Accept( CSocketSSL& roSocket )
+  {
+  std::cout << "CSocketSSL::Accept( CSocketSSL& )" << std::endl;
+  inherited::Accept( roSocket );
+
+  m_ptBio = ::BIO_new_socket( roSocket.m_nSock, BIO_NOCLOSE );
+  m_ptSsl = ::SSL_new( m_ptSslCtx );
+  ::SSL_set_bio( m_ptSsl, m_ptBio, m_ptBio);
+
+  int nResult;
+  if ( (nResult = ::SSL_accept(roSocket.m_ptSsl)) <= 0 )
+    {
+    throw CSocketException( "SSL accept error" );
+    }
+
+  m_ptBio    = ::BIO_new( BIO_f_buffer() );
+  m_ptSslBio = ::BIO_new( BIO_f_ssl() );
+  ::BIO_set_ssl( m_ptSslBio, m_ptSsl, BIO_CLOSE);
+  ::BIO_push( m_ptBio, m_ptSslBio );
+
+  } // void CSocketSSL::Accept( CSocket& roSocket ) const
+
+
+void CSocketSSL::Close()
+  {
+  int nResult = ::SSL_shutdown( m_ptSsl );
+  if( !nResult )
+    {
+    // If SSL_shutdown() is called first then it always returns '0'.
+    //   In this case, try again, but first send a TCP FIN to trigger the other side's close_notify
+    ::shutdown( m_nSock, 1 );
+    nResult = ::SSL_shutdown( m_ptSsl );
+    }
+
+  switch( nResult )
+    {  
+    case  1: break; // closed
+    case  0:
+    case -1:
+    default:
+      throw CSocketException("Shutdown failed");
+    }
+
+  ::SSL_free    ( m_ptSsl );     m_ptSsl = 0;     // ???
+  ::SSL_CTX_free( m_ptSslCtx );  m_ptSslCtx = 0;  // ???
+  inherited::Close();
+  }
+
+void CSocketSSL::Connect( const std::string& rsHost,
+                          const std::string& rsPort )
+  {
+  inherited::Connect( rsHost, rsPort );
+  }
+
+void CSocketSSL::Connect( const std::string& rsCertificate,
+                          const std::string& rsCA,
+                          const std::string& rsHost,
+                          const std::string& rsPort )
   {
   inherited::Connect( rsHost, rsPort );
 //  std::cout << "Socket connected" << std::endl;
@@ -117,7 +183,7 @@ void CSocketSSL::ConnectSSL( const std::string& rsCertificate,
   // Set our cipher list
   if ( s_sCiphers.length() )
     {
-    SSL_CTX_set_cipher_list( m_ptSslCtx, s_sCiphers.c_str() );
+    ::SSL_CTX_set_cipher_list( m_ptSslCtx, s_sCiphers.c_str() );
     }
   std::cout << "Selected cipher list" << std::endl;
 
@@ -129,10 +195,10 @@ void CSocketSSL::ConnectSSL( const std::string& rsCertificate,
 */
 
   // Connect the SSL socket
-  m_ptSsl = SSL_new( m_ptSslCtx );
-  ptSbio  = BIO_new_socket( m_nSock, BIO_NOCLOSE );
-  SSL_set_bio( m_ptSsl, ptSbio, ptSbio );
-  if( SSL_connect(m_ptSsl) <= 0 )
+  m_ptSsl = ::SSL_new( m_ptSslCtx );
+  ptSbio  = ::BIO_new_socket( m_nSock, BIO_NOCLOSE );
+  ::SSL_set_bio( m_ptSsl, ptSbio, ptSbio );
+  if( ::SSL_connect(m_ptSsl) <= 0 )
     {
     //- berr_exit("SSL connect error");
     throw CSocketException("SSL connect error connecting to " + rsHost);
@@ -173,7 +239,7 @@ void CSocketSSL::Send( const std::string& s ) const
                                       s.c_str(),
                                       s.length() );
 
-  switch( SSL_get_error(m_ptSsl, nResult) )
+  switch( ::SSL_get_error(m_ptSsl, nResult) )
     {      
     case SSL_ERROR_NONE:
       if ( s.length() != nResult )
@@ -194,7 +260,7 @@ const std::string& CSocketSSL::Receive( std::string& s ) const
 
   static char aszBuffer[RECEIVE_BUFFER_SIZE];
 
-  unsigned int nResult = SSL_read( m_ptSsl, aszBuffer, RECEIVE_BUFFER_SIZE-1 );
+  unsigned int nResult = ::SSL_read( m_ptSsl, aszBuffer, RECEIVE_BUFFER_SIZE-1 );
   switch( SSL_get_error(m_ptSsl, nResult) )
     {
     case SSL_ERROR_NONE:
@@ -223,38 +289,38 @@ SSL_CTX* CSocketSSL::InitializeSslCtx( const std::string rsKeyfile,
   if( !m_ptBioError )
     {
     // Global system initialization
-    SSL_library_init();
-    SSL_load_error_strings();
+    ::SSL_library_init();
+    ::SSL_load_error_strings();
 
     // An error write context
-    m_ptBioError = BIO_new_fp(stderr,BIO_NOCLOSE);
+    m_ptBioError = ::BIO_new_fp(stderr,BIO_NOCLOSE);
     }
   std::cout << "Initialized SSL" << std::endl;
 
   // Create our context
-  ptMethode = TLSv1_method(); // TLSv1_method() SSLv2_method() SSLv23_method() SSLv3_method()
-  ptSslCtx  = SSL_CTX_new( ptMethode );
+  ptMethode = ::TLSv1_method(); // TLSv1_method() SSLv2_method() SSLv23_method() SSLv3_method()
+  ptSslCtx  = ::SSL_CTX_new( ptMethode );
   std::cout << "SSL Context created" << std::endl;
 
   // Load our certificates
-  if ( ! SSL_CTX_use_certificate_chain_file(ptSslCtx, (rsKeyfile + ".crt").c_str()) )
+  if ( ! ::SSL_CTX_use_certificate_chain_file(ptSslCtx, (rsKeyfile + ".crt").c_str()) )
     {
     throw CSocketException("Can't read certificate file");
     }
   std::cout << "Read certificate file" << std::endl;
 
   s_sPassword = rsPassword;
-  SSL_CTX_set_default_passwd_cb( ptSslCtx, PasswordCallback );
+  ::SSL_CTX_set_default_passwd_cb( ptSslCtx, PasswordCallback );
 
   // Load our keys
-  if ( ! SSL_CTX_use_PrivateKey_file(ptSslCtx, (rsKeyfile + ".key").c_str(), SSL_FILETYPE_PEM ) )
+  if ( ! ::SSL_CTX_use_PrivateKey_file(ptSslCtx, (rsKeyfile + ".key").c_str(), SSL_FILETYPE_PEM ) )
     {
     throw CSocketException("Can't read key file");
     }
   std::cout << "Read key file" << std::endl;
 
   // Load the CAs we trust
-  if( ! SSL_CTX_load_verify_locations(ptSslCtx, CA_LIST, 0) )
+  if( ! ::SSL_CTX_load_verify_locations(ptSslCtx, CA_LIST, 0) )
 //  if( ! SSL_CTX_load_verify_locations(ptSslCtx, 0, CA_PATH) )
     {
     throw CSocketException("Can't read CA list");
@@ -271,10 +337,10 @@ bool CSocketSSL::CertificateCheck( SSL* ptSsl, const std::string& rsHost )
   X509  *ptPeer;
   char   acPeer_CN[256];
 
-  ptPeer = SSL_get_peer_certificate( ptSsl );
+  ptPeer = ::SSL_get_peer_certificate( ptSsl );
 
 // ?? verifies against the system CAs? ??
-  int nResult = 0; // SSL_get_verify_result( ptSsl );
+  int nResult = SSL_get_verify_result( ptSsl );
   if ( nResult != X509_V_OK )
     {
     std::string sError;
@@ -380,13 +446,13 @@ bool CSocketSSL::CertificateCheck( SSL* ptSsl, const std::string& rsHost )
       } // switch ( nResult )
     throw CSocketException( "Certificate verification: " + sError );
     } // if ( nResult != X509_V_OK )
-//  std::cout << "Certificate issued for host " + rsHost << std::endl;
+  std::cout << "Certificate issued for " + rsHost << std::endl;
 
   // Check the common name
-  X509_NAME_get_text_by_NID( X509_get_subject_name(ptPeer),
-                             NID_commonName,
-                             acPeer_CN,
-                             sizeof(acPeer_CN) );
+  ::X509_NAME_get_text_by_NID( X509_get_subject_name(ptPeer),
+                               NID_commonName,
+                               acPeer_CN,
+                               sizeof(acPeer_CN) );
   if( strcasecmp( acPeer_CN, rsHost.c_str() ))
     {
     throw CSocketException("Common name doesn't match host name");
@@ -394,3 +460,43 @@ bool CSocketSSL::CertificateCheck( SSL* ptSsl, const std::string& rsHost )
   std::cout << "Common name matches host name: " << acPeer_CN << std::endl;
   return true;
   }
+
+
+/* -------------------------
+
+       SERVER SPECIFIC
+
+   ------------------------- */
+
+void CSocketSSL::LoadDHParameters( const std::string& sParamsFile )
+  {
+  DH*  ptDH=0; // ret
+  BIO* ptBio;  // bio
+
+  if ( (ptBio = ::BIO_new_file( sParamsFile.c_str(),"r")) == NULL)
+    {
+    throw CSocketException( "Couldn't open DH file" );
+    }
+
+  ptDH = ::PEM_read_bio_DHparams( ptBio, NULL, NULL,  NULL);
+  ::BIO_free( ptBio );
+
+  if( ::SSL_CTX_set_tmp_dh(m_ptSslCtx, ptDH) < 0 )
+    {
+    throw CSocketException( "Couldn't set DH parameters" );
+    }
+  } // void CSocketSSL::LoadDHParameters( SSL_CTX* ptSslCtx, const std::string& sParamsFile)
+
+void CSocketSSL::GenerateEphRsaKey()
+  {
+  RSA* ptRsa;
+
+  ptRsa = ::RSA_generate_key( 512, RSA_F4, NULL, NULL );
+
+  if ( !SSL_CTX_set_tmp_rsa(m_ptSslCtx, ptRsa) )
+    {
+    throw CSocketException( "Couldn't set RSA key" );
+    }
+
+  ::RSA_free( ptRsa );
+  } // void CSocketSSL::GenerateEphRsaKey()

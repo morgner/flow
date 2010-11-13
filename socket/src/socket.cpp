@@ -137,7 +137,7 @@ void CSocket::Accept( CSocket& roSocket ) const
   roSocket.m_nSock = ::accept( m_nSock,
                                m_tAddr,
                                &addr_length );
-  
+
   if ( roSocket.m_nSock <= 0 )
     {
     throw CSocketException( "Could not 'accept' in CSocket::Accept()." );
@@ -146,19 +146,18 @@ void CSocket::Accept( CSocket& roSocket ) const
   timeval timeout;
   timeout.tv_sec  = 0;
   timeout.tv_usec = 100;
-  
+
   int result = setsockopt( roSocket.m_nSock,
                            SOL_SOCKET,
                            SO_RCVTIMEO,
                            (const char*)&timeout,
                            sizeof(timeout) );
-  
+
   if ( result == -1 )
     {
     throw CSocketException ( "Could not 'setsockopt' SO_RCVTIMEO in CSocket::Create()." );
-    }
-
-  }
+    } // if ( result == -1 )
+  } // void CSocket::Accept( CSocket& roSocket ) const
 
 
 void CSocket::Close( )
