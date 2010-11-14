@@ -1,5 +1,5 @@
 /***************************************************************************
- socket.h  -  description
+ socket.h  - description
  -----------------------
  begin                 : Fri Oct 29 2010
  copyright             : Copyright (C) 2010 by Manfred Morgner
@@ -34,8 +34,8 @@
 #include <string>
 #include <arpa/inet.h>
 
-
 #include <memory.h>
+
 
 #include <sstream>
 template <typename T>
@@ -97,7 +97,7 @@ class CSocket
                                         const std::string& rsPort );
     virtual       void         Close  ();
 
-    virtual       void         Send    ( const std::string& s )     const;
+    virtual       size_t       Send    ( const std::string& s )     const;
     virtual const std::string& Receive (       std::string& s )     const;
 
   public:

@@ -43,6 +43,7 @@ class CSocketSSL : public CSocket
     typedef CSocket inherited;
 
     static std::string s_sCiphers;
+    static bool        s_bSslInitialized;
 
   class Cx509
     {
@@ -71,8 +72,7 @@ class CSocketSSL : public CSocket
     SSL_CTX*    m_ptSslCtx;          // the SSL Context
     SSL*        m_ptSsl;             // the SSL socket
     BIO*        m_ptBio;             // 
-    BIO*        m_ptSslBio;          // 
-    BIO*        m_ptBioError;        // 
+//    BIO*        m_ptSslBio;          // 
 
   public:
              CSocketSSL( const int          nSock           = INVALID_SOCKET );
@@ -89,7 +89,7 @@ class CSocketSSL : public CSocket
     virtual       CSocket*     Accept  ();
     virtual       void         Connect ();
     virtual       void         Close   ();
-    virtual       void         Send    ( const std::string& s ) const;
+    virtual       size_t       Send    ( const std::string& s ) const;
     virtual const std::string& Receive (       std::string& s ) const;
 
   public:
