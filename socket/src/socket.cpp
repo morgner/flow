@@ -34,6 +34,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <stdlib.h> // malloc & free
 
 //#include <sys/types.h>
 //#include <sys/socket.h>
@@ -55,7 +56,8 @@ CSocket::~CSocket()
     ::close(m_nSock);
     m_nSock = INVALID_SOCKET;
     }
-	free( m_pcBuffer );
+  free( m_pcBuffer );
+  m_pcBuffer = 0;
   }
 
 void CSocket::Create()

@@ -49,13 +49,13 @@ class CSocketSSL : public CSocket
     protected:
       X509* m_ptPeer;
 
-       Cx509(){};
+       Cx509(){}
     public:
-       Cx509( X509* ptPeer ) : m_ptPeer(ptPeer) {};
-      ~Cx509()         { X509_free(m_ptPeer); };
+       Cx509( X509* ptPeer ) : m_ptPeer(ptPeer) {}
+      ~Cx509()         { X509_free(m_ptPeer); }
 
-      operator X509*() { return m_ptPeer; };
-      bool isValid()   { return m_ptPeer != 0; };
+      operator X509*() { return m_ptPeer; }
+      bool isValid()   { return m_ptPeer != 0; }
     }; // class Cx509
 
   protected:

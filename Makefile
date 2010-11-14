@@ -1,5 +1,5 @@
 
-CC = g++
+CC = clang
 
 SERVER_LIBS = -lflowsocket              -lc -lstdc++ -lpthread -lssl -lcrypto
 CLIENT_LIBS = -lflowsocket -lflowsystem -lc -lstdc++           -lssl -lcrypto
@@ -14,7 +14,7 @@ SERVER_INC = -I$(SERVER_PATH)/include -I$(SOCKET_PATH)/include
 CLIENT_INC = -I$(CLIENT_PATH)/include -I$(SOCKET_PATH)/include
 SYSTEM_INC = -I$(SYSTEM_PATH)/include -I$(SOCKET_PATH)/include
 
-CFLAGS = -c -O3 -mtune=native -Wall -pedantic
+CFLAGS = -c -mtune=native -Wall -pedantic
 
 LDFLAGS  = -L.
 
