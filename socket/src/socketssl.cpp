@@ -293,7 +293,7 @@ const std::string& CSocketSSL::Receive( std::string& s ) const
     case SSL_ERROR_ZERO_RETURN:
       throw CSocketException( "SSL_ERROR_ZERO_RETURN" );
     case SSL_ERROR_SYSCALL:
-      throw CSocketException( "SSL_ERROR_SYSCALL" );
+      throw CSocketException( "remote disconnect (SSL_ERROR_SYSCALL)" );
     default:
       throw CSocketException( "Unknown SSL Error - Read problem" );
     }
