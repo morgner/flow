@@ -40,6 +40,13 @@
 #include "partner.h"
 #include "container.h"
 
+#define KEY_FILE  "certificates/client/localhost.key"
+#define PASSWORD  ""
+#define CRT_FILE  "certificates/client/localhost.crt"
+#define CA_CHAIN  "certificates/server/server-CA-chain.pem"
+#define CA_PATH   "certificates/trust/"
+#define DHFILE    "dh1024.pem"
+
 
 long                 g_lLastRemoteId = 100;
 CContainerMapByCLUID g_oContainerMapByCLUID;

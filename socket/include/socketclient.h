@@ -41,11 +41,12 @@ class CSocketClient : public CSocketSSL
 
   public:  
              CSocketClient( const std::string& rsHost,
-                            const std::string& rsPort );
-             CSocketClient( const std::string& rsCertificate,
-                            const std::string& rsCA,
-                            const std::string& rsHost,
-                            const std::string& rsPort);
+                            const std::string& rsPort,
+                            const std::string& rsFileCertificate,
+                            const std::string& rsFileKey,
+                            const std::string& rsPassword,
+                            const std::string& rsFileCaChainClient,
+                            const std::string& rsFileCaChainHost );
     virtual ~CSocketClient();
 
   }; // class CSocketClient

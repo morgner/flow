@@ -33,19 +33,22 @@
 
 
 CSocketClient::CSocketClient( const std::string& rsHost,
-                              const std::string& rsPort )
+                              const std::string& rsPort,
+                              const std::string& rsFileCertificate,
+                              const std::string& rsFileKey,
+                              const std::string& rsPassword,
+                              const std::string& rsFileCaChainClient,
+                              const std::string& rsFileCaChainHost )
+  : CSocketSSL( rsHost,
+                rsPort,
+                rsFileCertificate,
+                rsFileKey,
+                rsPassword,
+                rsFileCaChainClient,
+                rsFileCaChainHost )
   {
   Create();
-  Connect( rsHost, rsPort );
-  }
-
-CSocketClient::CSocketClient( const std::string& rsCertificate,
-                              const std::string& rsCA,
-                              const std::string& rsHost,
-                              const std::string& rsPort )
-  {
-  Create();
-  Connect( rsCertificate, rsCA, rsHost, rsPort );
+  Connect();
   }
 
 CSocketClient::~CSocketClient()

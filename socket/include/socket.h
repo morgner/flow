@@ -48,7 +48,7 @@ template <typename T>
 
 const int INVALID_SOCKET      = -1;
 const int CLIENT_BACKLOG      =  3;
-const int RECEIVE_BUFFER_SIZE =  1025;
+const int RECEIVE_BUFFER_SIZE =  512;
 
 
 class CSocket
@@ -81,6 +81,7 @@ class CSocket
   
   protected:
     int       m_nSock;
+    char*     m_pcBuffer;
     CAddrInet m_tAddr;
 
   public:

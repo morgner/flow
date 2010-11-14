@@ -45,6 +45,7 @@
 CSocket::CSocket( const int nSock )
   : m_nSock( nSock )
   {
+  m_pcBuffer = (char*) malloc( RECEIVE_BUFFER_SIZE );
   }
 
 CSocket::~CSocket()
@@ -54,6 +55,7 @@ CSocket::~CSocket()
     ::close(m_nSock);
     m_nSock = INVALID_SOCKET;
     }
+	free( m_pcBuffer );
   }
 
 void CSocket::Create()
@@ -142,7 +144,7 @@ void CSocket::Accept( CSocket& roSocket ) const
     {
     throw CSocketException( "Could not 'accept' in CSocket::Accept()." );
     }
-
+/*
   timeval timeout;
   timeout.tv_sec  = 0;
   timeout.tv_usec = 100;
@@ -157,6 +159,7 @@ void CSocket::Accept( CSocket& roSocket ) const
     {
     throw CSocketException ( "Could not 'setsockopt' SO_RCVTIMEO in CSocket::Create()." );
     } // if ( result == -1 )
+*/  
   } // void CSocket::Accept( CSocket& roSocket ) const
 
 
@@ -226,10 +229,8 @@ const std::string& CSocket::Receive( std::string& s ) const
     }
   s = "";
 
-  char cBuffer[RECEIVE_BUFFER_SIZE];
-
   int result = ::recv( m_nSock,
-                       cBuffer,
+                       m_pcBuffer,
                        RECEIVE_BUFFER_SIZE -1,
                        0 );
   if ( (result == -1) and ( errno != EAGAIN ) )
@@ -240,8 +241,8 @@ const std::string& CSocket::Receive( std::string& s ) const
   else
     if ( result > 0 )
       {
-      cBuffer[result] = 0;
-      s = cBuffer;
+      m_pcBuffer[result] = 0;
+      s = m_pcBuffer;
       }
   return s;
   }

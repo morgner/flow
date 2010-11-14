@@ -36,8 +36,15 @@
 #include <map>
 #include <iostream>
 
-
 #define VERSION "0.1"
+
+#define DEFAULT_HOST "localhost"
+#define DEFAULT_PORT "30000"
+
+#define CRT_CLT_PATH  "certificates/client/"
+#define CRT_HST_PATH  "certificates/server/"
+#define PASSWORD      ""
+
 
 #include <getopt.h> // for static struct option
 #include <stdlib.h> // for atoi(), exit()
@@ -55,6 +62,7 @@ int main( int argc, char* argv[] )
       { "host",      required_argument, 0, 'h'},
       { "port",      required_argument, 0, 'p'},
       { "user",      required_argument, 0, 'u'},
+      { "password",  required_argument, 0, 'w'},
       { "recipient", required_argument, 0, 'r'},
       { "message",   required_argument, 0, 'm'},
       { "cluid",     required_argument, 0, 'i'},
@@ -104,8 +112,20 @@ int main( int argc, char* argv[] )
     *poPulex << g_oEnvironment["message"];
   else
     *poPulex << "Hello Word, this is I, a lonley pulex";
-  if ( g_oEnvironment.find("host")     == g_oEnvironment.end() )  g_oEnvironment["host"] = "localhost";
-  if ( g_oEnvironment.find("port")     == g_oEnvironment.end() )  g_oEnvironment["port"] = "30000";
+  if ( g_oEnvironment.find("host")     == g_oEnvironment.end() )  g_oEnvironment["host"]     = DEFAULT_HOST;
+  if ( g_oEnvironment.find("port")     == g_oEnvironment.end() )  g_oEnvironment["port"]     = DEFAULT_PORT;
+  if ( g_oEnvironment.find("password") == g_oEnvironment.end() )  g_oEnvironment["password"] = PASSWORD;
+
+  std::string sUserCert  = CRT_CLT_PATH + poPulex->UsernameGet() + ".crt";
+  std::string sUserKey   = CRT_CLT_PATH + poPulex->UsernameGet() + ".key";
+  std::string sUserChain = CRT_CLT_PATH  "cachain.pem";
+  std::string sHostChain = CRT_HST_PATH  "cachain.pem";
+
+  if ( bVerbose ) std::cout << sUserCert  << std::endl;
+  if ( bVerbose ) std::cout << sUserKey   << std::endl;
+  if ( bVerbose ) std::cout << "*" << g_oEnvironment["password"] << "*" << std::endl;
+  if ( bVerbose ) std::cout << sUserChain << std::endl;
+  if ( bVerbose ) std::cout << sHostChain << std::endl;
 
   if ( bVerbose ) std::cout << *poPulex << std::endl;
 
@@ -114,10 +134,13 @@ int main( int argc, char* argv[] )
     {
     if ( bVerbose ) std::cout << " * HOST: " << g_oEnvironment["host"] << std::endl;
     if ( bVerbose ) std::cout << " * PORT: " << g_oEnvironment["port"] << std::endl;
-    CSocketClient oConnection( "certificates/client/username",
-                               "certificates/client/client-CA-chain.pem",
-                               g_oEnvironment["host"],
-                               g_oEnvironment["port"] );
+	CSocketClient oConnection( g_oEnvironment["host"],
+                               g_oEnvironment["port"],
+                               sUserCert,
+                               sUserKey,
+                               g_oEnvironment["password"],
+                               sUserChain,
+                               sHostChain );
 
     std::string sServerReply;
     /// iterate over all Pulexes in our Domain and let them jump
@@ -135,7 +158,7 @@ int main( int argc, char* argv[] )
         {
         oConnection >> sInput;
         sServerReply += sInput;
-        } while ( sInput.rfind("\r") == std::string::npos );
+        } while ( sInput.rfind(".\r") == std::string::npos );
       }
     catch ( CSocketException& e )
       {

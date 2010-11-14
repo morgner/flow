@@ -63,7 +63,7 @@ void CEnvironment::CommandlineRead( int argc, char* argv[], const struct option*
   extern char* optarg;
   int          c;
   int          option_index = 0;
-  while ( (c = getopt_long (argc, argv, "HVvh:p:u:r:m:i:", ptOption, &option_index)) != EOF )
+  while ( (c = getopt_long (argc, argv, "HVvh:p:u:w:r:m:i:", ptOption, &option_index)) != EOF )
     {
     switch (c)
       {
@@ -97,6 +97,10 @@ void CEnvironment::CommandlineRead( int argc, char* argv[], const struct option*
 
       case 'u':
         (*this)["user"] = optarg;
+        break;
+
+      case 'w':
+        (*this)["password"] = optarg;
         break;
 
       case 'r':

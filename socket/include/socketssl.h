@@ -35,7 +35,6 @@
 
 #include <string>
 
-
 #include <openssl/ssl.h>
 
 class CSocketSSL : public CSocket
@@ -43,39 +42,53 @@ class CSocketSSL : public CSocket
   private:
     typedef CSocket inherited;
 
-    static std::string s_sPassword;
     static std::string s_sCiphers;
 
+  class Cx509
+    {
+    protected:
+      X509* m_ptPeer;
+
+       Cx509(){};
+    public:
+       Cx509( X509* ptPeer ) : m_ptPeer(ptPeer) {};
+      ~Cx509()         { X509_free(m_ptPeer); };
+
+      operator X509*() { return m_ptPeer; };
+      bool isValid()   { return m_ptPeer != 0; };
+    }; // class Cx509
 
   protected:
-    std::string m_sCertificate;
-    std::string m_sCA;
-    SSL_CTX*    m_ptSslCtx;
-    SSL*        m_ptSsl;
-    BIO*        m_ptBio;
-    BIO*        m_ptSslBio;
-    BIO*        m_ptBioError;
+    std::string m_sHost;             // the name oder IP of the server
+    std::string m_sPort;             // the port at the server
+    std::string m_sFileCertificate;  // the certificate for the user
+    std::string m_sFileKey;          // the key for the user
+    std::string m_sPassword;         // the password for the key
+    std::string m_sFileCaChainClient;// the CA chain for the user
+    std::string m_sFileCaChainHost;  // the CA chain for the server
+    std::string m_sTrustPathHost;    // not used yet
+
+    SSL_CTX*    m_ptSslCtx;          // the SSL Context
+    SSL*        m_ptSsl;             // the SSL socket
+    BIO*        m_ptBio;             // 
+    BIO*        m_ptSslBio;          // 
+    BIO*        m_ptBioError;        // 
 
   public:
              CSocketSSL( const int          nSock           = INVALID_SOCKET );
-             CSocketSSL( const std::string& rsCertificate,
-                         const std::string& rsCA,
-                         const int          nSock           = INVALID_SOCKET );
+             CSocketSSL( const std::string& rsHost,
+                         const std::string& rsPort,
+                         const std::string& rsFileCertificate,
+                         const std::string& rsFileKey,
+                         const std::string& rsPassword,
+                         const std::string& rsFileCaChainClient,
+                         const std::string& rsFileCaChainHost );
     virtual ~CSocketSSL();
 
-    virtual       void         Accept (       CSocketSSL& roSocket );
-    virtual       CSocket*     Accept ();
-    virtual       void         Connect( const std::string& rsHost,
-                                        const std::string& rsPort );
-
-    virtual       void         Connect( const std::string& rsCertificate,
-                                        const std::string& rsCA,
-                                        const std::string& rsHost,
-                                        const std::string& rsPort );
-
-
+    virtual       void         Accept  (       CSocketSSL& roSocket );
+    virtual       CSocket*     Accept  ();
+    virtual       void         Connect ();
     virtual       void         Close   ();
-
     virtual       void         Send    ( const std::string& s ) const;
     virtual const std::string& Receive (       std::string& s ) const;
 
@@ -84,17 +97,14 @@ class CSocketSSL : public CSocket
     const CSocketSSL& operator << (       long         n ) const;
     const CSocketSSL& operator >> (       std::string& s ) const;
 
-
-
-
-    SSL_CTX* InitializeSslCtx( const std::string rsKeyfile,
-                               const std::string rsPassword  = "" );
-
-    bool CertificateCheck(       SSL*         ptSsl,
-                           const std::string& rsHost);
+  protected:
+    bool InitializeSslCtx();
+    bool CertificateCheck();
 
   protected:
-    static int PasswordCallback( char* pszBuffer, int nBufferSize, int nRWFlag, void* pUserData );
+           const std::string& PasswordGet     () const;
+    static       int          PasswordCallback( char* pszBuffer, int nBufferSize, int nRWFlag, void* pUserData );
+
 
   // server specific
 
