@@ -46,7 +46,7 @@
 CSocket::CSocket( const int nSock )
   : m_nSock( nSock )
   {
-  m_pcBuffer = (char*) malloc( RECEIVE_BUFFER_SIZE );
+  m_pcBuffer = (char*)malloc( RECEIVE_BUFFER_SIZE );
   }
 
 CSocket::~CSocket()
@@ -231,19 +231,19 @@ const std::string& CSocket::Receive( std::string& s ) const
     }
   s = "";
 
-  int result = ::recv( m_nSock,
-                       m_pcBuffer,
-                       RECEIVE_BUFFER_SIZE -1,
-                       0 );
-  if ( (result == -1) and ( errno != EAGAIN ) )
+  int nResult = ::recv( m_nSock,
+                        m_pcBuffer,
+                        RECEIVE_BUFFER_SIZE -1,
+                        0 );
+  if ( (nResult == -1) and ( errno != EAGAIN ) )
     {
     std::cout << "errno == " << errno << "  in CSocket::Receive\n";
     throw CSocketException( "Could not read from socket in CSocket::Receive()." );
     }
   else
-    if ( result > 0 )
+    if ( nResult > 0 )
       {
-      m_pcBuffer[result] = 0;
+      m_pcBuffer[nResult] = 0;
       s = m_pcBuffer;
       }
   return s;
