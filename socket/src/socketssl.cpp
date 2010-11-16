@@ -268,11 +268,8 @@ void CSocketSSL::Close()
   if( nResult != 1 )
     {
     std::cout << "SSL_shutdown first  result: " << nResult << std::endl;
-    // decreases the useage counter. if set to NULL, send FIN/ACK an 
-    // frees the socket
-//    ::close( m_nSock );
-    // destroys the socket after sending FIN/ACK regardless of the usage counter 
-//    ::shutdown( m_nSock, SHUT_WR );
+    // destroys the socket (?) after sending FIN/ACK regardless of the usage counter 
+    ::shutdown( m_nSock, SHUT_RDWR );
     nResult = ::SSL_shutdown( m_ptSsl );
     } // if ( nResult != 1 )
 
