@@ -35,8 +35,10 @@ CSocketException::CSocketException()
   {
   }
 
-CSocketException::CSocketException( const std::string& s )
-  : m_sDescription ( s )
+CSocketException::CSocketException( const std::string& sDescription,
+                                          bool         bFatal )
+  : m_sDescription ( sDescription ),
+    m_bFatal( bFatal )
   {}
 
 CSocketException::~CSocketException()
@@ -48,3 +50,7 @@ const std::string& CSocketException::Info()
   return m_sDescription;
   }
 
+bool CSocketException::isFatal()
+  {
+  return m_bFatal;
+  }

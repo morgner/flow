@@ -99,6 +99,7 @@ void CPartner::Action()
     catch ( CSocketException& e)
       {
       std::cout << "Exception: " << e.Info() << std::endl;
+      if ( e.isFatal() ) break;
       }
     sClientData += sInput;
     } while ( sInput.rfind("\r") == std::string::npos ); // m_bStopRequested

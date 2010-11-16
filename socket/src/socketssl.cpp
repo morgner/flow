@@ -60,20 +60,67 @@ int CSocketSSL::PasswordCallback( char *pszBuffer, int nBufferSize, int nRWFlag,
     }
   strcpy( pszBuffer, sPassword.c_str() );
   return( sPassword.length() );
-  }
+  } // int CSocketSSL::PasswordCallback( char *pszBuffer, int nBufferSize, int nRWFlag, void* pUserData )
 
+
+// called as result of a call to Accept(), gemnerating a new CSocketSSL object
+// to connet with a client
+CSocketSSL::CSocketSSL( const CSocketSSL& src )
+  : inherited( src.m_nSock ),
+    m_sHost( src.m_sHost),
+    m_sPort( src.m_sPort ),
+    // TLS credentials
+    m_sFileCertificate( src.m_sFileCertificate ),
+    m_sFileKey( src.m_sFileKey ),
+    m_sPassword( src.m_sPassword ),
+    m_sFileCaChainClient( src.m_sFileCaChainClient ),
+    m_sFileCaChainHost( src.m_sFileCaChainHost ),
+    // pointer to NULL
+    m_ptSslCtx( src.m_ptSslCtx ),
+    m_ptSsl( src.m_ptSsl )
+  {
+
+  ( (CSocket&)src ).Accept( *this );
+
+
+  BIO* ptSBio = ::BIO_new_socket( m_nSock, BIO_NOCLOSE );
+  m_ptSsl     = ::SSL_new( m_ptSslCtx );
+  ::SSL_set_bio( m_ptSsl, ptSBio, ptSBio);
+
+  // When the SSL_CTX object was created with SSL_CTX_new(3), it was either
+  // assigned a dedicated client method, a dedicated server method, or a generic
+  // method, that can be used for both client and server connections.
+  // When using the SSL_connect(3) or SSL_accept(3) routines, the correct
+  // handshake routines are automatically set. When performing a transparent
+  // negotiation using SSL_write(3) or SSL_read(3), the handshake routines must
+  // be explicitly set in advance using either SSL_set_connect_state() or
+  // SSL_set_accept_state()
+  ::SSL_set_accept_state( m_ptSsl );
+  std::cout << "Configured SSL to server mode" << std::endl;
+
+  int nResult = ::SSL_accept( m_ptSsl );
+  std::cout << "::SSL_accept( m_ptSsl ): " << nResult << std::endl;
+  if ( nResult <= 0 )
+    {
+    throw CSocketException( "SSL accept error" );
+    }
+
+  BIO* ptFBio   = ::BIO_new( BIO_f_buffer() );
+  BIO* ptSslBio = ::BIO_new( BIO_f_ssl() );
+  ::BIO_set_ssl( ptSslBio, m_ptSsl, BIO_CLOSE);
+  ::BIO_push   ( ptFBio, ptSslBio );
+
+//  ::SSL_CTX_set_verify( m_ptSslCtx, SSL_VERIFY_PEER, 0 );
+//  CertificateCheck();
+  } // CSocketSSL::CSocketSSL( const CSocketSSL& src )
 
 /// for server connections (calling Accept()) ??
 CSocketSSL::CSocketSSL( const int nSock )
-  : inherited( nSock ),
-    // pointer to NULL
-    m_ptSslCtx( 0 ),
-    m_ptSsl( 0 ),
-    m_ptBio( 0 )
+  : inherited( nSock )
   {
-  }
+  } // CSocketSSL::CSocketSSL( const int nSock )
 
-/// for client connection (calling 'Connect()')
+/// ?? for client connection (calling 'Connect()')
 CSocketSSL::CSocketSSL( const std::string& rsHost,
                         const std::string& rsPort,
                         const std::string& rsFileCertificate,
@@ -91,8 +138,7 @@ CSocketSSL::CSocketSSL( const std::string& rsHost,
     m_sFileCaChainHost( rsFileCaChainHost ),
     // pointer to NULL
     m_ptSslCtx( 0 ),
-    m_ptSsl( 0 ),
-    m_ptBio( 0 )
+    m_ptSsl( 0 )
   {
   if( !s_bSslInitialized )
     {
@@ -105,96 +151,26 @@ CSocketSSL::CSocketSSL( const std::string& rsHost,
     s_bSslInitialized = true;
     std::cout << "Initialize SSL" << std::endl;
     }
-  }
+
+  InitializeSslCtx();
+  std::cout << "Initialized SSL Context" << std::endl;
+
+  } // CSocketSSL::CSocketSSL( const std::string& rsHost, ...
 
 CSocketSSL::~CSocketSSL()
   {
   Close();
-  }
+  } // CSocketSSL::~CSocketSSL()
 
 
 CSocket* CSocketSSL::Accept ()
   {
-  CSocketSSL* poSocket = new CSocketSSL;
-  Accept( *poSocket );
-  return poSocket;
-  }
+//  CSocketSSL* poSocket = new CSocketSSL( *this );
+//  Accept( *poSocket );
+//  return poSocket;
+  return new CSocketSSL( *this );
+  } // CSocket* CSocketSSL::Accept ()
 
-
-void CSocketSSL::Accept( CSocketSSL& roSocket )
-  {
-  std::cout << "CSocketSSL::Accept( CSocketSSL& )" << std::endl;
-  inherited::Accept( roSocket );
-
-  m_ptBio = ::BIO_new_socket( roSocket.m_nSock, BIO_NOCLOSE );
-  m_ptSsl = ::SSL_new( m_ptSslCtx );
-  ::SSL_set_bio( m_ptSsl, m_ptBio, m_ptBio);
-
-  int nResult;
-  if ( (nResult = ::SSL_accept(roSocket.m_ptSsl)) <= 0 )
-    {
-    throw CSocketException( "SSL accept error" );
-    }
-/*
-  m_ptBio    = ::BIO_new( BIO_f_buffer() );
-  m_ptSslBio = ::BIO_new( BIO_f_ssl() );
-  ::BIO_set_ssl( m_ptSslBio, m_ptSsl, BIO_CLOSE);
-  ::BIO_push( m_ptBio, m_ptSslBio );
-*/
-  } // void CSocketSSL::Accept( CSocket& roSocket ) const
-
-
-void CSocketSSL::Close()
-  {
-  if ( !m_ptSsl ) return;
-
-  // SSL_shutdown() his is a complicated matter,
-  // See: http://www.openssl.org/docs/ssl/SSL_shutdown.html
-  int nResult = ::SSL_shutdown( m_ptSsl );
-  if( nResult != 1 )
-    {
-    std::cout << "SSL_shutdown first  result: " << nResult << std::endl;
-    // decreases the useage counter. if set to NULL, send FIN/ACK an 
-    // frees the socket
-//    ::close( m_nSock );
-    // destroys the socket after sending FIN/ACK regardless of the usage counter 
-//    ::shutdown( m_nSock, SHUT_WR );
-    nResult = ::SSL_shutdown( m_ptSsl );
-    } // if ( nResult != 1 )
-
-  switch( nResult )
-    {  
-    case  1:
-      std::cout << "SSL_shutdown completed successful" << std::endl;
-      break; // ok both sides negotiated the shutdown status (not neccessary)
-    case  0:
-    case -1:
-    default:
-      std::cout << "SSL_shutdown second result: " << nResult << std::endl;
-//      throw CSocketException("Shutdown failed");
-      break;
-    }
-
-  // SSL_free() decrements the reference count of ssl, and removes the SSL 
-  // structure pointed to by ssl and frees up the allocated memory if the
-  // reference count has reached 0.
-  if ( m_ptSsl )
-    {
-    ::SSL_free ( m_ptSsl );
-    }
-
-  // SSL_CTX_free() decrements the reference count of ctx, and removes the
-  // SSL_CTX object pointed to by ctx and frees up the allocated memory if the
-  // the reference count has reached 0.
-  if ( m_ptSslCtx )
-    {
-    ::SSL_CTX_free( m_ptSslCtx );
-    }
-
-  m_ptSsl = 0;
-  m_ptSslCtx = 0;
-  inherited::Close();
-  }
 
 void CSocketSSL::Connect()
   {
@@ -213,10 +189,6 @@ void CSocketSSL::Connect()
    *   start opening the Secure Layer over the Socket
    *
    * ++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
-
-  /// Build our SSL context
-  InitializeSslCtx(); // m_ptSslCtx
-  std::cout << "Initialized SSL Context" << std::endl;
 
   // Set our cipher list
   if ( s_sCiphers.length() )
@@ -276,11 +248,66 @@ void CSocketSSL::Connect()
     }
   std::cout << "Connected with SSL" << std::endl;
 
+  ::SSL_do_handshake( m_ptSsl );
+
   if ( !CertificateCheck() )
     {
     std::cout << " ** Certificate did not pass check" << std::endl;
     }
   std::cout << "Host is ok" << std::endl;
+  } // void CSocketSSL::Connect()
+
+
+void CSocketSSL::Close()
+  {
+  if ( !m_ptSsl ) return;
+
+  // SSL_shutdown() his is a complicated matter,
+  // See: http://www.openssl.org/docs/ssl/SSL_shutdown.html
+  int nResult = ::SSL_shutdown( m_ptSsl );
+  if( nResult != 1 )
+    {
+    std::cout << "SSL_shutdown first  result: " << nResult << std::endl;
+    // decreases the useage counter. if set to NULL, send FIN/ACK an 
+    // frees the socket
+//    ::close( m_nSock );
+    // destroys the socket after sending FIN/ACK regardless of the usage counter 
+//    ::shutdown( m_nSock, SHUT_WR );
+    nResult = ::SSL_shutdown( m_ptSsl );
+    } // if ( nResult != 1 )
+
+  switch( nResult )
+    {  
+    case  1:
+      std::cout << "SSL_shutdown completed successful" << std::endl;
+      break; // ok both sides negotiated the shutdown status (not neccessary)
+    case  0:
+    case -1:
+    default:
+      std::cout << "SSL_shutdown second result: " << nResult << std::endl;
+//      throw CSocketException("Shutdown failed");
+      break;
+    }
+
+  // SSL_free() decrements the reference count of ssl, and removes the SSL 
+  // structure pointed to by ssl and frees up the allocated memory if the
+  // reference count has reached 0.
+  if ( m_ptSsl )
+    {
+    ::SSL_free ( m_ptSsl );
+    }
+
+  // SSL_CTX_free() decrements the reference count of ctx, and removes the
+  // SSL_CTX object pointed to by ctx and frees up the allocated memory if the
+  // the reference count has reached 0.
+  if ( m_ptSslCtx )
+    {
+    ::SSL_CTX_free( m_ptSslCtx );
+    }
+
+  m_ptSsl = 0;
+  m_ptSslCtx = 0;
+  inherited::Close();
   }
 
 
@@ -335,8 +362,6 @@ size_t CSocketSSL::Send( const std::string& s ) const
 
 const std::string& CSocketSSL::Receive( std::string& s ) const
   {
-  std::cout << "CSocketSSL::Receive(s)" << std::endl;
-
   // Tries to read <num bytes> from the specified ssl into the buffer.
   int nResult = ::SSL_read( m_ptSsl, m_pcBuffer, RECEIVE_BUFFER_SIZE -1 );
   if ( (nResult > 0) && (nResult < RECEIVE_BUFFER_SIZE) )
@@ -350,13 +375,13 @@ const std::string& CSocketSSL::Receive( std::string& s ) const
       break;
 
     case SSL_ERROR_WANT_READ:
-      throw CSocketException("SSL_ERROR_WANT_READ");
+      throw CSocketException("read timeout (SSL_ERROR_WANT_READ)");
     case SSL_ERROR_WANT_WRITE:
       throw CSocketException("SSL_ERROR_WANT_WRITE");
     case SSL_ERROR_ZERO_RETURN:
       throw CSocketException( "SSL_ERROR_ZERO_RETURN" );
     case SSL_ERROR_SYSCALL:
-      throw CSocketException( "remote disconnect (SSL_ERROR_SYSCALL)" );
+      throw CSocketException( "remote disconnect (SSL_ERROR_SYSCALL)", true );
     default:
       throw CSocketException( "Unknown SSL Error - Read problem" );
     }
@@ -388,9 +413,9 @@ bool CSocketSSL::InitializeSslCtx()
   if ( ! ::SSL_CTX_use_certificate_chain_file(m_ptSslCtx,
                                               m_sFileCertificate.c_str()) )
     {
-    throw CSocketException("Can't read certificate file");
+    throw CSocketException("Can't read certificate file: " + m_sFileCertificate);
     }
-  std::cout << "Read certificate file" << std::endl;
+  std::cout << "Read certificate file: " + m_sFileCertificate << std::endl;
 
   // sets the default password callback called when loading/storing a
   // PEM certificate with encryption.
@@ -599,6 +624,8 @@ const std::string& CSocketSSL::PasswordGet() const
 
 void CSocketSSL::LoadDHParameters( const std::string& sParamsFile )
   {
+  std::cout << "void CSocketSSL::LoadDHParameters( " << sParamsFile << " )" << std::endl;
+
   DH*  ptDH=0; // ret
   BIO* ptBio;  // bio
 

@@ -39,9 +39,16 @@ class CSocketServer : public CSocketSSL
   private:
     typedef CSocketSSL inhertited;
 
+  protected:
+             CSocketServer( );
   public:
-             CSocketServer();
-             CSocketServer( const int nPort );
+             CSocketServer( const std::string& rsHost,
+                            const std::string& rsPort,
+                            const std::string& rsFileCertificate,
+                            const std::string& rsFileKey,
+                            const std::string& rsPassword,
+                            const std::string& rsFileCaChainHost,
+                            const std::string& rsFileCaChainClient = "" );
     virtual ~CSocketServer();
 };
 

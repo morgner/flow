@@ -35,13 +35,26 @@ CSocketServer::CSocketServer()
   {
   }
 
-CSocketServer::CSocketServer( int nPort )
+CSocketServer::CSocketServer( const std::string& rsHost,
+                              const std::string& rsPort,
+                              const std::string& rsFileCertificate,
+                              const std::string& rsFileKey,
+                              const std::string& rsPassword,
+                              const std::string& rsFileCaChainHost,
+                              const std::string& rsFileCaChainClient )
+  : CSocketSSL( rsHost,
+                rsPort,
+                rsFileCertificate,
+                rsFileKey,
+                rsPassword,
+                rsFileCaChainClient,
+                rsFileCaChainHost )
   {
   Create();
-  Bind( nPort );
+  Bind( atoi( rsPort.c_str() ) );
   Listen();
-  }
+  } // CSocketServer::CSocketServer( const std::string& rsHost,
 
 CSocketServer::~CSocketServer()
   {
-  }
+  } // 	CSocketServer::~CSocketServer()

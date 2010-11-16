@@ -40,6 +40,8 @@
 #include "partner.h"
 #include "container.h"
 
+#define SRV_HOST  "localhost"
+#define SRV_PORT  "30000"
 #define KEY_FILE  "certificates/client/localhost.key"
 #define PASSWORD  ""
 #define CRT_FILE  "certificates/client/localhost.crt"
@@ -66,7 +68,14 @@ int main ( int argc, char* argv[] )
   {
   try // server bind ...
     {
-    CSocketServer server( 30000 );
+    CSocketServer server( "localhsot",
+                          "30000",
+                          "certificates/server/localhost.crt",
+                          "certificates/server/localhost.key",
+                          "",
+                          "certificates/server/cachain.pem",
+                          "certificates/client/cachain.pem" );
+
     std::cout << "Waiting for clients..." << std::endl;
     while ( true )
       {

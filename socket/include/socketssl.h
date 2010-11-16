@@ -71,9 +71,8 @@ class CSocketSSL : public CSocket
 
     SSL_CTX*    m_ptSslCtx;          // the SSL Context
     SSL*        m_ptSsl;             // the SSL socket
-    BIO*        m_ptBio;             // 
-//    BIO*        m_ptSslBio;          // 
 
+             CSocketSSL( const CSocketSSL& src );
   public:
              CSocketSSL( const int          nSock           = INVALID_SOCKET );
              CSocketSSL( const std::string& rsHost,
@@ -85,7 +84,7 @@ class CSocketSSL : public CSocket
                          const std::string& rsFileCaChainHost );
     virtual ~CSocketSSL();
 
-    virtual       void         Accept  (       CSocketSSL& roSocket );
+//    virtual       void         Accept  (       CSocketSSL& roSocket );
     virtual       CSocket*     Accept  ();
     virtual       void         Connect ();
     virtual       void         Close   ();

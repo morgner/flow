@@ -36,16 +36,18 @@
 class CSocketException
   {
   protected:
+    std::string m_sDescription;
+    bool        m_bFatal;
+
              CSocketException();
   public:
-             CSocketException( const std::string& s );
+             CSocketException( const std::string& sDescription,
+                                     bool         bFatal       = false );
     virtual ~CSocketException();
 
   public:
     const std::string& Info();
-
-  private:
-    std::string m_sDescription;
+          bool         isFatal();
 
   }; // class CSocketException
 
