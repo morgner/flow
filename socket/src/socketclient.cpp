@@ -54,4 +54,3 @@ CSocketClient::CSocketClient( const std::string& rsHost,
 CSocketClient::~CSocketClient()
   {
   }
-

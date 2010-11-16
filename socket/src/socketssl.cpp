@@ -83,7 +83,8 @@ CSocketSSL::CSocketSSL( const CSocketSSL& src )
     m_sPathCaTrust( src.m_sPathCaTrust ),
     // pointer to NULL
     m_ptSslCtx( src.m_ptSslCtx ),
-    m_ptSsl( src.m_ptSsl )
+    m_ptSsl( 0 ),
+    m_ptFBio( 0 )
   {
 
   ( (CSocket&)src ).Accept( *this );
@@ -138,10 +139,10 @@ CSocketSSL::CSocketSSL( const CSocketSSL& src )
     throw CSocketException( "SSL accept error" );
     }
 
-  BIO* ptFBio   = ::BIO_new( BIO_f_buffer() );
+  m_ptFBio      = ::BIO_new( BIO_f_buffer() );
   BIO* ptSslBio = ::BIO_new( BIO_f_ssl() );
   ::BIO_set_ssl( ptSslBio, m_ptSsl, BIO_CLOSE);
-  ::BIO_push   ( ptFBio, ptSslBio );
+  ::BIO_push   ( m_ptFBio, ptSslBio );
 
   CertificateCheck();
   } // CSocketSSL::CSocketSSL( const CSocketSSL& src )
@@ -170,7 +171,8 @@ CSocketSSL::CSocketSSL( const std::string& rsHost,
     m_sPathCaTrust( rsPathCaTrust ),
     // pointer to NULL
     m_ptSslCtx( 0 ),
-    m_ptSsl( 0 )
+    m_ptSsl( 0 ),
+    m_ptFBio( 0 )
   {
   if( !s_bSslInitialized )
     {
@@ -364,8 +366,18 @@ size_t CSocketSSL::Send( const std::string& s ) const
   {
   // SSL_write() writes num bytes from the buffer buf into the specified
   // ssl connection.
-  size_t nResult = ::SSL_write( m_ptSsl, s.c_str(), s.length() );
-
+  size_t nResult;
+  if ( m_ptFBio )
+    {
+//    std::cout << "BIO_puts" << std::endl;
+    nResult = ::BIO_puts ( m_ptFBio, s.c_str() );
+    nResult =   BIO_flush( m_ptFBio ); // ::BIO_ctrl( m_ptFBio, BIO_CTRL_FLUSH, 0, NULL );
+    }
+  else
+    {
+//    std::cout << "SSL_write" << std::endl;
+    nResult = ::SSL_write( m_ptSsl, s.c_str(), s.length() );
+    }
   switch( ::SSL_get_error(m_ptSsl, nResult) )
     {      
     case SSL_ERROR_NONE:
@@ -377,11 +389,15 @@ size_t CSocketSSL::Send( const std::string& s ) const
       break;
 
     case SSL_ERROR_WANT_READ:
-      throw CSocketException("SSL_ERROR_WANT_READ");
+      throw CSocketException("read timeout (SSL_ERROR_WANT_READ)");
     case SSL_ERROR_WANT_WRITE:
       throw CSocketException("SSL_ERROR_WANT_WRITE");
+    case SSL_ERROR_ZERO_RETURN:
+      throw CSocketException( "SSL_ERROR_ZERO_RETURN" );
+    case SSL_ERROR_SYSCALL:
+      throw CSocketException( "remote disconnect (SSL_ERROR_SYSCALL)", true );
     default:
-      throw CSocketException("SSL write problem");
+      throw CSocketException( "Unknown SSL Error - Read problem" );
     }
   } // void CSocketSSL::Send( const std::string& s ) const
 
@@ -389,7 +405,16 @@ size_t CSocketSSL::Send( const std::string& s ) const
 const std::string& CSocketSSL::Receive( std::string& s ) const
   {
   // Tries to read <num bytes> from the specified ssl into the buffer.
-  int nResult = ::SSL_read( m_ptSsl, m_pcBuffer, RECEIVE_BUFFER_SIZE -1 );
+  
+  int nResult;
+  if ( m_ptFBio )
+    {
+    nResult = ::BIO_gets( m_ptFBio, m_pcBuffer, RECEIVE_BUFFER_SIZE -1 );
+    }
+  else
+    {
+    nResult = ::SSL_read( m_ptSsl, m_pcBuffer, RECEIVE_BUFFER_SIZE -1 );
+    }
   if ( (nResult > 0) && (nResult < RECEIVE_BUFFER_SIZE) )
      {
      m_pcBuffer[nResult+1] = 0;
@@ -405,6 +430,7 @@ const std::string& CSocketSSL::Receive( std::string& s ) const
     case SSL_ERROR_WANT_WRITE:
       throw CSocketException("SSL_ERROR_WANT_WRITE");
     case SSL_ERROR_ZERO_RETURN:
+sleep(1);
       throw CSocketException( "SSL_ERROR_ZERO_RETURN" );
     case SSL_ERROR_SYSCALL:
       throw CSocketException( "remote disconnect (SSL_ERROR_SYSCALL)", true );

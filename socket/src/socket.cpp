@@ -37,6 +37,7 @@
 #include <stdlib.h> // malloc & free
 
 #include <netdb.h>
+#include <netinet/tcp.h> // TCP_NODELAY
 
 #include <iostream>
 
@@ -71,16 +72,27 @@ void CSocket::Create()
     }
 
   int on = 1;
-  int result = ::setsockopt( m_nSock,
-                             SOL_SOCKET,
-                             SO_REUSEADDR,
-                             (void*)&on,
-                             sizeof(on));
-  if ( result == -1 )
+  int nResult = ::setsockopt( m_nSock,
+                              SOL_SOCKET,
+                              SO_REUSEADDR,
+                              (void*)&on,
+                              sizeof(on));
+  if ( nResult == -1 )
     {
     throw CSocketException( "Could not 'setsockopt' SO_REUSEADDR in CSocket::Create()." );
     }
-
+/*
+  int off = 0;
+  nResult = ::setsockopt( m_nSock,
+                          IPPROTO_TCP,
+                          TCP_NODELAY,
+                          (void*) &off,
+                          sizeof(on) );
+  if ( nResult == -1 )
+    {
+    throw CSocketException( "Could not 'setsockopt' TCP_NODELAY in CSocket::Create()." );
+    }
+*/
   } // void CSocket::Create()
 
 

@@ -72,6 +72,8 @@ class CSocketSSL : public CSocket
     SSL_CTX*    m_ptSslCtx;          // the SSL Context
     SSL*        m_ptSsl;             // the SSL socket
 
+    BIO*        m_ptFBio;            // the file-BIO to read from/write to (as server)
+
              CSocketSSL( const CSocketSSL& src );
   public:
              CSocketSSL( const int          nSock           = INVALID_SOCKET );

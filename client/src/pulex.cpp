@@ -66,7 +66,11 @@ CSocket& operator << (CSocket& oStream, CPulex& oPulex )
   oStream << scn_remote_id     << ":" << oPulex.RemoteIdGet()    << "\n";
   for ( CPulex::iterator it=oPulex.begin(); it != oPulex.end(); ++it )
     {
-    oStream << scn_content_text << ":" << *it << "\n";
+    // with SSL the server breaks down if '*it' is empty but piped from the client
+    if ( it->length() )
+      oStream << scn_content_text << ":" << *it << "\n";
+    else
+      oStream << scn_content_text << ":" << "\n";
     }
   return oStream;
   }
