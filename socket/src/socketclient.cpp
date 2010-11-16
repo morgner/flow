@@ -37,15 +37,15 @@ CSocketClient::CSocketClient( const std::string& rsHost,
                               const std::string& rsFileCertificate,
                               const std::string& rsFileKey,
                               const std::string& rsPassword,
-                              const std::string& rsFileCaChainClient,
-                              const std::string& rsFileCaChainHost )
+                              const std::string& rsFileCaChainTrust,
+                              const std::string& rsPathCaTrust )
   : CSocketSSL( rsHost,
                 rsPort,
                 rsFileCertificate,
                 rsFileKey,
                 rsPassword,
-                rsFileCaChainClient,
-                rsFileCaChainHost )
+                rsFileCaChainTrust,
+                rsPathCaTrust )
   {
   Create();
   Connect();

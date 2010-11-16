@@ -43,6 +43,7 @@
 
 #define CRT_CLT_PATH  "certificates/client/"
 #define CRT_HST_PATH  "certificates/server/"
+#define CRT_TRS_PATH  "certificates/trust/"
 #define PASSWORD      ""
 
 
@@ -118,14 +119,14 @@ int main( int argc, char* argv[] )
 
   std::string sUserCert  = CRT_CLT_PATH + poPulex->UsernameGet() + ".crt";
   std::string sUserKey   = CRT_CLT_PATH + poPulex->UsernameGet() + ".key";
-  std::string sUserChain = CRT_CLT_PATH  "cachain.pem";
   std::string sHostChain = CRT_HST_PATH  "cachain.pem";
+  std::string sHostTPath = CRT_TRS_PATH;
 
   if ( bVerbose ) std::cout << sUserCert  << std::endl;
   if ( bVerbose ) std::cout << sUserKey   << std::endl;
   if ( bVerbose ) std::cout << "*" << g_oEnvironment["password"] << "*" << std::endl;
-  if ( bVerbose ) std::cout << sUserChain << std::endl;
   if ( bVerbose ) std::cout << sHostChain << std::endl;
+  if ( bVerbose ) std::cout << sHostTPath << std::endl;
 
   if ( bVerbose ) std::cout << *poPulex << std::endl;
 
@@ -139,8 +140,8 @@ int main( int argc, char* argv[] )
                                sUserCert,
                                sUserKey,
                                g_oEnvironment["password"],
-                               sUserChain,
-                               sHostChain );
+                               sHostChain,
+                               sHostTPath );
 
     std::string sServerReply;
     /// iterate over all Pulexes in our Domain and let them jump

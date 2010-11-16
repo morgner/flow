@@ -65,9 +65,9 @@ class CSocketSSL : public CSocket
     std::string m_sFileCertificate;  // the certificate for the user
     std::string m_sFileKey;          // the key for the user
     std::string m_sPassword;         // the password for the key
-    std::string m_sFileCaChainClient;// the CA chain for the user
-    std::string m_sFileCaChainHost;  // the CA chain for the server
-    std::string m_sTrustPathHost;    // not used yet
+    std::string m_sFileCaChainTrust; // the CA chain for the server
+    std::string m_sPathCaTrust;      // not used yet
+    std::string m_sPeerCN;           // the common name out of the peers certificate
 
     SSL_CTX*    m_ptSslCtx;          // the SSL Context
     SSL*        m_ptSsl;             // the SSL socket
@@ -80,8 +80,8 @@ class CSocketSSL : public CSocket
                          const std::string& rsFileCertificate,
                          const std::string& rsFileKey,
                          const std::string& rsPassword,
-                         const std::string& rsFileCaChainClient,
-                         const std::string& rsFileCaChainHost );
+                         const std::string& rsFileCaChainTrust,
+                         const std::string& rsPathCaTrust );
     virtual ~CSocketSSL();
 
 //    virtual       void         Accept  (       CSocketSSL& roSocket );

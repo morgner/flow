@@ -68,13 +68,13 @@ int main ( int argc, char* argv[] )
   {
   try // server bind ...
     {
-    CSocketServer server( "localhsot",
+    CSocketServer server( "localhost",
                           "30000",
                           "certificates/server/localhost.crt",
                           "certificates/server/localhost.key",
                           "",
-                          "certificates/server/cachain.pem",
-                          "certificates/client/cachain.pem" );
+                          "certificates/client/cachain.pem",
+                          "certificates/trust/" );
 
     std::cout << "Waiting for clients..." << std::endl;
     while ( true )

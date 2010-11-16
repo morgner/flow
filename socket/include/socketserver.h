@@ -47,8 +47,8 @@ class CSocketServer : public CSocketSSL
                             const std::string& rsFileCertificate,
                             const std::string& rsFileKey,
                             const std::string& rsPassword,
-                            const std::string& rsFileCaChainHost,
-                            const std::string& rsFileCaChainClient = "" );
+                            const std::string& rsFileCaChainTrust,
+                            const std::string& rsPathCaTrust = "" );
     virtual ~CSocketServer();
 };
 

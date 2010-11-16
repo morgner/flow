@@ -63,6 +63,12 @@ int CSocketSSL::PasswordCallback( char *pszBuffer, int nBufferSize, int nRWFlag,
   } // int CSocketSSL::PasswordCallback( char *pszBuffer, int nBufferSize, int nRWFlag, void* pUserData )
 
 
+int VerifyCallback(int n, X509_STORE_CTX* ptX509_store_ctx)
+  {
+  return 1;
+  }
+
+
 // called as result of a call to Accept(), gemnerating a new CSocketSSL object
 // to connet with a client
 CSocketSSL::CSocketSSL( const CSocketSSL& src )
@@ -73,15 +79,14 @@ CSocketSSL::CSocketSSL( const CSocketSSL& src )
     m_sFileCertificate( src.m_sFileCertificate ),
     m_sFileKey( src.m_sFileKey ),
     m_sPassword( src.m_sPassword ),
-    m_sFileCaChainClient( src.m_sFileCaChainClient ),
-    m_sFileCaChainHost( src.m_sFileCaChainHost ),
+    m_sFileCaChainTrust( src.m_sFileCaChainTrust ),
+    m_sPathCaTrust( src.m_sPathCaTrust ),
     // pointer to NULL
     m_ptSslCtx( src.m_ptSslCtx ),
     m_ptSsl( src.m_ptSsl )
   {
 
   ( (CSocket&)src ).Accept( *this );
-
 
   BIO* ptSBio = ::BIO_new_socket( m_nSock, BIO_NOCLOSE );
   m_ptSsl     = ::SSL_new( m_ptSslCtx );
@@ -98,8 +103,36 @@ CSocketSSL::CSocketSSL( const CSocketSSL& src )
   ::SSL_set_accept_state( m_ptSsl );
   std::cout << "Configured SSL to server mode" << std::endl;
 
+  ::SSL_set_verify( m_ptSsl, SSL_VERIFY_PEER, VerifyCallback );
+  std::cout << "SSL mode set to verify to force the client to send his certificate" << std::endl;
+
   int nResult = ::SSL_accept( m_ptSsl );
-  std::cout << "::SSL_accept( m_ptSsl ): " << nResult << std::endl;
+
+  int nError = ::SSL_get_error(m_ptSsl, nResult);
+  switch( nError )
+    {      
+    case SSL_ERROR_NONE:
+      std::cout << "Connection Accepted" << std::endl;
+      break;
+
+    case SSL_ERROR_SSL:
+      throw CSocketException( "SSL accept problem: SSL_ERROR_SSL" );
+      break;
+    case SSL_ERROR_WANT_READ:
+      std::cout << "SSL accept problem: SSL_ERROR_WANT_READ" << std::endl;
+      break;
+    case SSL_ERROR_WANT_WRITE:
+      std::cout << "SSL accept problem: SSL_ERROR_WANT_WRITE" << std::endl;
+      break;
+    case SSL_ERROR_SYSCALL:
+      throw CSocketException( "SSL accept problem: SSL_ERROR_SYSCALL" );
+    case SSL_ERROR_ZERO_RETURN:
+      throw CSocketException( "SSL accept problem: SSL_ERROR_ZERO_RETURN" );
+
+    default:
+      throw CSocketException( "SSL accept problem: " + to_string(nError) );
+    }
+
   if ( nResult <= 0 )
     {
     throw CSocketException( "SSL accept error" );
@@ -110,8 +143,7 @@ CSocketSSL::CSocketSSL( const CSocketSSL& src )
   ::BIO_set_ssl( ptSslBio, m_ptSsl, BIO_CLOSE);
   ::BIO_push   ( ptFBio, ptSslBio );
 
-//  ::SSL_CTX_set_verify( m_ptSslCtx, SSL_VERIFY_PEER, 0 );
-//  CertificateCheck();
+  CertificateCheck();
   } // CSocketSSL::CSocketSSL( const CSocketSSL& src )
 
 /// for server connections (calling Accept()) ??
@@ -126,16 +158,16 @@ CSocketSSL::CSocketSSL( const std::string& rsHost,
                         const std::string& rsFileCertificate,
                         const std::string& rsFileKey,
                         const std::string& rsPassword,
-                        const std::string& rsFileCaChainClient,
-                        const std::string& rsFileCaChainHost )
+                        const std::string& rsFileCaChainTrust,
+                        const std::string& rsPathCaTrust )
   : m_sHost( rsHost),
     m_sPort( rsPort ),
     // TLS credentials
     m_sFileCertificate( rsFileCertificate ),
     m_sFileKey( rsFileKey ),
     m_sPassword( rsPassword ),
-    m_sFileCaChainClient( rsFileCaChainClient ),
-    m_sFileCaChainHost( rsFileCaChainHost ),
+    m_sFileCaChainTrust( rsFileCaChainTrust ),
+    m_sPathCaTrust( rsPathCaTrust ),
     // pointer to NULL
     m_ptSslCtx( 0 ),
     m_ptSsl( 0 )
@@ -165,9 +197,6 @@ CSocketSSL::~CSocketSSL()
 
 CSocket* CSocketSSL::Accept ()
   {
-//  CSocketSSL* poSocket = new CSocketSSL( *this );
-//  Accept( *poSocket );
-//  return poSocket;
   return new CSocketSSL( *this );
   } // CSocket* CSocketSSL::Accept ()
 
@@ -437,15 +466,18 @@ bool CSocketSSL::InitializeSslCtx()
   // Specifies the locations for ctx, at which CA certificates for verification
   // purposes are located. The certificates available via CAfile and CApath
   // are trusted.
-  bool bHasCaChain = m_sFileCaChainHost.length() > 0;
-  bool bHasTrusDir = m_sTrustPathHost.length()   > 0;
+  bool bHasCaChain  = m_sFileCaChainTrust.length() > 0;
+  bool bHasTrustDir = m_sPathCaTrust.length()      > 0;
+  std::cout << "CA chain :" << m_sFileCaChainTrust << std::endl;
+  std::cout << "CA path  :" << m_sPathCaTrust      << std::endl;
   if( ! ::SSL_CTX_load_verify_locations( m_ptSslCtx, 
-                               (bHasCaChain) ? m_sFileCaChainHost.c_str() : 0,
-                               (bHasTrusDir) ? m_sTrustPathHost.c_str()   : 0) )
+                               (bHasCaChain)  ? m_sFileCaChainTrust.c_str() : 0,
+                               (bHasTrustDir) ? m_sPathCaTrust.c_str()      : 0) )
     {
     throw CSocketException("Can't read CA list");
     }
-  std::cout << "Checked CA list" << std::endl;
+  std::cout << "Read verify CA chain :" << m_sFileCaChainTrust << std::endl;
+  std::cout << "Read verify CA path  :" << m_sPathCaTrust      << std::endl;
 
   return true;
   } // bool CSocketSSL::InitializeSslCtx()
@@ -580,7 +612,6 @@ bool CSocketSSL::CertificateCheck()
       } // switch ( nResult )
     throw CSocketException( "Certificate verification: " + sError );
     } // if ( nResult != X509_V_OK )
-  std::cout << "Certificate issued for " + m_sHost << std::endl;
 
 
   char acPeerCommonName[256];
@@ -594,14 +625,17 @@ bool CSocketSSL::CertificateCheck()
                                NID_commonName,
                                acPeerCommonName,
                                sizeof(acPeerCommonName) );
-  if( strcasecmp( acPeerCommonName, m_sHost.c_str() ))
+  if( strcasecmp(acPeerCommonName, m_sHost.c_str()) )
     {
-    throw CSocketException("Certificate CN doesn't match host name " +
-                           std::string(acPeerCommonName) );
+//-    throw CSocketException("Certificate CN doesn't match host name " +
+//-                           std::string(acPeerCommonName) );
     }
-  std::cout << "Certificate CN matches host name: "
-            << acPeerCommonName
-            << std::endl;
+
+  m_sPeerCN = acPeerCommonName;
+  if ( m_sPeerCN.length() )
+    {
+    std::cout << "Peer certificate issued to: " + m_sPeerCN << std::endl;
+    }
 
   return true;
   } // bool CSocketSSL::CertificateCheck()
