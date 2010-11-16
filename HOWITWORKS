@@ -3,17 +3,17 @@
 Copyright (C) 2010 Manfred Morgner manfred@morgner.com
 
 'flow' consists of two parts a client and a server. One user of a flowclient
-send messages to other user(s) of flowclient using a server system
+sends messages for other user(s) of flowclients to a flowserver
 
  1) one client sends messages encrypted to the server
  2) the server stores the messages
- 3) ontoher client calls the messages sent for him from the server
+ 3) another client calls the messages sent for him from the server
 
 The server may or may not check if the client is who he claims he is for the
 simple reasomn that, if he is not one of the true recipients, he will be
 unable to decrypt the messages he got.
 
-Clients may request messages by time or message identification code by asking
+Clients may request messages by time or message identification codes by asking
 
  * next message after <time or id>
  * all messages after <time or id>

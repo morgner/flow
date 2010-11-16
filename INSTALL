@@ -21,10 +21,11 @@ build process
 To build the whole project simply run 'make' in the base directory of the
 project.
 
-You may change the compiler setting the CC value at the start of the Makefile
+You may change the compiler, the CC value at the start of the Makefile,
 to either g++ or clang. Using clang may produce better results.
 
-As far as the compiler supports it, the resulting binaries are
+As far as the compiler supports it, the resulting binaries are optimized
+for the current CPU
 
 dependencies
 ------------

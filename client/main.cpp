@@ -111,7 +111,7 @@ int main( int argc, char* argv[] )
   if ( g_oEnvironment.find("message")  != g_oEnvironment.end() ) 
     *poPulex << g_oEnvironment["message"];
   else
-    *poPulex << "Hello Word, this is I, a lonley pulex";
+    *poPulex << "Hello World, this is I, a lonley pulex";
   if ( g_oEnvironment.find("host")     == g_oEnvironment.end() )  g_oEnvironment["host"]     = DEFAULT_HOST;
   if ( g_oEnvironment.find("port")     == g_oEnvironment.end() )  g_oEnvironment["port"]     = DEFAULT_PORT;
   if ( g_oEnvironment.find("password") == g_oEnvironment.end() )  g_oEnvironment["password"] = PASSWORD;
@@ -192,7 +192,7 @@ void CEnvironment::Usage( int nStatus )
             << "  -r, --recipient      the user name to send the message to" << std::endl
             << "                       default: all known recipients" << std::endl << std::endl
             << "  -m, --message        the message" << std::endl
-            << "                       default: 'Hello Word, this is I, a lonley pulex'" << std::endl << std::endl
+            << "                       default: 'Hello World, this is I, a lonley pulex'" << std::endl << std::endl
             << "  -i, --cluid          force the use a specific client unique identifier" << std::endl
             << "                       default: <automatic>" << std::endl << std::endl
             ;
