@@ -94,14 +94,22 @@ a system to exchange data with public social community systems
 
 current status
 --------------
+currently data are transported unencrypted over an encrypted transport layer
+but the server is not stable in reading them, so the next step is, to stabilize
+the server to read the incoming information 
+
+client and server are verbose about their doings - to let onlookers learn how
+they do what they are doing
+
+-- before this:
 the server is able to receive data from the client and keeps them in his memory
 the client is able to connect to a remote server and send a message there
+TLS on all your ways
 
 next steps
 ----------
-the client should be able to request messages from the server and recontruct
+the client should be able to request messages from the server and recontruct them
 the client should remember some important command line information
 
-TLS on all your ways
 data compression
 data encryption
