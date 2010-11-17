@@ -1,0 +1,49 @@
+== A short discussion about trust and security in personal communication by
+using certificates
+
+Preposition: I assume you know real life people you trust and wish to
+             trustfully communicate with
+
+What does an official certificate authority certificy?
+
+First things first, there is no such thing as an official certificate authority!
+
+Being a certificate authority (CA) is a business, not a governmental service. But
+even if it was a governmental service, there is no 'world-government'. And even
+if there was a world-government, would you trust them to secure
+your private communication? 
+
+So, who is trustworthy enough to be entrusted by for you?
+
+You!
+
+SSL implements a trust model which expects you to trust CAs to care for your
+trustees. Which may be acceptable if you do business using SSL.
+
+For private communication the matter is complex, but can be reduced to one
+line of argumentation.
+
+
+You need to ensure, that trust is something you are able to manage. CAs don't
+help. So the last piece of information which remains is your communication partners certificate.
+Regardless of who signed it or even if it is signed at all.
+
+If your friend gave you his keys, it would be unusual behavior of you
+not to accept them because you don't know the manufacturer.
+
+So, if you look deep in the implementation of 'flow' you will find out, that
+flow seems to trust every certificate. If you see it this way, you are looking
+at it the wrong way.
+
+Important for trust is the 'Trust Path', the path where the trusted
+certificates lives.
+
+If you copy a certificate to this place, 'flow' will trust it.
+
+This way, the responsibility to ensure who to trust is given back to you.
+
+But remember, if you copy a CA to this place, 'flow' will at least trust all
+certificates directly issued by this CA. If a partner delivers a CA chain, 
+'flow' trusts the partner if the chain ends on a trusted CA certificate.
+
+So be careful which CA you copy into your 'Trust Path'
