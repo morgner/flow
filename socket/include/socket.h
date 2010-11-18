@@ -32,6 +32,7 @@
 #define _SOCKET_H
 
 #include <string>
+#include <vector>
 #include <arpa/inet.h>
 
 #include <memory.h>
@@ -78,32 +79,39 @@ class CSocket
           return r;
           }
       }; // class CSocketAddrInet
-  
+
+    class CBuffer : public std::vector<char>
+      {
+      public:
+        CBuffer() { resize( RECEIVE_BUFFER_SIZE ); }
+        operator char*() { return &front(); }
+      };
+
   protected:
     int       m_nSock;
-    char*     m_pcBuffer;
+    CBuffer   m_ovBuffer;
     CAddrInet m_tAddr;
 
   public:
              CSocket( const int nSock = INVALID_SOCKET );
+             CSocket( const CSocket& src  );
     virtual ~CSocket();
   
-    virtual       void         Create ();
-    virtual       void         Bind   ( const int         nPort );
-    virtual       void         Listen ()                            const;
-    virtual       void         Accept (       CSocket&    roSocket) const;
-    virtual       CSocket*     Accept ()                            const;
-    virtual       void         Connect( const std::string& rsHost,
-                                        const std::string& rsPort );
-    virtual       void         Close  ();
+    virtual void     Create ();
+    virtual void     Bind   ( const int         nPort );
+    virtual void     Listen ()                            const;
+    virtual CSocket* Accept ()                            const;
+    virtual void     Connect( const std::string& rsHost,
+                              const std::string& rsPort );
+    virtual void     Close  ();
 
-    virtual       size_t       Send    ( const std::string& s )     const;
-    virtual const std::string& Receive (       std::string& s )     const;
+    virtual size_t   Send    ( const std::string& s )     const;
+    virtual size_t   Receive (       std::string& s );
 
   public:
     const CSocket& operator << ( const std::string& s ) const;
     const CSocket& operator << (       long         n ) const;
-    const CSocket& operator >> (       std::string& s ) const;
+    const CSocket& operator >> (       std::string& s );
 
     bool isValid() const;
 

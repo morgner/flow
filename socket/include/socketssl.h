@@ -76,7 +76,7 @@ class CSocketSSL : public CSocket
 
              CSocketSSL( const CSocketSSL& src );
   public:
-             CSocketSSL( const int          nSock           = INVALID_SOCKET );
+             CSocketSSL();
              CSocketSSL( const std::string& rsHost,
                          const std::string& rsPort,
                          const std::string& rsFileCertificate,
@@ -86,17 +86,16 @@ class CSocketSSL : public CSocket
                          const std::string& rsPathCaTrust );
     virtual ~CSocketSSL();
 
-//    virtual       void         Accept  (       CSocketSSL& roSocket );
-    virtual       CSocket*     Accept  ();
-    virtual       void         Connect ();
-    virtual       void         Close   ();
-    virtual       size_t       Send    ( const std::string& s ) const;
-    virtual const std::string& Receive (       std::string& s ) const;
+    virtual CSocket* Accept  ()                       const;
+    virtual void     Connect ();
+    virtual void     Close   ();
+    virtual size_t   Send    ( const std::string& s ) const;
+    virtual size_t   Receive (       std::string& s );
 
   public:
     const CSocketSSL& operator << ( const std::string& s ) const;
     const CSocketSSL& operator << (       long         n ) const;
-    const CSocketSSL& operator >> (       std::string& s ) const;
+    const CSocketSSL& operator >> (       std::string& s );
 
   protected:
     bool InitializeSslCtx();

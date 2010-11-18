@@ -1,5 +1,14 @@
 == some test snippets for OpenSSL applications and credentials
 
+create DH parameters for the application
+----------------------------------------
+
+(to be done during server installation)
+
+BITS=1024
+openssl dhparam -out dh${BITS}.pem ${BITS}
+
+
 to chain CAs together for a CA chain file
 -----------------------------------------
 

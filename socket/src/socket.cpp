@@ -45,9 +45,40 @@
 CSocket::CSocket( const int nSock )
   : m_nSock( nSock )
   {
-  // a buffer or C functions to receive data
-  m_pcBuffer = (char*)malloc( RECEIVE_BUFFER_SIZE );
+  m_ovBuffer.resize(RECEIVE_BUFFER_SIZE);
   } // CSocket::CSocket( const int nSock )
+
+CSocket::CSocket( const CSocket& src )
+  {
+  if ( !src.isValid() )
+    {
+    throw CSocketException( "Source Socket is invalid, so new socket can't be better" );
+    }
+  m_ovBuffer.resize(RECEIVE_BUFFER_SIZE);
+
+  socklen_t addr_length = m_tAddr.SizeGet();
+  m_nSock      = ::accept( src.m_nSock,
+                           src.m_tAddr,
+                           &addr_length );
+  if ( m_nSock <= 0 )
+    {
+    throw CSocketException( "Could not 'accept', new socket is invalid" );
+    }
+
+  timeval timeout;
+  timeout.tv_sec  = 0;
+  timeout.tv_usec = 1000; // looks like this value is ignored
+  int nResult = ::setsockopt( m_nSock,
+                              SOL_SOCKET,
+                              SO_RCVTIMEO,
+                              (const char*)&timeout,
+                              sizeof(timeout) );
+  if ( nResult == -1 )
+    {
+    throw CSocketException( "Could not set SO_RCVTIMEO, new socket is invalid" );
+    } // if ( result == -1 )
+
+  } // CSocket::CSocket( const CSocket& src )
 
 CSocket::~CSocket()
   {
@@ -56,8 +87,6 @@ CSocket::~CSocket()
     ::close(m_nSock);
     m_nSock = INVALID_SOCKET;
     }
-  free( m_pcBuffer );
-  m_pcBuffer = 0;
   } // CSocket::~CSocket()
 
 void CSocket::Create()
@@ -65,7 +94,7 @@ void CSocket::Create()
   m_nSock = ::socket(AF_INET,
                      SOCK_STREAM,
                      0);
-  if ( ! isValid() )
+  if ( !isValid() )
     {
     std::cout << "errno == " << errno << "  in CSocket::Receive\n";
     throw CSocketException( "Could not create socket in CSocket::Create()." );
@@ -98,7 +127,7 @@ void CSocket::Create()
 
 void CSocket::Bind ( const int nPort )
   {
-  if ( ! isValid() )
+  if ( !isValid() )
     {
     throw CSocketException( "Socket is invalid in CSocket::Bind()." );
     }
@@ -119,7 +148,7 @@ void CSocket::Bind ( const int nPort )
 
 void CSocket::Listen() const
   {
-  if ( ! isValid() )
+  if ( !isValid() )
     {
     throw CSocketException( "Socket is invalid in CSocket::Listen()." );
     }
@@ -133,50 +162,15 @@ void CSocket::Listen() const
   } // void CSocket::Listen() const
 
 
-CSocket* CSocket::Accept () const
+CSocket* CSocket::Accept() const
   {
-  CSocket* poSocket = new CSocket;
-  Accept( *poSocket );
-  return poSocket;
+  return new CSocket( *this );
   } // CSocket* CSocket::Accept () const
-
-void CSocket::Accept( CSocket& roSocket ) const
-  {
-  if ( ! isValid() )
-    {
-    throw CSocketException( "Socket is invalid in CSocket::Accept()." );
-    }
-
-  socklen_t addr_length = m_tAddr.SizeGet();
-  roSocket.m_nSock      = ::accept( m_nSock,
-                                    m_tAddr,
-                                    &addr_length );
-  if ( roSocket.m_nSock <= 0 )
-    {
-    throw CSocketException( "Could not 'accept' in CSocket::Accept()." );
-    }
-
-  timeval timeout;
-  timeout.tv_sec  = 1;
-  timeout.tv_usec = 100;
-
-  int result = ::setsockopt( roSocket.m_nSock,
-                             SOL_SOCKET,
-                             SO_RCVTIMEO,
-                             (const char*)&timeout,
-                             sizeof(timeout) );
-
-  if ( result == -1 )
-    {
-    throw CSocketException( "Could not set SO_RCVTIMEO in CSocket::Create()." );
-    } // if ( result == -1 )
-
-  } // void CSocket::Accept( CSocket& roSocket ) const
 
 
 void CSocket::Close( )
   {
-  if ( ! isValid() ) return;
+  if ( !isValid() ) return;
   
   int nResult = ::close( m_nSock );
 
@@ -203,7 +197,7 @@ const CSocket& CSocket::operator << ( long n ) const
   }
 
 
-const CSocket& CSocket::operator >> ( std::string& s ) const
+const CSocket& CSocket::operator >> ( std::string& s )
   {
   Receive( s );
   return *this;
@@ -212,7 +206,7 @@ const CSocket& CSocket::operator >> ( std::string& s ) const
 
 size_t CSocket::Send(const std::string& s) const
   {
-  if ( ! isValid() )
+  if ( !isValid() )
     {
     throw CSocketException( "Socket is invalid in CSocket::Send()." );
     }
@@ -231,17 +225,17 @@ size_t CSocket::Send(const std::string& s) const
 
 
 // Receive data from socket. To be used from >> operator
-const std::string& CSocket::Receive( std::string& s ) const
+size_t CSocket::Receive( std::string& s )
   {
-  if ( ! isValid() )
+  if ( !isValid() )
     {
     throw CSocketException( "Socket is invalid in CSocket::Receive()." );
     }
   s.clear();
 
   size_t nResult = ::recv( m_nSock,
-                           m_pcBuffer,
-                           RECEIVE_BUFFER_SIZE -1,
+                           m_ovBuffer,
+                           m_ovBuffer.capacity() -1,
                            0 );
   if ( (nResult == -1) and ( errno != EAGAIN ) )
     {
@@ -251,10 +245,10 @@ const std::string& CSocket::Receive( std::string& s ) const
   else
     if ( nResult > 0 )
       {
-      m_pcBuffer[nResult] = 0;
-      s = m_pcBuffer;
+      m_ovBuffer[nResult] = 0;
+      s = m_ovBuffer;
       }
-  return s;
+  return nResult;
   } // const std::string& CSocket::Receive( std::string& s ) const
 
 
@@ -272,11 +266,11 @@ void CSocket::Connect(const std::string& rsHost,
   hints.ai_family   = AF_UNSPEC;   // use AF_INET6 to force IPv6
   hints.ai_socktype = SOCK_STREAM;
 
-  int rv = ::getaddrinfo( rsHost.c_str(),
-                          rsPort.c_str(),
-                          &hints,
-                          &servinfo);
-  if ( rv != 0 )
+  int nResult = ::getaddrinfo( rsHost.c_str(),
+                               rsPort.c_str(),
+                               &hints,
+                               &servinfo);
+  if ( nResult != 0 )
     {
     // if ( g_bVerbose ) std::cerr << "getaddrinfo: " << gai_strerror(rv) << std::endl;
     throw CSocketException( "Could not find out host IP in CSocket::Connect()." );
@@ -312,7 +306,7 @@ void CSocket::Connect(const std::string& rsHost,
 
   ::freeaddrinfo( servinfo );
 
-  if ( ! isValid() )
+  if ( !isValid() )
     {
     throw CSocketException( "Could not connect to host in CSocket::Connect()." );
     }

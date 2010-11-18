@@ -40,7 +40,7 @@ class CSocketServer : public CSocketSSL
     typedef CSocketSSL inhertited;
 
   protected:
-             CSocketServer( );
+             CSocketServer();
   public:
              CSocketServer( const std::string& rsHost,
                             const std::string& rsPort,

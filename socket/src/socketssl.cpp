@@ -33,6 +33,9 @@
 
 #include <iostream>
 
+#define FILE_DH1024 "certificates/dh1024.pem"
+
+
 /* openssl ciphers -tls1
 
 DHE-RSA-AES256-SHA:DHE-DSS-AES256-SHA:AES256-SHA:EDH-RSA-DES-CBC3-SHA:
@@ -69,10 +72,16 @@ int VerifyCallback(int n, X509_STORE_CTX* ptX509_store_ctx)
   }
 
 
-// called as result of a call to Accept(), gemnerating a new CSocketSSL object
+
+CSocketSSL::CSocketSSL()
+  {
+  } // CSocketSSL::CSocketSSL()
+
+
+// called as result of a call to Accept(), generating a new CSocketSSL object
 // to connet with a client
 CSocketSSL::CSocketSSL( const CSocketSSL& src )
-  : inherited( src.m_nSock ),
+  : inherited( src ),
     m_sHost( src.m_sHost),
     m_sPort( src.m_sPort ),
     // TLS credentials
@@ -86,8 +95,7 @@ CSocketSSL::CSocketSSL( const CSocketSSL& src )
     m_ptSsl( 0 ),
     m_ptFBio( 0 )
   {
-
-  ( (CSocket&)src ).Accept( *this );
+  GenerateEphRsaKey();
 
   BIO* ptSBio = ::BIO_new_socket( m_nSock, BIO_NOCLOSE );
   m_ptSsl     = ::SSL_new( m_ptSslCtx );
@@ -101,15 +109,33 @@ CSocketSSL::CSocketSSL( const CSocketSSL& src )
   // negotiation using SSL_write(3) or SSL_read(3), the handshake routines must
   // be explicitly set in advance using either SSL_set_connect_state() or
   // SSL_set_accept_state()
+  // + We are the server, so the SSL Methode is 'accept'
   ::SSL_set_accept_state( m_ptSsl );
   std::cout << "Configured SSL to server mode" << std::endl;
 
+  // SL_CTX_set_verify() sets the verification flags for ctx to be mode and
+  // specifies the verify_callback function to be used. If no callback function
+  // shall be specified, the NULL pointer can be used for verify_callback.
+  //   * SSL_VERIFY_NONE
+  //   * SSL_VERIFY_PEER
+  //   * SSL_VERIFY_FAIL_IF_NO_PEER_CERT
+  //   * SSL_VERIFY_CLIENT_ONCE
+  // + The callback accepts every certficate because we do not use the
+  // + certificate for authentication, but for partner identification. So we
+  // + are forced to let the server send a certificate which has to be done by
+  // + forcing the client to authenticate with a certificate.
+  // + Client identification is done to ensure the client has a certificate
+  // + and so will be able to read messages left for him here on our server.
   ::SSL_set_verify( m_ptSsl, SSL_VERIFY_PEER, VerifyCallback );
   std::cout << "SSL mode set to verify to force the client to send his certificate" << std::endl;
 
-  int nResult = ::SSL_accept( m_ptSsl );
-
-  int nError = ::SSL_get_error(m_ptSsl, nResult);
+  int nResult;
+  int nError = SSL_ERROR_WANT_READ;
+   while ( nError == SSL_ERROR_WANT_READ )
+    {
+    nResult = ::SSL_accept( m_ptSsl );
+    nError  = ::SSL_get_error(m_ptSsl, nResult);
+    }
   switch( nError )
     {      
     case SSL_ERROR_NONE:
@@ -139,6 +165,13 @@ CSocketSSL::CSocketSSL( const CSocketSSL& src )
     throw CSocketException( "SSL accept error" );
     }
 
+  // SSL_do_handshake() will wait for a SSL/TLS handshake to take place. If the
+  // connection is in client mode, the handshake will be started. The handshake
+  // routines may have to be explicitly set in advance using either
+  // SSL_set_connect_state() or SSL_set_accept_state().
+  // + possibly only relevant for clients ??
+//  ::SSL_do_handshake( m_ptSsl );
+
   m_ptFBio      = ::BIO_new( BIO_f_buffer() );
   BIO* ptSslBio = ::BIO_new( BIO_f_ssl() );
   ::BIO_set_ssl( ptSslBio, m_ptSsl, BIO_CLOSE);
@@ -146,12 +179,6 @@ CSocketSSL::CSocketSSL( const CSocketSSL& src )
 
   CertificateCheck();
   } // CSocketSSL::CSocketSSL( const CSocketSSL& src )
-
-/// for server connections (calling Accept()) ??
-CSocketSSL::CSocketSSL( const int nSock )
-  : inherited( nSock )
-  {
-  } // CSocketSSL::CSocketSSL( const int nSock )
 
 /// ?? for client connection (calling 'Connect()')
 CSocketSSL::CSocketSSL( const std::string& rsHost,
@@ -189,6 +216,9 @@ CSocketSSL::CSocketSSL( const std::string& rsHost,
   InitializeSslCtx();
   std::cout << "Initialized SSL Context" << std::endl;
 
+  LoadDHParameters(FILE_DH1024);
+  std::cout << "DH Parameters loaded" << std::endl;
+
   } // CSocketSSL::CSocketSSL( const std::string& rsHost, ...
 
 CSocketSSL::~CSocketSSL()
@@ -197,12 +227,14 @@ CSocketSSL::~CSocketSSL()
   } // CSocketSSL::~CSocketSSL()
 
 
-CSocket* CSocketSSL::Accept ()
+// Server connecting to a Client
+CSocket* CSocketSSL::Accept () const
   {
   return new CSocketSSL( *this );
   } // CSocket* CSocketSSL::Accept ()
 
 
+// Client connecting to a Server
 void CSocketSSL::Connect()
   {
   inherited::Connect( m_sHost, m_sPort );
@@ -279,6 +311,10 @@ void CSocketSSL::Connect()
     }
   std::cout << "Connected with SSL" << std::endl;
 
+  // SSL_do_handshake() will wait for a SSL/TLS handshake to take place. If the
+  // connection is in client mode, the handshake will be started. The handshake
+  // routines may have to be explicitly set in advance using either
+  // SSL_set_connect_state() or SSL_set_accept_state().
   ::SSL_do_handshake( m_ptSsl );
 
   if ( !CertificateCheck() )
@@ -317,6 +353,13 @@ void CSocketSSL::Close()
       break;
     }
 
+  // BIO_free_all() frees up an entire BIO chain, it does not halt if an error
+  // occurs freeing up an individual BIO in the chain.
+  if ( m_ptFBio )
+    {
+    BIO_free_all( m_ptFBio );
+	m_ptFBio = 0;
+    }
   // SSL_free() decrements the reference count of ssl, and removes the SSL 
   // structure pointed to by ssl and frees up the allocated memory if the
   // reference count has reached 0.
@@ -355,7 +398,7 @@ const CSocketSSL& CSocketSSL::operator << ( long n ) const
   }
 
 
-const CSocketSSL& CSocketSSL::operator >> ( std::string& s ) const
+const CSocketSSL& CSocketSSL::operator >> ( std::string& s )
   {
   Receive( s );
   return *this;
@@ -367,18 +410,19 @@ size_t CSocketSSL::Send( const std::string& s ) const
   // SSL_write() writes num bytes from the buffer buf into the specified
   // ssl connection.
   size_t nResult;
+  int    nError;
   if ( m_ptFBio )
     {
-//    std::cout << "BIO_puts" << std::endl;
+    // Server do this
     nResult = ::BIO_puts ( m_ptFBio, s.c_str() );
-    nResult =   BIO_flush( m_ptFBio ); // ::BIO_ctrl( m_ptFBio, BIO_CTRL_FLUSH, 0, NULL );
+    nError  =   BIO_flush( m_ptFBio ); // ::BIO_ctrl( m_ptFBio, BIO_CTRL_FLUSH, 0, NULL );
     }
   else
     {
-//    std::cout << "SSL_write" << std::endl;
-    nResult = ::SSL_write( m_ptSsl, s.c_str(), s.length() );
+    // Clients do this
+    nError = nResult = ::SSL_write( m_ptSsl, s.c_str(), s.length() );
     }
-  switch( ::SSL_get_error(m_ptSsl, nResult) )
+  switch( ::SSL_get_error(m_ptSsl, nError) )
     {      
     case SSL_ERROR_NONE:
       if ( s.length() != nResult )
@@ -402,22 +446,22 @@ size_t CSocketSSL::Send( const std::string& s ) const
   } // void CSocketSSL::Send( const std::string& s ) const
 
 
-const std::string& CSocketSSL::Receive( std::string& s ) const
+size_t CSocketSSL::Receive( std::string& s )
   {
   // Tries to read <num bytes> from the specified ssl into the buffer.
   
   int nResult;
   if ( m_ptFBio )
     {
-    nResult = ::BIO_gets( m_ptFBio, m_pcBuffer, RECEIVE_BUFFER_SIZE -1 );
+    nResult = ::BIO_gets( m_ptFBio, m_ovBuffer, m_ovBuffer.capacity() -1 );
     }
   else
     {
-    nResult = ::SSL_read( m_ptSsl, m_pcBuffer, RECEIVE_BUFFER_SIZE -1 );
+    nResult = ::SSL_read( m_ptSsl, m_ovBuffer, m_ovBuffer.capacity() -1 );
     }
   if ( (nResult > 0) && (nResult < RECEIVE_BUFFER_SIZE) )
      {
-     m_pcBuffer[nResult+1] = 0;
+     m_ovBuffer[nResult+1] = 0;
      }
   switch( ::SSL_get_error(m_ptSsl, nResult) )
     {
@@ -426,6 +470,7 @@ const std::string& CSocketSSL::Receive( std::string& s ) const
       break;
 
     case SSL_ERROR_WANT_READ:
+      break;
       throw CSocketException("read timeout (SSL_ERROR_WANT_READ)");
     case SSL_ERROR_WANT_WRITE:
       throw CSocketException("SSL_ERROR_WANT_WRITE");
@@ -438,8 +483,8 @@ sleep(1);
       throw CSocketException( "Unknown SSL Error - Read problem" );
     }
 
-  s = m_pcBuffer;
-  return s;
+  s = m_ovBuffer;
+  return nResult;
   } // const std::string& CSocketSSL::Receive( std::string& s ) const
 
 
@@ -454,7 +499,7 @@ bool CSocketSSL::InitializeSslCtx()
 
   // SSL_CTX_new() creates a new SSL_CTX object as framework to establish
   // TLS/SSL enabled connections.
-  m_ptSslCtx  = ::SSL_CTX_new( ptMethode );
+  m_ptSslCtx = ::SSL_CTX_new( ptMethode );
   std::cout << "SSL Context created" << std::endl;
 
   // loads a certificate chain from file into ctx. The certificates must be in
@@ -462,8 +507,8 @@ bool CSocketSSL::InitializeSslCtx()
   // (actual client or server certificate), followed by intermediate CA certi-
   // ficates if applicable, and ending at the highest level (root) CA. There
   // is no corresponding function working on a single SSL object.
-  if ( ! ::SSL_CTX_use_certificate_chain_file(m_ptSslCtx,
-                                              m_sFileCertificate.c_str()) )
+  if ( !::SSL_CTX_use_certificate_chain_file(m_ptSslCtx,
+                                             m_sFileCertificate.c_str()) )
     {
     throw CSocketException("Can't read certificate file: " + m_sFileCertificate);
     }
@@ -481,9 +526,9 @@ bool CSocketSSL::InitializeSslCtx()
   // The formatting type of the certificate must be specified from:
   //    * SSL_FILETYPE_PEM
   //    * SSL_FILETYPE_ASN1
-  if ( ! ::SSL_CTX_use_PrivateKey_file(m_ptSslCtx,
-                                       m_sFileKey.c_str(),
-                                       SSL_FILETYPE_PEM ) )
+  if ( !::SSL_CTX_use_PrivateKey_file(m_ptSslCtx,
+                                      m_sFileKey.c_str(),
+                                      SSL_FILETYPE_PEM ) )
     {
     throw CSocketException("Can't read key file");
     }
@@ -523,7 +568,8 @@ bool CSocketSSL::CertificateCheck()
   //     Theswhy ==> class Cx509
   Cx509 oPeer = ::SSL_get_peer_certificate( m_ptSsl );
 
-  if ( ! oPeer.isValid() )
+  // At first we need to check if there is a certificate to check
+  if ( !oPeer.isValid() )
     {
     throw CSocketException( "Peer did not present a certificate" );
     }
@@ -641,29 +687,27 @@ bool CSocketSSL::CertificateCheck()
 
 
   char acPeerCommonName[256];
-  // Retrieve the ``text'' from the first entry in name which matches nid, if no
+  // Retrieve the 'text' from the first entry in name which matches nid, if no
   // such entry exists -1 is returned. At most len bytes will be written and the
   // text written to buf will be null terminated. The length of the output
   // string written is returned excluding the terminating null. If buf is NULL
   // then the amount of space needed in buf (excluding the final null) is
   // returned
-  ::X509_NAME_get_text_by_NID( X509_get_subject_name(oPeer),
-                               NID_commonName,
-                               acPeerCommonName,
-                               sizeof(acPeerCommonName) );
-  if( strcasecmp(acPeerCommonName, m_sHost.c_str()) )
+  int nLen = ::X509_NAME_get_text_by_NID( X509_get_subject_name(oPeer),
+                                          NID_commonName,
+                                          acPeerCommonName,
+                                          sizeof(acPeerCommonName) );
+/*
+  if ( strcasecmp(acPeerCommonName, m_sHost.c_str()) )
     {
-//-    throw CSocketException("Certificate CN doesn't match host name " +
-//-                           std::string(acPeerCommonName) );
+    throw CSocketException("Certificate CN doesn't match host name " +
+                           std::string(acPeerCommonName) );
     }
+*/
 
-  m_sPeerCN = acPeerCommonName;
-  if ( m_sPeerCN.length() )
-    {
-    std::cout << "Peer certificate issued to: " + m_sPeerCN << std::endl;
-    }
+  m_sPeerCN = ( nLen > 0 ) ? acPeerCommonName : "";
 
-  return true;
+  return m_sPeerCN > "";
   } // bool CSocketSSL::CertificateCheck()
 
 // provides the password for the PasswordCallback(...)
@@ -679,21 +723,38 @@ const std::string& CSocketSSL::PasswordGet() const
 
    ------------------------- */
 
+// When using a cipher with RSA authentication, an ephemeral DH key exchange
+// can take place. Using ephemeral DH key exchange yields forward secrecy, as
+// the connection can only be decrypted, when the DH key is known.
+// By generating a temporary DH key inside the server application that is lost
+// when the application is left, it becomes impossible for an attacker to
+// decrypt past sessions, even if he gets hold of the normal (certified) key,
+// as this key was only used for signing.
+//
+// + BITS=1024; openssl dhparam -out dh${BITS}.pem ${BITS}
+
 void CSocketSSL::LoadDHParameters( const std::string& sParamsFile )
   {
   std::cout << "void CSocketSSL::LoadDHParameters( " << sParamsFile << " )" << std::endl;
 
-  DH*  ptDH=0; // ret
-  BIO* ptBio;  // bio
+  DH*  ptDH=0;
+  BIO* ptBio;
 
+  // BIO_new_file() creates a new file BIO with mode mode the meaning of mode
+  // is the same as the stdio function fopen(). The BIO_CLOSE flag is set on
+  // the returned BIO.
   if ( (ptBio = ::BIO_new_file( sParamsFile.c_str(),"r")) == NULL)
     {
     throw CSocketException( "Couldn't open DH file" );
     }
 
+  // The PEM functions read or write structures in PEM format. In this sense
+  // PEM format is simply base64 encoded data surrounded by header lines.
   ptDH = ::PEM_read_bio_DHparams( ptBio, NULL, NULL,  NULL);
   ::BIO_free( ptBio );
 
+  // SSL_CTX_set_tmp_dh() sets DH parameters to be used to be dh. The key is
+  // inherited by all ssl objects created from ctx.
   if( ::SSL_CTX_set_tmp_dh(m_ptSslCtx, ptDH) < 0 )
     {
     throw CSocketException( "Couldn't set DH parameters" );
@@ -704,12 +765,24 @@ void CSocketSSL::GenerateEphRsaKey()
   {
   RSA* ptRsa;
 
+  // RSA_generate_key() generates a key pair and returns it in a newly
+  // allocated RSA structure. The pseudo-random number generator must be seeded
+  // prior to calling RSA_generate_key().
+  //
+  // The modulus size will be num bits, and the public exponent will be e. Key
+  // sizes with num < 1024 should be considered insecure. The exponent is an
+  // odd number, typically 3, 17 or 65537.
   ptRsa = ::RSA_generate_key( 512, RSA_F4, NULL, NULL );
 
+  // SSL_CTX_set_tmp_rsa() sets the temporary/ephemeral RSA key to be used to
+  // be rsa. The key is inherited by all SSL objects newly created from ctx
+  // with SSL_new(). Already created SSL objects are not affected.
   if ( !SSL_CTX_set_tmp_rsa(m_ptSslCtx, ptRsa) )
     {
     throw CSocketException( "Couldn't set RSA key" );
     }
 
+  // RSA_free() frees the RSA structure and its components. The key is erased
+  // before the memory is returned to the system.
   ::RSA_free( ptRsa );
   } // void CSocketSSL::GenerateEphRsaKey()
