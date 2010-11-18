@@ -44,23 +44,51 @@
 
 class CPulex;
 
-std::ostream& operator<< ( std::ostream&, CPulex& );
-     CSocket& operator<< (      CSocket&, CPulex& );
+std::ostream& operator << ( std::ostream&, CPulex& );
+     CSocket& operator << (      CSocket&, CPulex& );
 
-class CPulex : public CHome, public std::list<std::string>
+typedef std::list<std::string> CListString;
+
+class CPulex : public CHome, public CListString
   {
   private:
     typedef CHome inherited;
 
     static const std::string s_sClassName;
 
+  protected:
+    std::string m_sSender;      // name of the user who generated the pulex
+    CListString m_lsRecipients; // names of the users who this pulex is intended to
+
   public:
              CPulex();
     virtual ~CPulex();
 
     virtual const std::string& ClassNameGet() const;
-  
+
             const std::string& operator << ( const std::string& rsData );
+
+            const std::string& SenderSet( const std::string& rsSender );
+            const std::string& SenderGet();
+
+    virtual size_t RecipientAdd( const std::string& rsRecipient );
+    virtual size_t RecipientDel( const std::string& rsRecipient );
+
+  public:
+    template<typename T>
+      T& Send( T& roStream );
+
+  public:
+    static const char* scn_username;
+    static const char* scn_sender;
+    static const char* scn_recipient;
+    static const char* scn_destination;
+    static const char* scn_class_name;
+    static const char* scn_local_id;
+    static const char* scn_local_id_time;
+    static const char* scn_remote_id;
+    static const char* scn_content_text;
+    static const char* scn_content_binary;
 
   }; // class CPulex
 

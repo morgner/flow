@@ -44,14 +44,13 @@ class CHome
     static const std::string s_sClassName;
 
   protected:
-    static std::string s_sUsername;
-    static std::string s_sPassword;
-    static long        s_nLastLocalId;
+    static long s_nLastLocalId;
 
   protected:
-    long m_tLocalId;  // time base local id
-    long m_nLocalId;  // sequence base local id
-    long m_nRemoteId; // remote id (to receive from a server)
+    std::string m_sUsername;  // name of the user who uses the object
+    long        m_tLocalId;   // time base local id
+    long        m_nLocalId;   // sequence base local id
+    long        m_nRemoteId;  // remote id (to receive from a server)
 
   public:
              CHome();
@@ -66,10 +65,8 @@ class CHome
             long RemoteIdSet( long lid );
             long RemoteIdGet();
 
-            const std::string& UsernameSet( const std::string& sUsername );
+            const std::string& UsernameSet( const std::string& rsUsername );
             const std::string& UsernameGet();
-            const std::string& PasswordSet( const std::string& sPassword );
-            const std::string& PasswordGet();
 
   }; // class CHome
 

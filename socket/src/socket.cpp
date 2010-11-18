@@ -42,10 +42,14 @@
 #include <iostream>
 
 
+const int CSocket::INVALID_SOCKET      = -1;
+const int CSocket::CLIENT_BACKLOG      =  5;
+const int CSocket::RECEIVE_BUFFER_SIZE =  512;
+
+
 CSocket::CSocket( const int nSock )
   : m_nSock( nSock )
   {
-  m_ovBuffer.resize(RECEIVE_BUFFER_SIZE);
   } // CSocket::CSocket( const int nSock )
 
 CSocket::CSocket( const CSocket& src )
@@ -54,7 +58,6 @@ CSocket::CSocket( const CSocket& src )
     {
     throw CSocketException( "Source Socket is invalid, so new socket can't be better" );
     }
-  m_ovBuffer.resize(RECEIVE_BUFFER_SIZE);
 
   socklen_t addr_length = m_tAddr.SizeGet();
   m_nSock      = ::accept( src.m_nSock,

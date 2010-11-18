@@ -107,7 +107,18 @@ int main( int argc, char* argv[] )
   if ( bVerbose ) std::cout << "===pipe-end===" << std::endl << std::endl;
 
   /// putting together defaults and command line input for the Pulex and the server parameters
-  if ( g_oEnvironment.find("user")     != g_oEnvironment.end() )  poPulex->UsernameSet( g_oEnvironment["user"] );
+  if ( g_oEnvironment.find("user")     != g_oEnvironment.end() )
+    poPulex->UsernameSet( g_oEnvironment["user"] );
+  else
+    poPulex->UsernameSet( "username" );
+
+  if ( g_oEnvironment.find("sender")   != g_oEnvironment.end() )
+    poPulex->SenderSet( g_oEnvironment["sender"] );
+  else
+    poPulex->SenderSet( "sender" );
+
+  poPulex->RecipientAdd( "recipient" );
+
   if ( g_oEnvironment.find("cluid")    != g_oEnvironment.end() )  poPulex->LocalIdSet ( atoi(g_oEnvironment["cluid"].c_str()) );
   if ( g_oEnvironment.find("message")  != g_oEnvironment.end() ) 
     *poPulex << g_oEnvironment["message"];
@@ -135,7 +146,7 @@ int main( int argc, char* argv[] )
     {
     if ( bVerbose ) std::cout << " * HOST: " << g_oEnvironment["host"] << std::endl;
     if ( bVerbose ) std::cout << " * PORT: " << g_oEnvironment["port"] << std::endl;
-	CSocketClient oConnection( g_oEnvironment["host"],
+    CSocketClient oConnection( g_oEnvironment["host"],
                                g_oEnvironment["port"],
                                sUserCert,
                                sUserKey,
@@ -188,7 +199,9 @@ void CEnvironment::Usage( int nStatus )
             << "                       default: localhost" << std::endl << std::endl
             << "  -p, --port           the port on the remote host to connect to" << std::endl
             << "                       default: 30000" << std::endl << std::endl
-            << "  -u, --user           the user name to send the message from" << std::endl
+            << "  -u, --user           the name of the user who owns the pulex" << std::endl
+            << "                       default: local user name" << std::endl << std::endl
+            << "  -s, --sender         the alias to send the message from" << std::endl
             << "                       default: local user name" << std::endl << std::endl
             << "  -r, --recipient      the user name to send the message to" << std::endl
             << "                       default: all known recipients" << std::endl << std::endl

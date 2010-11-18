@@ -32,8 +32,6 @@
 #include <sys/time.h>
 
 const std::string CHome::s_sClassName   = "HOME";
-      std::string CHome::s_sUsername    = "username";
-      std::string CHome::s_sPassword    = "password";
       long        CHome::s_nLastLocalId = 0;
 
 CHome::CHome()
@@ -82,23 +80,12 @@ long CHome::RemoteIdGet()
   return m_nRemoteId;
   }
 
-const std::string& CHome::UsernameSet( const std::string& sUsername )
+const std::string& CHome::UsernameSet( const std::string& rsUsername )
   {
-  return s_sUsername = sUsername;
+  return m_sUsername = rsUsername;
   }
 
 const std::string& CHome::UsernameGet()
   {
-  return s_sUsername;
+  return m_sUsername;
   }
-
-const std::string& CHome::PasswordSet( const std::string& sPassword )
-  {
-  return s_sPassword = sPassword;
-  }
-
-const std::string& CHome::PasswordGet()
-  {
-  return s_sPassword;
-  }
-

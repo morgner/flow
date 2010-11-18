@@ -114,6 +114,7 @@ void CPartner::Action()
        p1 = p2+1)
     {
     std::string s = sClientData.substr(p1, p2-p1);
+//    std::cout << s << std::endl;
     if ( s.find("u:") != std::string::npos )
       {
       poContainer = new CContainer;

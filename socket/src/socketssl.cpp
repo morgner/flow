@@ -736,8 +736,6 @@ const std::string& CSocketSSL::PasswordGet() const
 
 void CSocketSSL::LoadDHParameters( const std::string& sParamsFile )
   {
-  std::cout << "void CSocketSSL::LoadDHParameters( " << sParamsFile << " )" << std::endl;
-
   DH*  ptDH=0;
   BIO* ptBio;
 
@@ -766,10 +764,11 @@ void CSocketSSL::GenerateEphRsaKey()
   {
   RSA* ptRsa;
 
-  // RSA_generate_key() generates a key pair and returns it in a newly
-  // allocated RSA structure. The pseudo-random number generator must be seeded
-  // prior to calling RSA_generate_key().
-  //
+  // RSA *RSA_generate_key(int num, unsigned long e,
+  //                       void (*callback)(int, int, void *), void *cb_arg);
+  // Generates a key pair and returns it in a newly allocated RSA structure.
+  // The pseudo-random number generator must be seeded prior to calling RSA_generate_key().
+  srand ( time(0) );
   // The modulus size will be num bits, and the public exponent will be e. Key
   // sizes with num < 1024 should be considered insecure. The exponent is an
   // odd number, typically 3, 17 or 65537.

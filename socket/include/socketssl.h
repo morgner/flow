@@ -75,8 +75,8 @@ class CSocketSSL : public CSocket
     BIO*        m_ptFBio;            // the file-BIO to read from/write to (as server)
 
              CSocketSSL( const CSocketSSL& src );
-  public:
              CSocketSSL();
+  public:
              CSocketSSL( const std::string& rsHost,
                          const std::string& rsPort,
                          const std::string& rsFileCertificate,

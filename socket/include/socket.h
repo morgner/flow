@@ -47,10 +47,6 @@ template <typename T>
     return sout.str();
     }
 
-const int INVALID_SOCKET      = -1;
-const int CLIENT_BACKLOG      =  3;
-const int RECEIVE_BUFFER_SIZE =  512;
-
 
 class CSocket
   {
@@ -88,13 +84,17 @@ class CSocket
       };
 
   protected:
+    static const int INVALID_SOCKET;
+    static const int CLIENT_BACKLOG;
+    static const int RECEIVE_BUFFER_SIZE;
+
     int       m_nSock;
     CBuffer   m_ovBuffer;
     CAddrInet m_tAddr;
 
+             CSocket( const CSocket& src  );
   public:
              CSocket( const int nSock = INVALID_SOCKET );
-             CSocket( const CSocket& src  );
     virtual ~CSocket();
   
     virtual void     Create ();
