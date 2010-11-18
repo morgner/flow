@@ -459,9 +459,10 @@ size_t CSocketSSL::Receive( std::string& s )
     {
     nResult = ::SSL_read( m_ptSsl, m_ovBuffer, m_ovBuffer.capacity() -1 );
     }
-  if ( (nResult > 0) && (nResult < RECEIVE_BUFFER_SIZE) )
+  if ( (nResult > 0) && (nResult < m_ovBuffer.capacity()) )
      {
-     m_ovBuffer[nResult+1] = 0;
+//?     m_ovBuffser[nResult] = 0x00;
+     m_ovBuffer.at(nResult) = 0x00;
      }
   switch( ::SSL_get_error(m_ptSsl, nResult) )
     {
