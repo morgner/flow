@@ -125,7 +125,7 @@ void CPartner::Action()
       *poContainer += s;
       } // if ( poContainer )
     } // for ( std::string::size_type p1=0, p2=0; ...
-  
+
   pthread_mutex_lock( &m_tMutex );
   for ( CContainerList::iterator it=oContainerList.begin(); it != oContainerList.end(); ++it)
     {

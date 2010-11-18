@@ -63,7 +63,7 @@ void CEnvironment::CommandlineRead( int argc, char* argv[], const struct option*
   extern char* optarg;
   int          c;
   int          option_index = 0;
-  while ( (c = getopt_long (argc, argv, "HVvh:p:u:s:w:r:m:i:", ptOption, &option_index)) != EOF )
+  while ( (c = getopt_long (argc, argv, "HVvh:p:u:s:w:r:m:i:c:", ptOption, &option_index)) != EOF )
     {
     switch (c)
       {
@@ -125,6 +125,10 @@ void CEnvironment::CommandlineRead( int argc, char* argv[], const struct option*
           std::cout << "ERROR: --cluid (-i) has to be a numeric value greater than 0" << std::endl;
           exit(EXIT_FAILURE);
           }
+        break;
+
+      case 'c':
+        (*this)["call"] = optarg;
         break;
 
 //      default:

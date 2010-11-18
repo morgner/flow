@@ -120,7 +120,7 @@ template<typename T>
 
     for ( CListString::iterator it=m_lsRecipients.begin(); it != m_lsRecipients.end(); ++it )
       if ( it->length() )
-        roStream << scn_recipient   << ":" << *it << "\n";
+        roStream << scn_recipient << ":" << *it << "\n";
 
     roStream << scn_local_id      << ":" << LocalIdGet()     << "\n";
     roStream << scn_local_id_time << ":" << LocalIdTimeGet() << "\n";

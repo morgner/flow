@@ -63,10 +63,11 @@ int main( int argc, char* argv[] )
       { "host",      required_argument, 0, 'h'},
       { "port",      required_argument, 0, 'p'},
       { "user",      required_argument, 0, 'u'},
-      { "password",  required_argument, 0, 'w'},
+      { "sender",    required_argument, 0, 's'},
       { "recipient", required_argument, 0, 'r'},
       { "message",   required_argument, 0, 'm'},
       { "cluid",     required_argument, 0, 'i'},
+      { "call",      optional_argument, 0, 'c'},
       {  0,          0,                 0,  0 }
     }; // struct tOptions
   /// we need to read the command line parameters
