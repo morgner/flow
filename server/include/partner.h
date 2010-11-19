@@ -54,4 +54,8 @@ class CPartner
 
     void Action();
 
+    size_t Recall         ( const std::string& rsClientData,
+                                  CSocket*     roSocket );
+    size_t BuildContainers( const std::string& rsClientData );
+
   }; // class CPartner

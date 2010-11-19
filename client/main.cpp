@@ -162,6 +162,7 @@ int main( int argc, char* argv[] )
       for (CDomain::iterator it=oDomain.begin(); it != oDomain.end(); ++it)
         {
         oConnection << **it ;
+//        oConnection << "c:all" ;
         }
       oConnection << ".\r";
 

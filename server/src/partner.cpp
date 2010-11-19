@@ -34,12 +34,15 @@
 
 #include <iostream>
 
-
+// thread funciton performing client communication
+// the used object is left free into the open space,
+// so at the end of the thread, the used object is
+// to destroy
 void* CPartner::thread(void *pSelf)
   {
   CPartner* poPartner = reinterpret_cast<CPartner*>(pSelf);
   poPartner->Action();
-  poPartner->Stop();
+  delete poPartner;
   pthread_exit( NULL );
   }
 
@@ -55,11 +58,9 @@ CPartner::CPartner()
 
 CPartner::~CPartner()
   {
-  Stop();
   pthread_mutex_destroy(&m_tMutex);
   delete m_poSocket;
-  delete this;
-  }
+  } // CPartner::~CPartner()
 
 // start the thread
 void CPartner::Communicate( CSocket* poSocket ) 
@@ -103,19 +104,43 @@ void CPartner::Action()
       }
     sClientData += sInput;
     } while ( sInput.rfind("\r") == std::string::npos ); // m_bStopRequested
-  
+
+  if ( sClientData.find( "c:" ) == 0 )
+    Recall( sClientData, m_poSocket );
+  else
+    BuildContainers( sClientData );
+
+  *m_poSocket << ".\r";
+  }
+
+size_t CPartner::Recall( const std::string& rsClientData,
+                               CSocket*     poSocket )
+  {
+  for ( CContainerMapByCLUID::iterator it = g_oContainerMapByCLUID.begin(); 
+                                       it != g_oContainerMapByCLUID.end(); 
+                                     ++it )
+    {
+    *poSocket << it->second->RGUIDGet() << "\n";
+    *poSocket << it->second->CLUIDGet() << "\n";
+    }
+  return 0;
+  }
+
+
+size_t CPartner::BuildContainers( const std::string& rsClientData )
+  {
   /// a list to collect containers
   typedef std::list<CContainer*> CContainerList;
-  
+
   CContainerList oContainerList;  // temporary list to collect what we got
   CContainer*    poContainer = 0; // a potential container for if we get someting
   for (std::string::size_type p1=0, p2=0;
-       std::string::npos != ( p2 = sClientData.find('\n', p1) );
+       std::string::npos != ( p2 = rsClientData.find('\n', p1) );
        p1 = p2+1)
     {
-    std::string s = sClientData.substr(p1, p2-p1);
-//    std::cout << s << std::endl;
-    if ( s.find("u:") != std::string::npos )
+    std::string s = rsClientData.substr(p1, p2-p1);
+    std::cout << s << std::endl;
+    if ( s.find("u:") == 0 )
       {
       poContainer = new CContainer;
       oContainerList.push_back( poContainer );
@@ -153,10 +178,10 @@ void CPartner::Action()
 
     pthread_mutex_unlock( &m_tMutex );
     }
-  
+
   std::cout << oContainerList.size() << " elements received ";
   std::cout << g_oContainerMapByCLUID.size() << " elements total here." << std::endl;
-  /*  
+  /* 
    for ( CContainerMapByCLUID::iterator it = g_oContainerMapByCLUID.begin(); 
    it != g_oContainerMapByCLUID.end(); 
    ++it )
@@ -165,5 +190,5 @@ void CPartner::Action()
    *mPpoSocket << it->second->CLUIDGet() << "\n";
    }
    */
-  *m_poSocket << ".\r";
-  }
+  return g_oContainerMapByCLUID.size();
+  } // size_t CPartner::BuildContainers( const std::string& rsClientData )

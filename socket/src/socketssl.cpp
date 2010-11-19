@@ -353,31 +353,32 @@ void CSocketSSL::Close()
       break;
     }
 
+/*
   // BIO_free_all() frees up an entire BIO chain, it does not halt if an error
   // occurs freeing up an individual BIO in the chain.
+
+ >> is freed by "m_ptSsl"
+
   if ( m_ptFBio )
     {
     BIO_free_all( m_ptFBio );
-	m_ptFBio = 0;
+    m_ptFBio = 0;
     }
+*/
   // SSL_free() decrements the reference count of ssl, and removes the SSL 
   // structure pointed to by ssl and frees up the allocated memory if the
   // reference count has reached 0.
-  if ( m_ptSsl )
-    {
-    ::SSL_free ( m_ptSsl );
-    }
+  ::SSL_free ( m_ptSsl );
 
+/*
   // SSL_CTX_free() decrements the reference count of ctx, and removes the
   // SSL_CTX object pointed to by ctx and frees up the allocated memory if the
   // the reference count has reached 0.
-  if ( m_ptSslCtx )
-    {
-    ::SSL_CTX_free( m_ptSslCtx );
-    }
 
-  m_ptSsl = 0;
-  m_ptSslCtx = 0;
+ >> exists only ones per listener, will not be freed, should be static ?
+
+  ::SSL_CTX_free( m_ptSslCtx );
+*/
   inherited::Close();
   }
 
