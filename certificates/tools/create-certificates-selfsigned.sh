@@ -28,6 +28,7 @@ for NAME in $*
   do
   openssl req -new -utf8 -newkey rsa:1024 -${DES} -subj "/CN=${NAME}" -keyout ${NAME}.key -out ${NAME}.csr
   openssl x509 -req -days 7300 -in ${NAME}.csr -signkey ${NAME}.key -out ${NAME}.crt
+  openssl rsa -pubout -in ${NAME}.key -out ${NAME}.pub
   done
 
 if [ $# ]

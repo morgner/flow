@@ -169,6 +169,7 @@ openssl x509 -req -days 7300 -in ${NAME}.csr -CA ${CA}.crt -CAkey ${CA}.key -set
 echo "User Certificate for ${NAME} is: `pwd`/${NAME}.crt" | tee -a ${README}
 openssl verify -CAfile ${CLIENT_CA_CHAIN} ${NAME}.crt | tee -a ${README}
 
+openssl rsa -pubout -in ${NAME}.key -out ${NAME}.pub
 
 #
 # Client Certificate for ${USER2}, ser=202
@@ -185,3 +186,5 @@ CA=${DIR_CA}/${ICCA}
 openssl x509 -req -days 7300 -in ${NAME}.csr -CA ${CA}.crt -CAkey ${CA}.key -set_serial ${SER} -out ${NAME}.crt
 echo "User Certificate for ${NAME} is: `pwd`/${NAME}.crt" | tee -a ${README}
 openssl verify -CAfile ${CLIENT_CA_CHAIN} ${NAME}.crt | tee -a ${README}
+
+openssl rsa -pubout -in ${NAME}.key -out ${NAME}.pub
