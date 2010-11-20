@@ -120,7 +120,7 @@ int main( int argc, char* argv[] )
 
   poPulex->RecipientAdd( "recipient" );
 
-  if ( g_oEnvironment.find("cluid")    != g_oEnvironment.end() )  poPulex->LocalIdSet ( atoi(g_oEnvironment["cluid"].c_str()) );
+  if ( g_oEnvironment.find("cluid")    != g_oEnvironment.end() )  poPulex->ClientSideIdSet ( atoi(g_oEnvironment["cluid"].c_str()) );
   if ( g_oEnvironment.find("message")  != g_oEnvironment.end() ) 
     *poPulex << g_oEnvironment["message"];
   else

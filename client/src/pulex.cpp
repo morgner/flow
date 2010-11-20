@@ -29,6 +29,9 @@
 
 #include "pulex.h"
 
+#include <sys/time.h> // gettimeofday()
+
+
 // stream operators to send the pulex out
 
 std::ostream& operator << ( std::ostream& roStream, CPulex& roPulex )
@@ -43,12 +46,16 @@ CSocket& operator << ( CSocket& roStream, CPulex& roPulex )
 
 
 // static const members of the pulex
+const std::string CPulex::s_sClassName    = "FLOW.PULEX";
+      long        CPulex::s_nClientSideId = 0;
 
-
-const std::string CPulex::s_sClassName = "PULEX";
 
 CPulex::CPulex()
   {
+  timeval time;
+  gettimeofday( &time, 0 );
+  m_tClientSideId = time.tv_sec;
+  m_nClientSideId = ++s_nClientSideId;
   }
 
 CPulex::~CPulex()
@@ -69,45 +76,20 @@ const std::string& CPulex::operator << ( const std::string& rsData )
   }
 
 
-const std::string& CPulex::SenderSet( const std::string& rsSender )
+const std::string& CPulex::UsernameSet( const std::string& rsUserName )
   {
-  m_sSender = rsSender;
-  return rsSender;
+  return m_sUserName = rsUserName;
   }
 
 
-const std::string& CPulex::SenderGet()
+const std::string& CPulex::UsernameGet() const
   {
-  return m_sSender;
-  }
-
-
-// add the recipient to the recipient list
-size_t CPulex::RecipientAdd( const std::string& rsRecipient )
-  {
-  m_lsRecipients.push_back( rsRecipient );
-  return m_lsRecipients.size();
-  }
-
-
-// remove all recipient entries for the given alias
-size_t CPulex::RecipientDel( const std::string& rsRecipient )
-  {
-  m_lsRecipients.remove( rsRecipient );
-  return m_lsRecipients.size();
+  return m_sUserName;
   }
 
 
 // indicators to be used to transport the pulex
 const char* CPulex::scn_username       = "u";
-const char* CPulex::scn_sender         = "s";
-const char* CPulex::scn_recipient      = "e";
-const char* CPulex::scn_class_name     = "o";
-const char* CPulex::scn_local_id       = "l";
-const char* CPulex::scn_local_id_time  = "t";
-const char* CPulex::scn_remote_id      = "r";
-const char* CPulex::scn_content_text   = "x";
-const char* CPulex::scn_content_binary = "b";
 
 // generic stream sending methode
 template<typename T>
@@ -121,9 +103,9 @@ template<typename T>
       if ( it->length() )
         roStream << scn_recipient << ":" << *it << "\n";
 
-    roStream << scn_local_id      << ":" << LocalIdGet()     << "\n";
-    roStream << scn_local_id_time << ":" << LocalIdTimeGet() << "\n";
-    roStream << scn_remote_id     << ":" << RemoteIdGet()    << "\n";
+    roStream << scn_local_id      << ":" << ClientSideIdGet() << "\n";
+    roStream << scn_local_id_time << ":" << ClientSideTmGet() << "\n";
+    roStream << scn_remote_id     << ":" << ServerSideIdGet() << "\n";
 
     roStream << "===== to encrypt =====" << "\n";
     // content to encrypt - only for recipients

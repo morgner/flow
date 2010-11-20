@@ -36,29 +36,28 @@
 #pragma warning (disable:4786)
 #endif // _MSC_VER > 1000
 
-#include "home.h"
+#include "container.h"
+
+#include "socket.h"
 
 #include <list>
 #include <iostream>
-#include "socket.h"
 
 class CPulex;
 
 std::ostream& operator << ( std::ostream&, CPulex& );
      CSocket& operator << (      CSocket&, CPulex& );
 
-typedef std::list<std::string> CListString;
-
-class CPulex : public CHome, public CListString
+class CPulex : public CContainer // , public CListString
   {
   private:
-    typedef CHome inherited;
+    typedef CContainer inherited;
 
     static const std::string s_sClassName;
+    static       long        s_nClientSideId;
 
   protected:
-    std::string m_sSender;      // name of the user who generated the pulex
-    CListString m_lsRecipients; // names of the users who this pulex is intended to
+    std::string m_sUserName;    // name or alias of the user who uses the object
 
   public:
              CPulex();
@@ -68,11 +67,8 @@ class CPulex : public CHome, public CListString
 
             const std::string& operator << ( const std::string& rsData );
 
-            const std::string& SenderSet( const std::string& rsSender );
-            const std::string& SenderGet();
-
-    virtual size_t RecipientAdd( const std::string& rsRecipient );
-    virtual size_t RecipientDel( const std::string& rsRecipient );
+    const std::string& UsernameSet( const std::string& rsUserName );
+    const std::string& UsernameGet() const;
 
   public:
     template<typename T>
@@ -80,15 +76,6 @@ class CPulex : public CHome, public CListString
 
   public:
     static const char* scn_username;
-    static const char* scn_sender;
-    static const char* scn_recipient;
-    static const char* scn_destination;
-    static const char* scn_class_name;
-    static const char* scn_local_id;
-    static const char* scn_local_id_time;
-    static const char* scn_remote_id;
-    static const char* scn_content_text;
-    static const char* scn_content_binary;
 
   }; // class CPulex
 

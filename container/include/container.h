@@ -32,29 +32,47 @@
 #include <list>
 #include <string>
 
-typedef std::list<std::string> CData;       // x:*, b:*
-typedef std::list<std::string> CListString; // e:*
+//- typedef std::list<std::string> CData;       // x:*, b:*
+typedef std::list<std::string> CListString;
 
 class CContainer;
 typedef std::map <std::string, CContainer*> CContainerMapByCLUID;
 
-class CContainer : public std::list<std::string>
+class CContainer : public CListString
   {
+  private:
+    static const std::string s_sClassName;
+
   protected:
     std::string m_sSender;
     CListString m_lsRecipients;
     std::string m_sClass;
-    std::string m_sClientLocalId;
-    std::string m_sClientLocalIdTime;
-    std::string m_sServerId;
+    long        m_tClientSideId;   // time based client side id
+    long        m_nClientSideId;   // sequence base client side id
+    long        m_nServerSideId;   // server side id
 
   public:
      CContainer();
     ~CContainer();
 
-    const std::string& ServerIdGet() const;
-    const std::string& ServerIdSet( const std::string& sServerId );
+    virtual const std::string& SenderGet() const;
+    virtual const std::string& SenderSet( const std::string& rsSender );
 
+    virtual size_t RecipientAdd( const std::string& rsRecipient );
+    virtual size_t RecipientDel( const std::string& rsRecipient );
+
+    virtual long ClientSideTmGet() const;
+    virtual long ClientSideTmSet( long nClientSideTm );
+    virtual long ClientSideTmSet( const std::string& rsClientSideTm );
+                  
+    virtual long ClientSideIdGet() const;
+    virtual long ClientSideIdSet( long rnClientSideId );
+    virtual long ClientSideIdSet( const std::string& rsClientSideId );
+                  
+    virtual long ServerSideIdGet() const;
+    virtual long ServerSideIdSet( long rnServerSideId );
+    virtual long ServerSideIdSet( const std::string& rsServerSideId );
+                  
           std::string  RGUIDGet() const;
           std::string  CLUIDGet() const;
     const std::string& OwnerGet() const;
@@ -63,6 +81,17 @@ class CContainer : public std::list<std::string>
 
     // e.g. "c:PULEX", "x:please read", "x:the manual"
     const std::string& operator += ( const std::string& rsElement );
+
+  public:
+    static const char* scn_sender;
+    static const char* scn_recipient;
+    static const char* scn_destination;
+    static const char* scn_class_name;
+    static const char* scn_local_id;
+    static const char* scn_local_id_time;
+    static const char* scn_remote_id;
+    static const char* scn_content_text;
+    static const char* scn_content_binary;
 
   }; // class CContainer
 

@@ -181,7 +181,7 @@ size_t CPartner::BuildContainers( const std::string& rsClientData )
     CContainerMapByCLUID::iterator itf = g_oContainerMapByCLUID.find( sKey );
     if ( itf != g_oContainerMapByCLUID.end() )
       {
-      (*it)->ServerIdSet( itf->second->ServerIdGet() );
+      (*it)->ServerSideIdSet( itf->second->ServerSideIdGet() );
       std::cout << "replacing: " << sKey << " by " << (*it)->RGUIDGet() << "\n";
       delete itf->second;
       g_oContainerMapByCLUID.erase(itf);
@@ -189,12 +189,12 @@ size_t CPartner::BuildContainers( const std::string& rsClientData )
     else
       {
       std::cout << "appending: " << sKey << " as ";
-      (*it)->ServerIdSet( to_string(++g_lLastRemoteId) );
+      (*it)->ServerSideIdSet( to_string(++g_lLastRemoteId) );
       std::cout << (*it)->RGUIDGet() << "\n";
       }
     g_oContainerMapByCLUID[ sKey ] = *it;
 
-    for ( CData::iterator its=(*it)->begin(); its != (*it)->end(); ++its )
+    for ( CListString::iterator its=(*it)->begin(); its != (*it)->end(); ++its )
       {
       std::cout << " *** " << *its << std::endl;
       }
