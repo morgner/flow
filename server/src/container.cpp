@@ -74,6 +74,15 @@ const std::string& CContainer::OwnerGet() const
   return m_sSender;
   }
 
+bool CContainer::isFor( const std::string& rsRecipient )
+  {
+  for ( CListString::iterator it = m_lsRecipients.begin(); it != m_lsRecipients.end(); ++it)
+    {
+    if ( *it == rsRecipient ) return true;
+    }
+  return false;
+  }
+
 
 // e.g. "c:PULEX", "x:please read", "x:the manual"
 const std::string& CContainer::operator += ( const std::string& rsElement )
@@ -81,13 +90,12 @@ const std::string& CContainer::operator += ( const std::string& rsElement )
   if ( rsElement[1] == ':' )
     switch (rsElement[0])
       {
-      case 'u': m_sSender              = rsElement.substr(2);   break;
-      case 'p':                                                 break;
-      case 'd': m_lsReceivers.push_back( rsElement.substr(2) ); break;
-      case 'c': m_sClass               = rsElement.substr(2);   break;
-      case 'l': m_sClientLocalId       = rsElement.substr(2);   break;
-      case 't': m_sClientLocalIdTime   = rsElement.substr(2);   break;
-      case 'r': m_sServerId            = rsElement.substr(2);   break;
+      case 's': m_sSender               = rsElement.substr(2);   break;
+      case 'e': m_lsRecipients.push_back( rsElement.substr(2) ); break;
+      case 'c': m_sClass                = rsElement.substr(2);   break;
+      case 'l': m_sClientLocalId        = rsElement.substr(2);   break;
+      case 't': m_sClientLocalIdTime    = rsElement.substr(2);   break;
+      case 'r': m_sServerId             = rsElement.substr(2);   break;
 
       case 'x':
       case 'b': push_back( rsElement.substr(2) );

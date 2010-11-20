@@ -47,3 +47,15 @@ openssl s_client -connect localhost:30000 \
                  -CAfile certificates/client/client-CA-chain.pem \
                  -tls1 -verify 3
 
+
+
+openssl rsa -pubout -in username.key 
+
+openssl x509 -md5 -noout -in username.crt -fingerprint
+openssl dgst -md5 username.key
+openssl md5 username.key
+
+openssl enc -base64 -e -aes128 -in LICENSE.bz2 -out LICENSE.enc
+openssl enc -base64 -d -aes128 -in LICENSE.enc -out LICENSE.bz2
+
+echo HALLO | openssl passwd -stdin -1 -salt flow

@@ -32,8 +32,8 @@
 #include <list>
 #include <string>
 
-typedef std::list<std::string> CData;         // x:*
-typedef std::list<std::string> CReceiverList; // d:*
+typedef std::list<std::string> CData;       // x:*, b:*
+typedef std::list<std::string> CListString; // e:*
 
 class CContainer;
 typedef std::map <std::string, CContainer*> CContainerMapByCLUID;
@@ -41,13 +41,12 @@ typedef std::map <std::string, CContainer*> CContainerMapByCLUID;
 class CContainer : public std::list<std::string>
   {
   protected:
-    std::string   m_sSender;
-    CReceiverList m_lsReceivers;
-    std::string   m_sClass;
-    std::string   m_sClientLocalId;
-    std::string   m_sClientLocalIdTime;
-    std::string   m_sServerId;
-  
+    std::string m_sSender;
+    CListString m_lsRecipients;
+    std::string m_sClass;
+    std::string m_sClientLocalId;
+    std::string m_sClientLocalIdTime;
+    std::string m_sServerId;
 
   public:
      CContainer();
@@ -59,6 +58,8 @@ class CContainer : public std::list<std::string>
           std::string  RGUIDGet() const;
           std::string  CLUIDGet() const;
     const std::string& OwnerGet() const;
+
+          bool         isFor( const std::string& rsRecipient );
 
     // e.g. "c:PULEX", "x:please read", "x:the manual"
     const std::string& operator += ( const std::string& rsElement );

@@ -102,8 +102,7 @@ size_t CPulex::RecipientDel( const std::string& rsRecipient )
 const char* CPulex::scn_username       = "u";
 const char* CPulex::scn_sender         = "s";
 const char* CPulex::scn_recipient      = "e";
-const char* CPulex::scn_destination    = "d";
-const char* CPulex::scn_class_name     = "c";
+const char* CPulex::scn_class_name     = "o";
 const char* CPulex::scn_local_id       = "l";
 const char* CPulex::scn_local_id_time  = "t";
 const char* CPulex::scn_remote_id      = "r";

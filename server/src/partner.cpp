@@ -113,15 +113,36 @@ void CPartner::Action()
   *m_poSocket << ".\r";
   }
 
+
+// c:recipient
+// o:all
+// t:from_time
+// q:from_id
 size_t CPartner::Recall( const std::string& rsClientData,
                                CSocket*     poSocket )
   {
+  std::map<char, std::string> moQuery;
+
+  for (std::string::size_type p1=0, p2=0;
+       std::string::npos != ( p2 = rsClientData.find('\n', p1) );
+       p1 = p2+1)
+    {
+    std::string s = rsClientData.substr(p1, p2-p1);
+    if ( (s.length() > 2) && (s[1] == ':') )
+      {
+      moQuery[ s[0] ] = s.substr(2);
+      }
+    }
+
   for ( CContainerMapByCLUID::iterator it = g_oContainerMapByCLUID.begin(); 
                                        it != g_oContainerMapByCLUID.end(); 
                                      ++it )
     {
-    *poSocket << it->second->RGUIDGet() << "\n";
-    *poSocket << it->second->CLUIDGet() << "\n";
+    if ( it->second->isFor(moQuery['c']) )
+      {
+      *poSocket << it->second->RGUIDGet() << "\n";
+      *poSocket << it->second->CLUIDGet() << "\n";
+      }
     }
   return 0;
   }
@@ -134,12 +155,14 @@ size_t CPartner::BuildContainers( const std::string& rsClientData )
 
   CContainerList oContainerList;  // temporary list to collect what we got
   CContainer*    poContainer = 0; // a potential container for if we get someting
+  // splits the lines on their unixconform line ending seperator '\n'
   for (std::string::size_type p1=0, p2=0;
        std::string::npos != ( p2 = rsClientData.find('\n', p1) );
        p1 = p2+1)
     {
     std::string s = rsClientData.substr(p1, p2-p1);
     std::cout << s << std::endl;
+    // the first two chars of a line is the line content descriptor
     if ( s.find("u:") == 0 )
       {
       poContainer = new CContainer;
