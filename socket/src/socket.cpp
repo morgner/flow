@@ -34,10 +34,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <stdlib.h> // malloc & free
 
-#include <netdb.h>
-#include <netinet/tcp.h> // TCP_NODELAY
+#include <netdb.h> // getaddrinfo, addrinfo
+// #include <netinet/tcp.h> // TCP_NODELAY
 
 #include <iostream>
 

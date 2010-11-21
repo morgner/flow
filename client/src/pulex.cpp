@@ -28,7 +28,10 @@
  ***************************************************************************/
 
 #include "pulex.h"
+
 #include "socketexception.h"
+#include "sslclasses.h"
+
 
 #include <sys/time.h> // gettimeofday()
 
@@ -49,8 +52,9 @@ CSocket& operator << ( CSocket& roStream, CPulex& roPulex )
 
 
 // static const members of the pulex
-const std::string CPulex::s_sClassName    = "FLOW.PULEX";
-      long        CPulex::s_nClientSideId = 0;
+const std::string CPulex::s_sClassName      = "FLOW.PULEX";
+      long        CPulex::s_nClientSideId   = 0;
+const std::string CPulex::s_sDefaultMessage = "Hello World, this is I, a lonley pulex";
 
 
 CPulex::CPulex()
@@ -84,55 +88,59 @@ std::string Fingerprint( const std::string& rsName )
   if ( !rsName.length() ) return "no-name";
 
   std::string sFileName = "certificates/client/" + rsName + ".crt";
-  BIO* ptBio;
-  if ( (ptBio = ::BIO_new_file( sFileName.c_str(),"r")) == NULL)
+  CBio oBio = ::BIO_new_file( sFileName.c_str(),"r");
+  if ( !oBio.isValid() )
     {
-    ::BIO_free( ptBio );
     return "naname-" + rsName;
     throw CSocketException( "Couldn't open X509 file for: " + rsName );
     }
 
-  X509* ptX509 = X509_new();
-  X509* ptX509result = PEM_read_bio_X509_AUX(ptBio, &ptX509, 0, 0);
-  ::BIO_free( ptBio );
+  // Structured storage for a certificate
+  CX509 oX509;
+  // Reads a PEM certificate file, AUX is for PEM, without AUX DER is expected
+  // ptX509result is the same as (X509*)oX509 = not to be deleted!
+  X509* ptX509result = PEM_read_bio_X509_AUX( oBio, oX509, 0, 0 );
 
-  unsigned char* aucDer = 0;
-  int i = i2d_X509( ptX509result, &aucDer );
+  CUChar oDer;
+  // i2d_X509() encodes the structure pointed to by x into DER format. If out
+  // is not NULL is writes the DER encoded data to the buffer at *out, and
+  // increments it to point after the data just written. If the return value is
+  // negative an error occurred, otherwise it returns the length of the encoded
+  // data.
+  //
+  // For OpenSSL 0.9.7 and later if *out is NULL memory will be allocated for a
+  // buffer and the encoded data written to it. In this case *out is not
+  //  incremented and it points to the start of the data just written.
+  int i = i2d_X509( ptX509result, oDer );
 
-  unsigned char* pucSha1;
-  pucSha1 = (unsigned char*)malloc( SHA_DIGEST_LENGTH +1 );
-  if ( !SHA1( aucDer, i, pucSha1) )
+  CUChar oSha1 = (unsigned char*)malloc( SHA_DIGEST_LENGTH +1 );
+  if ( !SHA1( oDer, i, oSha1) )
     {
-    free( aucDer );
-    X509_free( ptX509 );
     throw CSocketException( "Couldn't create fingerprint for: " + rsName );
     }
 
-  free( aucDer );
-  X509_free( ptX509 );
-
   char pszHex[ 64 ];
   sprintf( pszHex, "%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X", 
-      ((unsigned char*)pucSha1)[0x00],
-      ((unsigned char*)pucSha1)[0x01],
-      ((unsigned char*)pucSha1)[0x02],
-      ((unsigned char*)pucSha1)[0x03],
-      ((unsigned char*)pucSha1)[0x04],
-      ((unsigned char*)pucSha1)[0x05],
-      ((unsigned char*)pucSha1)[0x06],
-      ((unsigned char*)pucSha1)[0x07],
-      ((unsigned char*)pucSha1)[0x08],
-      ((unsigned char*)pucSha1)[0x09],
-      ((unsigned char*)pucSha1)[0x0A],
-      ((unsigned char*)pucSha1)[0x0B],
-      ((unsigned char*)pucSha1)[0x0C],
-      ((unsigned char*)pucSha1)[0x0D],
-      ((unsigned char*)pucSha1)[0x0E],
-      ((unsigned char*)pucSha1)[0x0F],
-      ((unsigned char*)pucSha1)[0x10],
-      ((unsigned char*)pucSha1)[0x11],
-      ((unsigned char*)pucSha1)[0x12],
-      ((unsigned char*)pucSha1)[0x13] );
+      ((unsigned char*)oSha1)[0x00],
+      ((unsigned char*)oSha1)[0x01],
+      ((unsigned char*)oSha1)[0x02],
+      ((unsigned char*)oSha1)[0x03],
+      ((unsigned char*)oSha1)[0x04],
+      ((unsigned char*)oSha1)[0x05],
+      ((unsigned char*)oSha1)[0x06],
+      ((unsigned char*)oSha1)[0x07],
+      ((unsigned char*)oSha1)[0x08],
+      ((unsigned char*)oSha1)[0x09],
+      ((unsigned char*)oSha1)[0x0A],
+      ((unsigned char*)oSha1)[0x0B],
+      ((unsigned char*)oSha1)[0x0C],
+      ((unsigned char*)oSha1)[0x0D],
+      ((unsigned char*)oSha1)[0x0E],
+      ((unsigned char*)oSha1)[0x0F],
+      ((unsigned char*)oSha1)[0x10],
+      ((unsigned char*)oSha1)[0x11],
+      ((unsigned char*)oSha1)[0x12],
+      ((unsigned char*)oSha1)[0x13] );
 
   std::string sSha1 = pszHex;
   std::cout << sSha1 << " for " << rsName << std::endl; 

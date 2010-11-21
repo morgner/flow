@@ -1,7 +1,7 @@
 /***************************************************************************
- pulex.h  -  description
+ sslclasses.h description
  -----------------------
- begin                 : Fri Oct 29 2010
+ begin                 : Sun 22 11 2010
  copyright             : Copyright (C) 2010 by Manfred Morgner
  email                 : manfred@morgner.com
  ***************************************************************************/
@@ -28,49 +28,48 @@
  ***************************************************************************/
 
 
-#ifndef _PULEX_H
-#define _PULEX_H
+#ifndef _SSL_CLASSES_H
+#define _SSL_CLASSES_H
 
-#if _MSC_VER > 1000
-#pragma once
-#pragma warning (disable:4786)
-#endif // _MSC_VER > 1000
+#include <openssl/ssl.h>
+template<typename T>
+  class TSslPointer
+    {
+    protected:
+      T* m_ptElement;
 
-#include "container.h"
+    public:
+      TSslPointer()         { m_ptElement = 0;  }
+      TSslPointer( T* ptT ) { m_ptElement = ptT; }
 
-#include "socket.h"
+      operator T*()  { return  m_ptElement; }
+      operator T**() { return &m_ptElement; }
 
-#include <list>
-#include <iostream>
+      bool isValid() { return m_ptElement != 0; }
 
-class CPulex;
+    }; // template<typename T> class TSslClass
 
-std::ostream& operator << ( std::ostream&, CPulex& );
-     CSocket& operator << (      CSocket&, CPulex& );
-
-class CPulex : public CContainer // , public CListString
+class CX509 : public TSslPointer< X509 >
   {
-  private:
-    typedef CContainer inherited;
-
-    static const std::string s_sClassName;
-    static       long        s_nClientSideId;
   public:
-    static const std::string s_sDefaultMessage;
+     CX509() { m_ptElement = X509_new(); }
+     CX509( X509* ptX509 )  { m_ptElement = ptX509; }
+    ~CX509() { X509_free( m_ptElement ); }
+  }; // class CX509
 
+class CBio : public TSslPointer< BIO >
+  {
   public:
-             CPulex();
-    virtual ~CPulex();
+     CBio( BIO* ptBio )  { m_ptElement = ptBio; }
+    ~CBio() { BIO_free( m_ptElement ); }
+  }; // class CCBio
 
-    virtual const std::string& ClassNameGet() const;
-
-            const std::string& operator << ( const std::string& rsData );
-
+class CUChar : public TSslPointer< unsigned char >
+  {
   public:
-    template<typename T>
-      T& Send( T& roStream );
+     CUChar() { m_ptElement = 0; }
+     CUChar( unsigned char* ptUChar )  { m_ptElement = ptUChar; }
+    ~CUChar() { free( m_ptElement ); }
+  }; // class CUChar
 
-  }; // class CPulex
-
-
-#endif // _PULEX_H
+#endif // _SSL_CLASSES_H

@@ -567,8 +567,8 @@ bool CSocketSSL::CertificateCheck()
   // !! The reference count of the X509 object is incremented by one, so that
   // it will not be destroyed when the session containing the peer certificate
   // is freed. The X509 object must be explicitly freed using X509_free(X509*).
-  //     Theswhy ==> class Cx509
-  Cx509 oPeer = ::SSL_get_peer_certificate( m_ptSsl );
+  //     Thatswhy ==> class Cx509
+  CX509 oPeer = ::SSL_get_peer_certificate( m_ptSsl );
 
   // At first we need to check if there is a certificate to check
   if ( !oPeer.isValid() )

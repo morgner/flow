@@ -132,9 +132,9 @@ size_t CPartner::Recall( const std::string& rsClientData,
       {
       moQuery[ s[0] ] = s.substr(2);
       }
-    }
+    } // for (std::string::size_type p1=0, p2=0; ...
 
-  for ( CContainerMapByCLUID::iterator it = g_oContainerMapByCLUID.begin(); 
+  for ( CContainerMapByCLUID::iterator it  = g_oContainerMapByCLUID.begin(); 
                                        it != g_oContainerMapByCLUID.end(); 
                                      ++it )
     {

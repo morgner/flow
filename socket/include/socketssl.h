@@ -35,6 +35,8 @@
 
 #include <string>
 
+#include <sslclasses.h>
+
 #include <openssl/ssl.h>
 
 class CSocketSSL : public CSocket
@@ -44,20 +46,6 @@ class CSocketSSL : public CSocket
 
     static std::string s_sCiphers;
     static bool        s_bSslInitialized;
-
-  class Cx509
-    {
-    protected:
-      X509* m_ptPeer;
-
-       Cx509(){}
-    public:
-       Cx509( X509* ptPeer ) : m_ptPeer(ptPeer) {}
-      ~Cx509()         { X509_free(m_ptPeer); }
-
-      operator X509*() { return m_ptPeer; }
-      bool isValid()   { return m_ptPeer != 0; }
-    }; // class Cx509
 
   protected:
     std::string m_sHost;             // the name oder IP of the server

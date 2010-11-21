@@ -113,13 +113,16 @@ int main( int argc, char* argv[] )
   else
     poPulex->SenderSet( getenv("LOGNAME") );
 
-  poPulex->RecipientAdd( "recipient" );
+  if ( g_oEnvironment.find("sender")   != g_oEnvironment.end() )
+    poPulex->RecipientAdd( g_oEnvironment["recipient"] );
+  else
+    poPulex->RecipientAdd( "recipient" );
 
   if ( g_oEnvironment.find("cluid")    != g_oEnvironment.end() )  poPulex->ClientSideIdSet ( atoi(g_oEnvironment["cluid"].c_str()) );
   if ( g_oEnvironment.find("message")  != g_oEnvironment.end() ) 
     *poPulex << g_oEnvironment["message"];
   else
-    *poPulex << "Hello World, this is I, a lonley pulex";
+    *poPulex << CPulex::s_sDefaultMessage;
   if ( g_oEnvironment.find("host")     == g_oEnvironment.end() )  g_oEnvironment["host"]     = DEFAULT_HOST;
   if ( g_oEnvironment.find("port")     == g_oEnvironment.end() )  g_oEnvironment["port"]     = DEFAULT_PORT;
   if ( g_oEnvironment.find("password") == g_oEnvironment.end() )  g_oEnvironment["password"] = PASSWORD;
@@ -199,9 +202,11 @@ void CEnvironment::Usage( int nStatus )
             << "  -s, --sender         the alias to send the message from" << std::endl
             << "                       default: local user name" << std::endl << std::endl
             << "  -r, --recipient      the user name to send the message to" << std::endl
-            << "                       default: all known recipients" << std::endl << std::endl
+            << "                       default: 'recipient'" << std::endl
+            << std::endl
             << "  -m, --message        the message" << std::endl
-            << "                       default: 'Hello World, this is I, a lonley pulex'" << std::endl << std::endl
+            << "                       default: '" << CPulex::s_sDefaultMessage << "'" << std::endl
+            << std::endl
             << "  -i, --cluid          force the use a specific client unique identifier" << std::endl
             << "                       default: <automatic>" << std::endl << std::endl
             ;
