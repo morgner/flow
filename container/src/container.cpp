@@ -31,6 +31,7 @@
 #include "container.h"
 
 #include <iostream>
+#include <stdlib.h>
 
 const std::string CContainer::s_sClassName = "FLOW.CONTAINER";
 
