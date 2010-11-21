@@ -83,11 +83,15 @@ const std::string& CPulex::operator << ( const std::string& rsData )
   }
 
 
+// creates the SHA1 checksum of the certificate directed to by rsName
 std::string Fingerprint( const std::string& rsName )
   {
   if ( !rsName.length() ) return "no-name";
 
+  // This is where we expect the certificate to live
   std::string sFileName = "certificates/client/" + rsName + ".crt";
+
+  // Opens a file based readonly BIO to read from the certificate file
   CBio oBio = ::BIO_new_file( sFileName.c_str(),"r");
   if ( !oBio.isValid() )
     {
@@ -111,16 +115,20 @@ std::string Fingerprint( const std::string& rsName )
   // For OpenSSL 0.9.7 and later if *out is NULL memory will be allocated for a
   // buffer and the encoded data written to it. In this case *out is not
   //  incremented and it points to the start of the data just written.
-  int i = i2d_X509( ptX509result, oDer );
+  int nSize = i2d_X509( ptX509result, oDer );
 
-  CUChar oSha1 = (unsigned char*)malloc( SHA_DIGEST_LENGTH +1 );
-  if ( !SHA1( oDer, i, oSha1) )
+  CUChar oSha1 = (unsigned char*)malloc( SHA_DIGEST_LENGTH );
+  // Generates the SHA1 checksum from given DER certificate
+  if ( !SHA1( oDer, nSize, oSha1) )
     {
     throw CSocketException( "Couldn't create fingerprint for: " + rsName );
     }
 
-  char pszHex[ 64 ];
-  sprintf( pszHex, "%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X", 
+  // Sorry, this is, how it seems it must be. Building the HEX form of the
+  // fingerprint
+  char pszHexSha1[ 64 ];
+  sprintf( pszHexSha1, "%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X"
+                       "%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X", 
       ((unsigned char*)oSha1)[0x00],
       ((unsigned char*)oSha1)[0x01],
       ((unsigned char*)oSha1)[0x02],
@@ -142,9 +150,8 @@ std::string Fingerprint( const std::string& rsName )
       ((unsigned char*)oSha1)[0x12],
       ((unsigned char*)oSha1)[0x13] );
 
-  std::string sSha1 = pszHex;
-  std::cout << sSha1 << " for " << rsName << std::endl; 
-  return sSha1;
+  std::cout << pszHexSha1 << " for " << rsName << std::endl; 
+  return pszHexSha1;
   }
 
 
