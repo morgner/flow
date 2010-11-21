@@ -163,7 +163,7 @@ size_t CPartner::BuildContainers( const std::string& rsClientData )
     std::string s = rsClientData.substr(p1, p2-p1);
     std::cout << s << std::endl;
     // the first two chars of a line is the line content descriptor
-    if ( s.find("u:") == 0 )
+    if ( s.find("s:") == 0 )
       {
       poContainer = new CContainer;
       oContainerList.push_back( poContainer );

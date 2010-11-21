@@ -28,9 +28,12 @@
  ***************************************************************************/
 
 #include "pulex.h"
+#include "socketexception.h"
 
 #include <sys/time.h> // gettimeofday()
 
+#include <openssl/ssl.h>
+#include <openssl/x509.h>
 
 // stream operators to send the pulex out
 
@@ -88,6 +91,69 @@ const std::string& CPulex::UsernameGet() const
   }
 
 
+std::string Fingerprint( const std::string& rsName )
+  {
+  if ( !rsName.length() ) return "no-name";
+  std::cout << "name was: " << rsName << std::endl; 
+
+  std::string sFileName = "certificates/client/" + rsName + ".crt";
+  BIO* ptBio;
+  if ( (ptBio = ::BIO_new_file( sFileName.c_str(),"r")) == NULL)
+    {
+    ::BIO_free( ptBio );
+    return "naname-" + rsName;
+    throw CSocketException( "Couldn't open X509 file for: " + rsName );
+    }
+
+  X509* ptX509 = X509_new();
+  X509* ptX509result = PEM_read_bio_X509_AUX(ptBio, &ptX509, 0, 0);
+  ::BIO_free( ptBio );
+
+  unsigned char* aucDer = 0;
+  int i = i2d_X509( ptX509result, &aucDer );
+
+  unsigned char* pucSha1;
+  pucSha1 = (unsigned char*)malloc( SHA_DIGEST_LENGTH +1 );
+  if ( !SHA1( aucDer, i, pucSha1) )
+    {
+    free( aucDer );
+    X509_free( ptX509 );
+    throw CSocketException( "Couldn't create fingerprint for: " + rsName );
+    }
+
+  free( aucDer );
+  X509_free( ptX509 );
+
+  char pszHex[ 64 ];
+  sprintf( pszHex, "%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X", 
+      ((unsigned char*)pucSha1)[00],
+      ((unsigned char*)pucSha1)[01],
+      ((unsigned char*)pucSha1)[02],
+      ((unsigned char*)pucSha1)[03],
+      ((unsigned char*)pucSha1)[04],
+      ((unsigned char*)pucSha1)[05],
+      ((unsigned char*)pucSha1)[06],
+      ((unsigned char*)pucSha1)[07],
+      ((unsigned char*)pucSha1)[08],
+      ((unsigned char*)pucSha1)[09],
+      ((unsigned char*)pucSha1)[10],
+      ((unsigned char*)pucSha1)[11],
+      ((unsigned char*)pucSha1)[12],
+      ((unsigned char*)pucSha1)[13],
+      ((unsigned char*)pucSha1)[14],
+      ((unsigned char*)pucSha1)[15],
+      ((unsigned char*)pucSha1)[16],
+      ((unsigned char*)pucSha1)[17],
+      ((unsigned char*)pucSha1)[18],
+      ((unsigned char*)pucSha1)[19]
+       );
+
+  std::string sSha1 = pszHex;
+//  std::cout << "SHA1 of " << rsName << ".crt: " << sSha1 << " len: " << i << std::endl; 
+  return sSha1;
+  }
+
+
 // indicators to be used to transport the pulex
 const char* CPulex::scn_username       = "u";
 
@@ -96,12 +162,12 @@ template<typename T>
   T& CPulex::Send( T& roStream )
     {
     // content to manage the object if it's remote
-    roStream << scn_username      << ":" << UsernameGet()    << "\n";
-    roStream << scn_sender        << ":" << SenderGet()      << "\n";
+//    roStream << scn_username      << ":" << NameToDigest( UsernameGet() ) << "\n";
+    roStream << scn_sender        << ":" << Fingerprint( UsernameGet() ) << "\n";
 
     for ( CListString::iterator it=m_lsRecipients.begin(); it != m_lsRecipients.end(); ++it )
       if ( it->length() )
-        roStream << scn_recipient << ":" << *it << "\n";
+        roStream << scn_recipient << ":" << Fingerprint( *it ) << "\n";
 
     roStream << scn_local_id      << ":" << ClientSideIdGet() << "\n";
     roStream << scn_local_id_time << ":" << ClientSideTmGet() << "\n";
