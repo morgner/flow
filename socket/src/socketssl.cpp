@@ -541,8 +541,8 @@ bool CSocketSSL::InitializeSslCtx()
   // are trusted.
   bool bHasCaChain  = m_sFileCaChainTrust.length() > 0;
   bool bHasTrustDir = m_sPathCaTrust.length()      > 0;
-  std::cout << "CA chain :" << m_sFileCaChainTrust << std::endl;
-  std::cout << "CA path  :" << m_sPathCaTrust      << std::endl;
+  std::cout << "CA chain: " << m_sFileCaChainTrust << " " << bHasCaChain  << std::endl;
+  std::cout << "CA path : " << m_sPathCaTrust      << " " << bHasTrustDir << std::endl;
   if( ! ::SSL_CTX_load_verify_locations( m_ptSslCtx, 
                                (bHasCaChain)  ? m_sFileCaChainTrust.c_str() : 0,
                                (bHasTrustDir) ? m_sPathCaTrust.c_str()      : 0) )
@@ -633,8 +633,9 @@ bool CSocketSSL::CertificateCheck()
         sError = "Out of memory";
         break;
       case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
-        sError = "Self signed certificate and the certificate cannot be found "
-                 "in the list of trusted certificates";
+        sError.clear();
+//        sError = "Self signed certificate and the certificate cannot be found "
+//                 "in the list of trusted certificates";
         break;
       case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN:
         sError = "Self signed certificate in certificate chain";
@@ -684,7 +685,12 @@ bool CSocketSSL::CertificateCheck()
         break;
       default: sError = "Unknown Error #" + to_string(nResult);
       } // switch ( nResult )
-    throw CSocketException( "Certificate verification: " + sError );
+
+    // we don't abort the procedure if the error text is empty
+    if ( sError.length() )
+      {
+      throw CSocketException( "Certificate verification - " + sError );
+      }
     } // if ( nResult != X509_V_OK )
 
 

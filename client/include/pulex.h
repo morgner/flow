@@ -56,9 +56,6 @@ class CPulex : public CContainer // , public CListString
     static const std::string s_sClassName;
     static       long        s_nClientSideId;
 
-  protected:
-    std::string m_sUserName;    // name or alias of the user who uses the object
-
   public:
              CPulex();
     virtual ~CPulex();
@@ -67,15 +64,9 @@ class CPulex : public CContainer // , public CListString
 
             const std::string& operator << ( const std::string& rsData );
 
-    const std::string& UsernameSet( const std::string& rsUserName );
-    const std::string& UsernameGet() const;
-
   public:
     template<typename T>
       T& Send( T& roStream );
-
-  public:
-    static const char* scn_username;
 
   }; // class CPulex
 

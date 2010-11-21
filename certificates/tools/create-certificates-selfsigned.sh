@@ -31,7 +31,7 @@ for NAME in $*
   openssl rsa -pubout -in ${NAME}.key -out ${NAME}.pub
   done
 
-if [ $# ]
+if [ $# -lt 1 ]
   then
   echo "Usage: `basename $0` name1 name2 name3"
   fi

@@ -108,15 +108,10 @@ int main( int argc, char* argv[] )
   if ( bVerbose ) std::cout << "===pipe-end===" << std::endl << std::endl;
 
   /// putting together defaults and command line input for the Pulex and the server parameters
-  if ( g_oEnvironment.find("user")     != g_oEnvironment.end() )
-    poPulex->UsernameSet( g_oEnvironment["user"] );
-  else
-    poPulex->UsernameSet( "username" );
-
   if ( g_oEnvironment.find("sender")   != g_oEnvironment.end() )
     poPulex->SenderSet( g_oEnvironment["sender"] );
   else
-    poPulex->SenderSet( "sender" );
+    poPulex->SenderSet( getenv("LOGNAME") );
 
   poPulex->RecipientAdd( "recipient" );
 
@@ -129,13 +124,13 @@ int main( int argc, char* argv[] )
   if ( g_oEnvironment.find("port")     == g_oEnvironment.end() )  g_oEnvironment["port"]     = DEFAULT_PORT;
   if ( g_oEnvironment.find("password") == g_oEnvironment.end() )  g_oEnvironment["password"] = PASSWORD;
 
-  std::string sUserCert  = CRT_CLT_PATH + poPulex->UsernameGet() + ".crt";
-  std::string sUserKey   = CRT_CLT_PATH + poPulex->UsernameGet() + ".key";
+  std::string sSenderCrt = CRT_CLT_PATH + poPulex->SenderGet() + ".crt";
+  std::string sSenderKey = CRT_CLT_PATH + poPulex->SenderGet() + ".key";
   std::string sHostChain = CRT_HST_PATH  "cachain.pem";
   std::string sHostTPath = CRT_TRS_PATH;
 
-  if ( bVerbose ) std::cout << sUserCert  << std::endl;
-  if ( bVerbose ) std::cout << sUserKey   << std::endl;
+  if ( bVerbose ) std::cout << sSenderCrt << std::endl;
+  if ( bVerbose ) std::cout << sSenderKey << std::endl;
   if ( bVerbose ) std::cout << "*" << g_oEnvironment["password"] << "*" << std::endl;
   if ( bVerbose ) std::cout << sHostChain << std::endl;
   if ( bVerbose ) std::cout << sHostTPath << std::endl;
@@ -149,8 +144,8 @@ int main( int argc, char* argv[] )
     if ( bVerbose ) std::cout << " * PORT: " << g_oEnvironment["port"] << std::endl;
     CSocketClient oConnection( g_oEnvironment["host"],
                                g_oEnvironment["port"],
-                               sUserCert,
-                               sUserKey,
+                               sSenderCrt,
+                               sSenderKey,
                                g_oEnvironment["password"],
                                sHostChain,
                                sHostTPath );
@@ -201,8 +196,6 @@ void CEnvironment::Usage( int nStatus )
             << "                       default: localhost" << std::endl << std::endl
             << "  -p, --port           the port on the remote host to connect to" << std::endl
             << "                       default: 30000" << std::endl << std::endl
-            << "  -u, --user           the name of the user who owns the pulex" << std::endl
-            << "                       default: local user name" << std::endl << std::endl
             << "  -s, --sender         the alias to send the message from" << std::endl
             << "                       default: local user name" << std::endl << std::endl
             << "  -r, --recipient      the user name to send the message to" << std::endl

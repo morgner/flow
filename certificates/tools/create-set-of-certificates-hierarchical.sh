@@ -36,7 +36,7 @@ FLOWSERVER="localhost"
 FLOWSORGAN="'flow' Working Group"
 FLOWSCOUNT="CH"
 
-USER1="username"
+USER1=${LOGNAME}
 USER2="recipient"
 
 

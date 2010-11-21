@@ -79,22 +79,9 @@ const std::string& CPulex::operator << ( const std::string& rsData )
   }
 
 
-const std::string& CPulex::UsernameSet( const std::string& rsUserName )
-  {
-  return m_sUserName = rsUserName;
-  }
-
-
-const std::string& CPulex::UsernameGet() const
-  {
-  return m_sUserName;
-  }
-
-
 std::string Fingerprint( const std::string& rsName )
   {
   if ( !rsName.length() ) return "no-name";
-  std::cout << "name was: " << rsName << std::endl; 
 
   std::string sFileName = "certificates/client/" + rsName + ".crt";
   BIO* ptBio;
@@ -126,55 +113,54 @@ std::string Fingerprint( const std::string& rsName )
 
   char pszHex[ 64 ];
   sprintf( pszHex, "%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X", 
-      ((unsigned char*)pucSha1)[00],
-      ((unsigned char*)pucSha1)[01],
-      ((unsigned char*)pucSha1)[02],
-      ((unsigned char*)pucSha1)[03],
-      ((unsigned char*)pucSha1)[04],
-      ((unsigned char*)pucSha1)[05],
-      ((unsigned char*)pucSha1)[06],
-      ((unsigned char*)pucSha1)[07],
-      ((unsigned char*)pucSha1)[08],
-      ((unsigned char*)pucSha1)[09],
-      ((unsigned char*)pucSha1)[10],
-      ((unsigned char*)pucSha1)[11],
-      ((unsigned char*)pucSha1)[12],
-      ((unsigned char*)pucSha1)[13],
-      ((unsigned char*)pucSha1)[14],
-      ((unsigned char*)pucSha1)[15],
-      ((unsigned char*)pucSha1)[16],
-      ((unsigned char*)pucSha1)[17],
-      ((unsigned char*)pucSha1)[18],
-      ((unsigned char*)pucSha1)[19]
-       );
+      ((unsigned char*)pucSha1)[0x00],
+      ((unsigned char*)pucSha1)[0x01],
+      ((unsigned char*)pucSha1)[0x02],
+      ((unsigned char*)pucSha1)[0x03],
+      ((unsigned char*)pucSha1)[0x04],
+      ((unsigned char*)pucSha1)[0x05],
+      ((unsigned char*)pucSha1)[0x06],
+      ((unsigned char*)pucSha1)[0x07],
+      ((unsigned char*)pucSha1)[0x08],
+      ((unsigned char*)pucSha1)[0x09],
+      ((unsigned char*)pucSha1)[0x0A],
+      ((unsigned char*)pucSha1)[0x0B],
+      ((unsigned char*)pucSha1)[0x0C],
+      ((unsigned char*)pucSha1)[0x0D],
+      ((unsigned char*)pucSha1)[0x0E],
+      ((unsigned char*)pucSha1)[0x0F],
+      ((unsigned char*)pucSha1)[0x10],
+      ((unsigned char*)pucSha1)[0x11],
+      ((unsigned char*)pucSha1)[0x12],
+      ((unsigned char*)pucSha1)[0x13] );
 
   std::string sSha1 = pszHex;
-//  std::cout << "SHA1 of " << rsName << ".crt: " << sSha1 << " len: " << i << std::endl; 
+  std::cout << sSha1 << " for " << rsName << std::endl; 
   return sSha1;
   }
 
-
-// indicators to be used to transport the pulex
-const char* CPulex::scn_username       = "u";
 
 // generic stream sending methode
 template<typename T>
   T& CPulex::Send( T& roStream )
     {
-    // content to manage the object if it's remote
-//    roStream << scn_username      << ":" << NameToDigest( UsernameGet() ) << "\n";
-    roStream << scn_sender        << ":" << Fingerprint( UsernameGet() ) << "\n";
-
-    for ( CListString::iterator it=m_lsRecipients.begin(); it != m_lsRecipients.end(); ++it )
+    // information to manage the object if it's remote
+    roStream << scn_sender << ":" << Fingerprint( SenderGet() ) << "\n";
+    for ( CListString::iterator it  = m_lsRecipients.begin();
+                                it != m_lsRecipients.end();
+                              ++it )
+      {
       if ( it->length() )
+        {
         roStream << scn_recipient << ":" << Fingerprint( *it ) << "\n";
-
+        } // if ( it->length() )
+      } // for ( CListString::iterator it  = m_lsRecipients.begin();
     roStream << scn_local_id      << ":" << ClientSideIdGet() << "\n";
     roStream << scn_local_id_time << ":" << ClientSideTmGet() << "\n";
     roStream << scn_remote_id     << ":" << ServerSideIdGet() << "\n";
 
     roStream << "===== to encrypt =====" << "\n";
-    // content to encrypt - only for recipients
+    // content to encrypt for recipients
     roStream << scn_class_name    << ":" << ClassNameGet()   << "\n";
     for ( CPulex::iterator it=begin(); it != end(); ++it )
       {
