@@ -100,7 +100,7 @@ std::string Fingerprint( const std::string& rsName )
     }
 
   // Structured storage for a certificate
-  CX509 oX509;
+  CX509 oX509 = X509_new();
   // Reads a PEM certificate file, AUX is for PEM, without AUX DER is expected
   // ptX509result is the same as (X509*)oX509 = not to be deleted!
   X509* ptX509result = PEM_read_bio_X509_AUX( oBio, oX509, 0, 0 );
