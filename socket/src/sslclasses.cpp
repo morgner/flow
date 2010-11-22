@@ -1,7 +1,7 @@
 /***************************************************************************
- sslclasses.h description
+ sslclasses.cpp description
  -----------------------
- begin                 : Sun 21 11 2010
+ begin                 : Mon 22 11 2010
  copyright             : Copyright (C) 2010 by Manfred Morgner
  email                 : manfred@morgner.com
  ***************************************************************************/
@@ -36,12 +36,12 @@ void Delete( X509*& pt )
   X509_free( pt );
   }
 
-void Delete( RSA*&  pt )
+void Delete( RSA*& pt )
   {
-  RSA_free ( pt );
+  RSA_free( pt );
   }
 
-void Delete( BIO*&  pt )
+void Delete( BIO*& pt )
   {
-  BIO_free ( pt );
+  BIO_free( pt );
   }

@@ -54,7 +54,7 @@ template<typename T>
         
     public:
        TSslPointer( T* ptT = 0 ) { m_ptT = ptT; }
-      ~TSslPointer()         { Delete( m_ptT ); }
+      ~TSslPointer()             { Delete( m_ptT ); }
 
       T* operator =  ( T* ptT ) { Delete( m_ptT ); return m_ptT = ptT; }
       T& operator *  ()         { return *m_ptT; }
