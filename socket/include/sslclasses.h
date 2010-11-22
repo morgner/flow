@@ -31,7 +31,10 @@
 #ifndef _SSL_CLASSES_H
 #define _SSL_CLASSES_H
 
+#include <iostream>
 #include <openssl/ssl.h>
+
+
 template<typename T>
   class TSslPointer
     {
@@ -39,37 +42,61 @@ template<typename T>
       T* m_ptElement;
 
     public:
-      TSslPointer()         { m_ptElement = 0;  }
-      TSslPointer( T* ptT ) { m_ptElement = ptT; }
+       TSslPointer()         { m_ptElement = 0; }
+//     TSslPointer( T* ptT ) { m_ptElement = ptT; }
+//    ~TSslPointer()         { Free(); }
+      
+      T* operator =  ( T* ptT ) { Free(); return m_ptElement = ptT; }
+         operator T* () const   { return  m_ptElement; }
+         operator T**()         { return &m_ptElement; }
 
-      operator T*()  { return  m_ptElement; }
-      operator T**() { return &m_ptElement; }
-
-      bool isValid() { return m_ptElement != 0; }
+      virtual void Free() = 0;
+              bool isValid() const { return m_ptElement != 0; }
 
     }; // template<typename T> class TSslClass
 
 class CX509 : public TSslPointer< X509 >
   {
   public:
-     CX509() { m_ptElement = X509_new(); }
-     CX509( X509* ptX509 )  { m_ptElement = ptX509; }
-    ~CX509() { X509_free( m_ptElement ); }
+     CX509()               { m_ptElement = X509_new(); }
+     CX509( X509* ptX509 ) { m_ptElement = ptX509; }
+    ~CX509()               { Free(); }
+    
+    virtual void Free() { if ( isValid() ) { ::X509_free( m_ptElement ); m_ptElement = 0; } }
   }; // class CX509
 
 class CBio : public TSslPointer< BIO >
   {
   public:
-     CBio( BIO* ptBio )  { m_ptElement = ptBio; }
-    ~CBio() { BIO_free( m_ptElement ); }
+     CBio()             { m_ptElement = 0; }
+     CBio( BIO* ptBio ) { m_ptElement = ptBio; }
+    ~CBio()             { Free(); }
+    
+    virtual void Free() { if ( isValid() ) { ::BIO_free( m_ptElement ); m_ptElement = 0; } }
+  }; // class CBio
+
+class CRsa : public TSslPointer< RSA >
+  {
+  public:
+     CRsa()             { m_ptElement = RSA_new(); }
+     CRsa( RSA* ptRsa ) { m_ptElement = ptRsa; }
+    ~CRsa()             { Free(); }
+   
+    // RSA_free() frees the RSA structure and its components. The key is erased
+    // before the memory is returned to the system.
+    virtual void Free() { if ( isValid() ) { ::RSA_free( m_ptElement ); m_ptElement = 0; } }
   }; // class CCBio
+
+// typedef TSslPointer<unsigned char> CUChar;
 
 class CUChar : public TSslPointer< unsigned char >
   {
   public:
-     CUChar() { m_ptElement = 0; }
-     CUChar( unsigned char* ptUChar )  { m_ptElement = ptUChar; }
-    ~CUChar() { free( m_ptElement ); }
+     CUChar()                         { m_ptElement = 0; }
+     CUChar( unsigned char* ptUChar ) { m_ptElement = ptUChar; }
+    ~CUChar()                         { Free(); }
+    
+    virtual void Free() { if ( isValid() ) { free(m_ptElement); m_ptElement = 0; } }
   }; // class CUChar
 
 #endif // _SSL_CLASSES_H

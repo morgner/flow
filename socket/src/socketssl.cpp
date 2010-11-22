@@ -769,8 +769,6 @@ void CSocketSSL::LoadDHParameters( const std::string& sParamsFile )
 
 void CSocketSSL::GenerateEphRsaKey()
   {
-  RSA* ptRsa;
-
   // RSA *RSA_generate_key(int num, unsigned long e,
   //                       void (*callback)(int, int, void *), void *cb_arg);
   // Generates a key pair and returns it in a newly allocated RSA structure.
@@ -779,17 +777,13 @@ void CSocketSSL::GenerateEphRsaKey()
   // The modulus size will be num bits, and the public exponent will be e. Key
   // sizes with num < 1024 should be considered insecure. The exponent is an
   // odd number, typically 3, 17 or 65537.
-  ptRsa = ::RSA_generate_key( 512, RSA_F4, NULL, NULL );
+  CRsa oRsa = ::RSA_generate_key( 512, RSA_F4, NULL, NULL );
 
   // SSL_CTX_set_tmp_rsa() sets the temporary/ephemeral RSA key to be used to
   // be rsa. The key is inherited by all SSL objects newly created from ctx
   // with SSL_new(). Already created SSL objects are not affected.
-  if ( !SSL_CTX_set_tmp_rsa(m_ptSslCtx, ptRsa) )
+  if ( !SSL_CTX_set_tmp_rsa(m_ptSslCtx, (RSA*)oRsa) )
     {
     throw CSocketException( "Couldn't set RSA key" );
     }
-
-  // RSA_free() frees the RSA structure and its components. The key is erased
-  // before the memory is returned to the system.
-  ::RSA_free( ptRsa );
   } // void CSocketSSL::GenerateEphRsaKey()

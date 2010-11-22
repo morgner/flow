@@ -117,7 +117,7 @@ std::string Fingerprint( const std::string& rsName )
   //  incremented and it points to the start of the data just written.
   int nSize = i2d_X509( ptX509result, oDer );
 
-  CUChar oSha1 = (unsigned char*)malloc( SHA_DIGEST_LENGTH );
+  CUChar oSha1 = (unsigned char*)malloc(SHA_DIGEST_LENGTH);
   // Generates the SHA1 checksum from given DER certificate
   if ( !SHA1( oDer, nSize, oSha1) )
     {
@@ -126,9 +126,10 @@ std::string Fingerprint( const std::string& rsName )
 
   // Sorry, this is, how it seems it must be. Building the HEX form of the
   // fingerprint
-  char pszHexSha1[ 64 ];
-  sprintf( pszHexSha1, "%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X"
-                       "%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X", 
+  char pszHexSha1[ 41 ];
+  sprintf( pszHexSha1,
+     "%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X"
+     "%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X", 
       ((unsigned char*)oSha1)[0x00],
       ((unsigned char*)oSha1)[0x01],
       ((unsigned char*)oSha1)[0x02],
