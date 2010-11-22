@@ -61,7 +61,7 @@ class CX509 : public TSslPointer< X509 >
      CX509()               { m_ptElement = X509_new(); }
      CX509( X509* ptX509 ) { m_ptElement = ptX509; }
     ~CX509()               { Free(); }
-    
+
     virtual void Free() { if ( isValid() ) { ::X509_free( m_ptElement ); m_ptElement = 0; } }
   }; // class CX509
 
@@ -81,7 +81,7 @@ class CRsa : public TSslPointer< RSA >
      CRsa()             { m_ptElement = RSA_new(); }
      CRsa( RSA* ptRsa ) { m_ptElement = ptRsa; }
     ~CRsa()             { Free(); }
-   
+
     // RSA_free() frees the RSA structure and its components. The key is erased
     // before the memory is returned to the system.
     virtual void Free() { if ( isValid() ) { ::RSA_free( m_ptElement ); m_ptElement = 0; } }
@@ -95,7 +95,7 @@ class CUChar : public TSslPointer< unsigned char >
      CUChar()                         { m_ptElement = 0; }
      CUChar( unsigned char* ptUChar ) { m_ptElement = ptUChar; }
     ~CUChar()                         { Free(); }
-    
+
     virtual void Free() { if ( isValid() ) { free(m_ptElement); m_ptElement = 0; } }
   }; // class CUChar
 
