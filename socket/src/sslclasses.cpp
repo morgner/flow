@@ -30,18 +30,20 @@
 
 #include "sslclasses.h"
 
+template <>
+  void CX509::Delete( X509*& rpt )
+    {
+    X509_free( rpt );
+    }
 
-void Delete( X509*& pt )
-  {
-  X509_free( pt );
-  }
+template <>
+  void CRsa::Delete( RSA*& rpt )
+    {
+    RSA_free( rpt );
+    }
 
-void Delete( RSA*& pt )
-  {
-  RSA_free( pt );
-  }
-
-void Delete( BIO*& pt )
-  {
-  BIO_free( pt );
-  }
+template <>
+  void CBio::Delete( BIO*& rpt )
+    {
+    BIO_free( rpt );
+    }

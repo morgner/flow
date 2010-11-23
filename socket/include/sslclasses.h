@@ -35,17 +35,6 @@
 #include <openssl/ssl.h>
 
 
-void Delete( X509*& pt );
-void Delete( RSA*&  pt );
-void Delete( BIO*&  pt );
-
-template<typename T>
-  void Delete( T*& pt )
-    {
-    delete pt;
-    pt = 0;
-    }
-
 template<typename T>
   class TSslPointer
     {
@@ -63,12 +52,24 @@ template<typename T>
          operator T**()         { return &m_ptT; }
         
              bool isValid() { return m_ptT != 0; }
+      static void Delete( T*& rpt);
     }; // template<typename T> class TSslPointer
+
+template<typename T>
+  void TSslPointer<T>::Delete( T*& rpt )
+    {
+    delete rpt;
+    rpt = 0;
+    }
 
 
 typedef TSslPointer< X509 > CX509;
-typedef TSslPointer< RSA > CRsa;
-typedef TSslPointer< BIO > CBio;
+typedef TSslPointer< RSA >  CRsa;
+typedef TSslPointer< BIO >  CBio;
 typedef TSslPointer< unsigned char > CUChar;
+
+template<> void CX509::Delete( X509*& pt );
+template<> void CRsa::Delete ( RSA*&  pt );
+template<> void CBio::Delete ( BIO*&  pt );
 
 #endif // _SSL_CLASSES_H
