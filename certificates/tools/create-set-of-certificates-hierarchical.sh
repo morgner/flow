@@ -1,6 +1,5 @@
 #! /usr/bin/env bash
 
-#
 #  create-set-of-certificates-hierarchical.sh 
 #
 #  Copyright (C) 2010 by Manfred Morgner
@@ -13,6 +12,15 @@
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation; either version 2 of the License, or
 #  (at your option) any later version.
+# 
+#  The intermediate CAs require a file with the following content:
+# 
+#     [ v3_ca ]
+#     subjectKeyIdentifier   = hash
+#     authorityKeyIdentifier = keyid:always,issuer:always
+#     basicConstraints       = CA:true
+# 
+#  named 'v3_ca.conf' in the execution directory
 #  ---
 #
 #  Test a certificate
