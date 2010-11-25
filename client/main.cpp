@@ -39,10 +39,10 @@
 #define DEFAULT_HOST "localhost"
 #define DEFAULT_PORT "30000"
 
-#define CRT_CLT_PATH  "certificates/client/"
-#define CRT_HST_PATH  "certificates/server/"
-#define CRT_TRS_PATH  "certificates/trust/"
-#define PASSWORD      ""
+#define CRT_PATH  "certificates/client/"
+#define CA_CHAIN  "certificates/server/server-CA-chain.pem"
+#define CA_PATH   "certificates/trust/"
+#define PASSWORD  ""
 
 
 #include <stdlib.h> // for atoi(), exit()
@@ -57,17 +57,20 @@ int main( int argc, const char* argv[] )
   CEnvironment oEnvironment( argc, argv );
 
   /// these are the command line options                           
-  oEnvironment.OptionAppend( "help",      no_argument,       0, 'H', "Show this help text",                           "" );
-  oEnvironment.OptionAppend( "version",   no_argument,       0, 'V', "Show version information",                      "" );
-  oEnvironment.OptionAppend( "verbose",   no_argument,       0, 'v', "Act verbose",                                   "" );
-  oEnvironment.OptionAppend( "host",      required_argument, 0, 'h', "The host to conncet to",                        DEFAULT_HOST );
-  oEnvironment.OptionAppend( "port",      required_argument, 0, 'p', "The port to connect to",                        DEFAULT_PORT );
-  oEnvironment.OptionAppend( "sender",    required_argument, 0, 's', "Sender name or alias",                          "$LOGNAME" );
-  oEnvironment.OptionAppend( "password",  required_argument, 0, 'w', "Password for senders key",                      PASSWORD );
-  oEnvironment.OptionAppend( "recipient", required_argument, 0, 'r', "Recipients name or alias",                      "recipient" );
-  oEnvironment.OptionAppend( "message",   required_argument, 0, 'm', "The message",                                   "Hi there, I'm from far away" );
-  oEnvironment.OptionAppend( "cluid",     required_argument, 0, 'i', "Client side local ID (numeric) of the message", "1" );
-  oEnvironment.OptionAppend( "call",      optional_argument, 0, 'c', "Call message(s) from the server",               "" );
+  oEnvironment.OptionAppend( "help",        no_argument,       0, 'H', "Show this help text",                           "" );
+  oEnvironment.OptionAppend( "version",     no_argument,       0, 'V', "Show version information",                      "" );
+  oEnvironment.OptionAppend( "verbose",     no_argument,       0, 'v', "Act verbose",                                   "" );
+  oEnvironment.OptionAppend( "host",        required_argument, 0, 'h', "The host to conncet to",                        DEFAULT_HOST );
+  oEnvironment.OptionAppend( "port",        required_argument, 0, 'p', "The port to connect to",                        DEFAULT_PORT );
+  oEnvironment.OptionAppend( "sender",      required_argument, 0, 's', "Sender name or alias",                          "$LOGNAME" );
+  oEnvironment.OptionAppend( "password",    required_argument, 0, 'w', "Password for senders key",                      PASSWORD );
+  oEnvironment.OptionAppend( "recipient",   required_argument, 0, 'r', "Recipients name or alias",                      "recipient" );
+  oEnvironment.OptionAppend( "message",     required_argument, 0, 'm', "The message",                                   "Hi there, I'm from far away" );
+  oEnvironment.OptionAppend( "cluid",       required_argument, 0, 'i', "Client side local ID (numeric) of the message", "1" );
+  oEnvironment.OptionAppend( "cert-dir",    required_argument, 0, 'd', "Directory for trusted and client certificates", CRT_PATH );
+  oEnvironment.OptionAppend( "trust-chain", required_argument, 0, 'a', "Trusted CA chain",                              CA_CHAIN );
+  oEnvironment.OptionAppend( "trust-path",  required_argument, 0, 't', "Path to trusted certificates",                  CA_PATH );
+  oEnvironment.OptionAppend( "call",        optional_argument, 0, 'c', "Call message(s) from the server",               "" );
 
   /// we need to read the command line parameters
   oEnvironment.CommandlineRead();
@@ -107,22 +110,20 @@ int main( int argc, const char* argv[] )
   if ( bVerbose ) std::cout << "===pipe-end===" << std::endl << std::endl;
 
   /// putting together defaults and command line input for the Pulex and the server parameters
-    poPulex->SenderSet       ( oEnvironment["sender"] );
-    poPulex->RecipientAdd    ( oEnvironment["recipient"] );
-    poPulex->ClientSideIdSet ( atoi(oEnvironment["cluid"].c_str()) );
+  poPulex->SenderSet      ( oEnvironment["sender"] );
+  poPulex->RecipientAdd   ( oEnvironment["recipient"] );
+  poPulex->ClientSideIdSet( atoi(oEnvironment["cluid"].c_str()) );
 
-    *poPulex << oEnvironment["message"];
+  *poPulex << oEnvironment["message"];
 
-  std::string sSenderCrt = CRT_CLT_PATH + poPulex->SenderGet() + ".crt";
-  std::string sSenderKey = CRT_CLT_PATH + poPulex->SenderGet() + ".key";
-  std::string sHostChain = CRT_HST_PATH  "cachain.pem";
-  std::string sHostTPath = CRT_TRS_PATH;
+  std::string sSenderCrt = oEnvironment["cert-dir"] + poPulex->SenderGet() + ".crt";
+  std::string sSenderKey = oEnvironment["cert-dir"] + poPulex->SenderGet() + ".key";
 
   if ( bVerbose ) std::cout << sSenderCrt << std::endl;
   if ( bVerbose ) std::cout << sSenderKey << std::endl;
   if ( bVerbose ) std::cout << "*" << oEnvironment["password"] << "*" << std::endl;
-  if ( bVerbose ) std::cout << sHostChain << std::endl;
-  if ( bVerbose ) std::cout << sHostTPath << std::endl;
+  if ( bVerbose ) std::cout << oEnvironment["trust-chain"] << std::endl;
+  if ( bVerbose ) std::cout << oEnvironment["trust-path"]  << std::endl;
 
   if ( bVerbose ) std::cout << *poPulex << std::endl;
 
@@ -136,8 +137,8 @@ int main( int argc, const char* argv[] )
                                sSenderCrt,
                                sSenderKey,
                                oEnvironment["password"],
-                               sHostChain,
-                               sHostTPath );
+                               oEnvironment["trust-chain"],
+                               oEnvironment["trust-path"] );
 
     std::string sServerReply;
     /// iterate over all Pulexes in our Domain and let them jump

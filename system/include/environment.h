@@ -218,6 +218,7 @@ class CEnvironment : public std::map<std::string, std::string>
       {
       char* pcName = new char[rsName.length()+1];
       strncpy( pcName, rsName.c_str(), rsName.length() );
+      pcName[ rsName.length() ] = 0;
       option tOption = { pcName, nHasFlag, pnFlag, nVal } ;
       m_oOptions.Append( tOption, rsHelp, rsDefault);
       } // void OptionAppend ( const std::string&  rsName,
