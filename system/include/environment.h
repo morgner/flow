@@ -181,7 +181,7 @@ class CEnvironment : public std::map<std::string, std::string>
                         it != --end();
                       ++it, ++itH, ++itD)
             {
-            std::cout << "--" << it->name << ", -" << char(it->val) << space.substr( strlen(it->name) + 6 ) << *itH << std::endl;
+            std::cout << "-" << char(it->val) << ", --" << it->name << space.substr( strlen(it->name) + 6 ) << *itH << std::endl;
             if ( itD->length() )
               {
               std::cout << space << "default: " << *itD << std::endl;
@@ -252,8 +252,8 @@ class CEnvironment : public std::map<std::string, std::string>
 
     virtual void Usage()
       {
-      std::cout << ProgramNameGet() << " - carries your messages in protected mode" << std::endl;
-      std::cout << "Usage: " <<  ProgramNameGet() << " [OPTION]... [FILE]..." << std::endl;
+      std::cout << ProgramNameGet() << std::endl;
+      std::cout << "Usage: " <<  ProgramNameGet() << " [OPTION]..." << std::endl;
       std::cout << "Options:\n";
       m_oOptions.UsagePrint();
       } // virtual void Usage()

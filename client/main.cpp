@@ -56,18 +56,14 @@ int main( int argc, const char* argv[] )
   {
   CEnvironment oEnvironment( argc, argv );
 
-//  oEnvironment.OptionCallbackSet( OptionCallback );
-
-// static struct option const tOptions = { "help", no_argument, 0, 'H'};
-
   /// these are the command line options                           
   oEnvironment.OptionAppend( "help",      no_argument,       0, 'H', "Show this help text",                           "" );
   oEnvironment.OptionAppend( "version",   no_argument,       0, 'V', "Show version information",                      "" );
   oEnvironment.OptionAppend( "verbose",   no_argument,       0, 'v', "Act verbose",                                   "" );
-  oEnvironment.OptionAppend( "host",      required_argument, 0, 'h', "The host to conncet to",                        "localhost" );
-  oEnvironment.OptionAppend( "port",      required_argument, 0, 'p', "The port to connect to",                        "30000" );
+  oEnvironment.OptionAppend( "host",      required_argument, 0, 'h', "The host to conncet to",                        DEFAULT_HOST );
+  oEnvironment.OptionAppend( "port",      required_argument, 0, 'p', "The port to connect to",                        DEFAULT_PORT );
   oEnvironment.OptionAppend( "sender",    required_argument, 0, 's', "Sender name or alias",                          "$LOGNAME" );
-  oEnvironment.OptionAppend( "password",  required_argument, 0, 'w', "Password for senders key",                      "" );
+  oEnvironment.OptionAppend( "password",  required_argument, 0, 'w', "Password for senders key",                      PASSWORD );
   oEnvironment.OptionAppend( "recipient", required_argument, 0, 'r', "Recipients name or alias",                      "recipient" );
   oEnvironment.OptionAppend( "message",   required_argument, 0, 'm', "The message",                                   "Hi there, I'm from far away" );
   oEnvironment.OptionAppend( "cluid",     required_argument, 0, 'i', "Client side local ID (numeric) of the message", "1" );

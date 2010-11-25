@@ -37,17 +37,19 @@
 #include "socketserver.h"
 #include "socketexception.h"
 
+#include "environment.h"
+
 #include "partner.h"
 #include "container.h"
 
 #define SRV_HOST  "localhost"
 #define SRV_PORT  "30000"
-#define KEY_FILE  "certificates/client/localhost.key"
+#define KEY_FILE  "certificates/server/localhost.key"
 #define PASSWORD  ""
-#define CRT_FILE  "certificates/client/localhost.crt"
+#define CRT_FILE  "certificates/server/localhost.crt"
 #define CA_CHAIN  "certificates/server/server-CA-chain.pem"
 #define CA_PATH   "certificates/trust/"
-#define DHFILE    "dh1024.pem"
+#define DH_FILE   "dh1024.pem"
 
 
 long                 g_lLastRemoteId = 100;
@@ -64,17 +66,37 @@ CContainerMapByCLUID g_oContainerMapByCLUID;
  
  */
 
-int main ( int argc, char* argv[] )
+int main ( int argc, const char* argv[] )
   {
+  CEnvironment oEnvironment( argc, argv );
+
+  /// these are the command line options
+  oEnvironment.OptionAppend( "help",        no_argument,       0, 'H', "Show this help text",          "" );
+  oEnvironment.OptionAppend( "version",     no_argument,       0, 'V', "Show version information",     "" );
+  oEnvironment.OptionAppend( "verbose",     no_argument,       0, 'v', "Act verbose",                  "" );
+  oEnvironment.OptionAppend( "host",        required_argument, 0, 'h', "The host to conncet to",       SRV_HOST );
+  oEnvironment.OptionAppend( "port",        required_argument, 0, 'p', "The port to connect to",       SRV_PORT );
+  oEnvironment.OptionAppend( "cert",        required_argument, 0, 'c', "Server certificate",           CRT_FILE );
+  oEnvironment.OptionAppend( "key",         required_argument, 0, 'k', "Server key",                   KEY_FILE );
+  oEnvironment.OptionAppend( "password",    required_argument, 0, 'w', "Password for servers key",     PASSWORD );
+  oEnvironment.OptionAppend( "trust-chain", required_argument, 0, 'a', "Trusted CA chain",             CA_CHAIN );
+  oEnvironment.OptionAppend( "trust-path",  required_argument, 0, 't', "Path to trusted certificates", CA_PATH );
+  oEnvironment.OptionAppend( "dh-file",     required_argument, 0, 'd', "DH parameter file",            DH_FILE );
+
+  /// we need to read the command line parameters
+  oEnvironment.CommandlineRead();
+  /// for convienice we create a local shortcut to the environment value of 'isVerbose()'
+//  bool bVerbose = oEnvironment.find("verbose") != oEnvironment.end();
+
   try // server bind ...
     {
-    CSocketServer server( "localhost",
-                          "30000",
-                          "certificates/server/localhost.crt",
-                          "certificates/server/localhost.key",
-                          "",
-                          "certificates/client/cachain.pem",
-                          "certificates/trust/" );
+    CSocketServer server( oEnvironment["host"],
+                          oEnvironment["port"],
+                          oEnvironment["cert"],
+                          oEnvironment["key"],
+                          oEnvironment["password"],
+                          oEnvironment["trust-chain"],
+                          oEnvironment["trust-path"] );
 
     std::cout << "Waiting for clients..." << std::endl;
     while ( true )
