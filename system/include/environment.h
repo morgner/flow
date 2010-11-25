@@ -36,7 +36,7 @@
 bool OptionCallback(           char    c,        // short option (letter)
                     const std::string& rsName,   // long option (word)
                     const std::string& rsData,   // parameter data
-                    CEnvironment& roThis)        // the calling environment
+                    CEnvironment&      roThis)   // the calling environment
   {
   switch ( c )
     {
@@ -72,7 +72,10 @@ oEnvironment.OptionCallbackSet( OptionCallback );
 class CEnvironment : public std::map<std::string, std::string>
   {
   public:
-    typedef bool (*TOptionCallback)(char c, const std::string& rsName, const std::string& rsData, CEnvironment& roThis);
+    typedef bool (*TOptionCallback)(            char    c, 
+                                     const std::string& rsName,
+                                     const std::string& rsData,
+                                     CEnvironment&      roThis);
 
     class COptions : public std::vector<option>
       {
