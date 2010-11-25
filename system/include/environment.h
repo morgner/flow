@@ -242,7 +242,7 @@ class CEnvironment : public std::map<std::string, std::string>
         {
         if ( m_oOptions.hasShortOption(c) )
           {
-          OptionSet( c, m_oOptions.LongOptionByShortOption(c).c_str(), optarg );
+          OptionSet( c, m_oOptions.LongOptionByShortOption(c).c_str(), (optarg) ? optarg : "" );
           } // if ( m_oOptions.hasShortOption(c) )
         } // while ( (c = getopt_long ( m_nArgumentCount, ...
       } // void CommandlineRead ()
