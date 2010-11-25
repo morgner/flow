@@ -44,7 +44,7 @@ bool OptionCallback(           char    c,        // short option (letter)
       roThis[rsName] = "No5lives";
       return true;
     }
-    return false;
+  return false;
   }
 
 CEnvironment oEnvironment( argc, argv );
