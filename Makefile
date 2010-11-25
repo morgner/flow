@@ -1,8 +1,8 @@
 
 CC = clang
 
-SERVER_LIBS = -lflowsocket              -lflowcontainer -lc -lstdc++ -lpthread -lssl -lcrypto
-CLIENT_LIBS = -lflowsocket -lflowsystem -lflowcontainer -lc -lstdc++           -lssl -lcrypto
+SERVER_LIBS = -lflowsocket -lflowcontainer -lc -lstdc++ -lpthread -lssl -lcrypto
+CLIENT_LIBS = -lflowsocket -lflowcontainer -lc -lstdc++           -lssl -lcrypto
 
 SOCKET_PATH = socket
 SERVER_PATH = server
@@ -24,10 +24,6 @@ SOCKET_SRC=$(SOCKET_PATH)/src/socket.cpp $(SOCKET_PATH)/src/socketssl.cpp $(SOCK
 SOCKET_OBJ=$(SOCKET_SRC:.cpp=.o)
 SOCKET=libflowsocket.a
 
-SYSTEM_SRC=$(SYSTEM_PATH)/src/environment.cpp
-SYSTEM_OBJ=$(SYSTEM_SRC:.cpp=.o)
-SYSTEM=libflowsystem.a
-
 CNTAIN_SRC=$(CNTAIN_PATH)/src/container.cpp
 CNTAIN_OBJ=$(CNTAIN_SRC:.cpp=.o)
 CNTAIN=libflowcontainer.a
@@ -40,10 +36,9 @@ CLIENT_SRC=$(CLIENT_PATH)/src/pulex.cpp $(CLIENT_PATH)/src/domain.cpp $(CLIENT_P
 CLIENT_OBJ=$(CLIENT_SRC:.cpp=.o)
 CLIENT=flowclient
 
-all: $(SOCKET) $(SYSTEM) $(CNTAIN) $(SERVER) $(CLIENT)
+all: $(SOCKET) $(CNTAIN) $(SERVER) $(CLIENT)
 
 socket: $(SOCKET)
-system: $(SOCKET)
 container: $(SOCKET)
 client: $(SOCKET)
 server: $(SOCKET)
@@ -67,4 +62,4 @@ $(CLIENT): $(CLIENT_OBJ) $(SOCKET) $(SYSTEM)
 	$(CC) $(CFLAGS) $< -o $@ $(SOCKET_INC) $(SYSTEM_INC) $(CNTAIN_INC) $(SERVER_INC) $(CLIENT_INC)
 
 clean: 
-	rm -f $(SOCKET_OBJ) $(SYSTEM_OBJ) $(SERVER_OBJ) $(CLIENT_OBJ) $(SYSTEM) $(SOCKET) $(SERVER) $(CLIENT)
+	rm -f $(SOCKET_OBJ) $(SYSTEM_OBJ) $(SERVER_OBJ) $(CLIENT_OBJ) $(SOCKET) $(SERVER) $(CLIENT)

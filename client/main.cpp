@@ -27,8 +27,6 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "environment.h"
-
 #include "domain.h"
 #include "socketclient.h"
 #include "socketexception.h"
@@ -47,33 +45,38 @@
 #define PASSWORD      ""
 
 
-#include <getopt.h> // for static struct option
 #include <stdlib.h> // for atoi(), exit()
 #include <stdio.h>  // for EOF
 #include <fcntl.h>  // for fnctl()
 
-int main( int argc, char* argv[] )
+#include "environment.h"
+
+
+int main( int argc, const char* argv[] )
   {
-  /// these are the command line options
-  static struct option const tOptions[] =
-    {
-      { "help",      no_argument,       0, 'H'},
-      { "version",   no_argument,       0, 'V'},
-      { "verbose",   no_argument,       0, 'v'},
-      { "host",      required_argument, 0, 'h'},
-      { "port",      required_argument, 0, 'p'},
-      { "user",      required_argument, 0, 'u'},
-      { "sender",    required_argument, 0, 's'},
-      { "recipient", required_argument, 0, 'r'},
-      { "message",   required_argument, 0, 'm'},
-      { "cluid",     required_argument, 0, 'i'},
-      { "call",      optional_argument, 0, 'c'},
-      {  0,          0,                 0,  0 }
-    }; // struct tOptions
+  CEnvironment oEnvironment( argc, argv );
+
+//  oEnvironment.OptionCallbackSet( OptionCallback );
+
+// static struct option const tOptions = { "help", no_argument, 0, 'H'};
+
+  /// these are the command line options                           
+  oEnvironment.OptionAppend( "help",      no_argument,       0, 'H', "Show this help text", "" );
+  oEnvironment.OptionAppend( "version",   no_argument,       0, 'V', "Show version information", "" );
+  oEnvironment.OptionAppend( "verbose",   no_argument,       0, 'v', "Act verbose", "" );
+  oEnvironment.OptionAppend( "host",      required_argument, 0, 'h', "The host to conncet to", "localhost" );
+  oEnvironment.OptionAppend( "port",      required_argument, 0, 'p', "The port to connect to", "30000" );
+  oEnvironment.OptionAppend( "sender",    required_argument, 0, 's', "Sender name or alias", "$LOGNAME" );
+  oEnvironment.OptionAppend( "password",  required_argument, 0, 'w', "Password for senders key", "" );
+  oEnvironment.OptionAppend( "recipient", required_argument, 0, 'r', "Recipients name or alias", "recipient" );
+  oEnvironment.OptionAppend( "message",   required_argument, 0, 'm', "The message", "Hi there, I'm from far away" );
+  oEnvironment.OptionAppend( "cluid",     required_argument, 0, 'i', "Client side local ID (numeric) of the message", "1" );
+  oEnvironment.OptionAppend( "call",      optional_argument, 0, 'c', "Call message(s) from the server", "" );
+
   /// we need to read the command line parameters
-  g_oEnvironment.CommandlineRead( argc, argv, tOptions );
+  oEnvironment.CommandlineRead();
   /// for convienice we create a local shortcut to the environment value of 'isVerbose()'
-  bool bVerbose = g_oEnvironment.isVerbose();
+  bool bVerbose = oEnvironment.find("verbose") != oEnvironment.end();
 
   /// the real operation starts here
   CDomain oDomain;
@@ -108,24 +111,11 @@ int main( int argc, char* argv[] )
   if ( bVerbose ) std::cout << "===pipe-end===" << std::endl << std::endl;
 
   /// putting together defaults and command line input for the Pulex and the server parameters
-  if ( g_oEnvironment.find("sender")   != g_oEnvironment.end() )
-    poPulex->SenderSet( g_oEnvironment["sender"] );
-  else
-    poPulex->SenderSet( getenv("LOGNAME") );
+    poPulex->SenderSet       ( oEnvironment["sender"] );
+    poPulex->RecipientAdd    ( oEnvironment["recipient"] );
+    poPulex->ClientSideIdSet ( atoi(oEnvironment["cluid"].c_str()) );
 
-  if ( g_oEnvironment.find("sender")   != g_oEnvironment.end() )
-    poPulex->RecipientAdd( g_oEnvironment["recipient"] );
-  else
-    poPulex->RecipientAdd( "recipient" );
-
-  if ( g_oEnvironment.find("cluid")    != g_oEnvironment.end() )  poPulex->ClientSideIdSet ( atoi(g_oEnvironment["cluid"].c_str()) );
-  if ( g_oEnvironment.find("message")  != g_oEnvironment.end() ) 
-    *poPulex << g_oEnvironment["message"];
-  else
-    *poPulex << CPulex::s_sDefaultMessage;
-  if ( g_oEnvironment.find("host")     == g_oEnvironment.end() )  g_oEnvironment["host"]     = DEFAULT_HOST;
-  if ( g_oEnvironment.find("port")     == g_oEnvironment.end() )  g_oEnvironment["port"]     = DEFAULT_PORT;
-  if ( g_oEnvironment.find("password") == g_oEnvironment.end() )  g_oEnvironment["password"] = PASSWORD;
+    *poPulex << oEnvironment["message"];
 
   std::string sSenderCrt = CRT_CLT_PATH + poPulex->SenderGet() + ".crt";
   std::string sSenderKey = CRT_CLT_PATH + poPulex->SenderGet() + ".key";
@@ -134,7 +124,7 @@ int main( int argc, char* argv[] )
 
   if ( bVerbose ) std::cout << sSenderCrt << std::endl;
   if ( bVerbose ) std::cout << sSenderKey << std::endl;
-  if ( bVerbose ) std::cout << "*" << g_oEnvironment["password"] << "*" << std::endl;
+  if ( bVerbose ) std::cout << "*" << oEnvironment["password"] << "*" << std::endl;
   if ( bVerbose ) std::cout << sHostChain << std::endl;
   if ( bVerbose ) std::cout << sHostTPath << std::endl;
 
@@ -143,13 +133,13 @@ int main( int argc, char* argv[] )
   /// try to let all Pulexes jump to the server
   try
     {
-    if ( bVerbose ) std::cout << " * HOST: " << g_oEnvironment["host"] << std::endl;
-    if ( bVerbose ) std::cout << " * PORT: " << g_oEnvironment["port"] << std::endl;
-    CSocketClient oConnection( g_oEnvironment["host"],
-                               g_oEnvironment["port"],
+    if ( bVerbose ) std::cout << "HOST: " << oEnvironment["host"] << std::endl;
+    if ( bVerbose ) std::cout << "PORT: " << oEnvironment["port"] << std::endl;
+    CSocketClient oConnection( oEnvironment["host"],
+                               oEnvironment["port"],
                                sSenderCrt,
                                sSenderKey,
-                               g_oEnvironment["password"],
+                               oEnvironment["password"],
                                sHostChain,
                                sHostTPath );
 
@@ -185,30 +175,3 @@ int main( int argc, char* argv[] )
 
   return 0;
   } // int main( int argc, char* argv[] )
-
-/// print the normal console usage text to the console
-void CEnvironment::Usage( int nStatus )
-  {
-  std::cout << g_oEnvironment.ProgramNameGet() << " - carries your messages in protected mode" << std::endl;
-  std::cout << "Usage: " <<  g_oEnvironment.ProgramNameGet() << " [OPTION]... [FILE]..." << std::endl;
-  std::cout << "Options:\n"
-            << "  -H, --help           display this help and exit" << std::endl
-            << "  -V, --version        output version information and exit" << std::endl
-            << std::endl
-            << "  -h, --host           the host name or IP to send the message to" << std::endl
-            << "                       default: localhost" << std::endl << std::endl
-            << "  -p, --port           the port on the remote host to connect to" << std::endl
-            << "                       default: 30000" << std::endl << std::endl
-            << "  -s, --sender         the alias to send the message from" << std::endl
-            << "                       default: local user name" << std::endl << std::endl
-            << "  -r, --recipient      the user name to send the message to" << std::endl
-            << "                       default: 'recipient'" << std::endl
-            << std::endl
-            << "  -m, --message        the message" << std::endl
-            << "                       default: '" << CPulex::s_sDefaultMessage << "'" << std::endl
-            << std::endl
-            << "  -i, --cluid          force the use a specific client unique identifier" << std::endl
-            << "                       default: <automatic>" << std::endl << std::endl
-            ;
-  exit( nStatus );
-  } // void CEnvironment::Usage( int nStatus )
