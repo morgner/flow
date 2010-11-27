@@ -42,7 +42,7 @@ CContainer::CContainer()
 
 CContainer::~CContainer()
   {
-  std::cout << " ** destruction of " << RGUIDGet() << std::endl;
+//  std::cout << " ** destruction of " << RGUIDGet() << std::endl;
   }
 
 
@@ -149,7 +149,6 @@ std::string CContainer::RGUIDGet() const
   {
   std::ostringstream sout;
   sout << "RGUID"         << ":"
-       << m_sClass        << ":"
        << m_nClientSideId << ":"
        << m_tClientSideId << ":"
        << m_nServerSideId;
@@ -160,7 +159,6 @@ std::string CContainer::CLUIDGet() const
   {
   std::ostringstream sout;
   sout << "CLUID"         << ":"
-       << m_sClass        << ":"
        << m_sSender       << ":"
        << m_nClientSideId;
   return sout.str();
@@ -198,13 +196,11 @@ const std::string& CContainer::operator += ( const std::string& rsElement )
       {
       case 's': m_sSender               = rsElement.substr(2);   break;
       case 'e': m_lsRecipients.push_back( rsElement.substr(2) ); break;
-      case 'o': m_sClass                = rsElement.substr(2);   break;
       case 'l': m_nClientSideId         = atol( rsElement.substr(2).c_str() ); break;
       case 't': m_tClientSideId         = atol( rsElement.substr(2).c_str() ); break;
       case 'r': m_nServerSideId         = atol( rsElement.substr(2).c_str() ); break;
 
-      case 'x':
-      case 'b': push_back( rsElement.substr(2) );
+      case 'x': push_back( rsElement.substr(2) );
       }
 
   return rsElement;

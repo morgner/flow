@@ -32,6 +32,8 @@
 
 #include <pthread.h>
 
+extern bool g_bVerbose;
+
 class CPartner
   {
   protected:

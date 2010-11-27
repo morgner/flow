@@ -51,6 +51,7 @@
 #define CA_PATH   "certificates/trust/"
 #define DH_FILE   "dh1024.pem"
 
+bool g_bVerbose = false;
 
 long                 g_lLastRemoteId = 100;
 CContainerMapByCLUID g_oContainerMapByCLUID;
@@ -86,7 +87,7 @@ int main ( int argc, const char* argv[] )
   /// we need to read the command line parameters
   oEnvironment.CommandlineRead();
   /// for convienice we create a local shortcut to the environment value of 'isVerbose()'
-//  bool bVerbose = oEnvironment.find("verbose") != oEnvironment.end();
+  bool g_bVerbose = oEnvironment.find("verbose") != oEnvironment.end();
 
   try // server bind ...
     {
@@ -96,9 +97,10 @@ int main ( int argc, const char* argv[] )
                           oEnvironment["key"],
                           oEnvironment["password"],
                           oEnvironment["trust-chain"],
-                          oEnvironment["trust-path"] );
+                          oEnvironment["trust-path"],
+                          g_bVerbose );
 
-    std::cout << "Waiting for clients..." << std::endl;
+    if ( g_bVerbose ) std::cout << "Waiting for clients..." << std::endl;
     while ( true )
       {
       /// wait for a client

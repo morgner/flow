@@ -88,6 +88,8 @@ class CSocket
     static const int CLIENT_BACKLOG;
     static const int RECEIVE_BUFFER_SIZE;
 
+    static bool s_bVerbose;
+
     int       m_nSock;
     CBuffer   m_ovBuffer;
     CAddrInet m_tAddr;
@@ -96,7 +98,9 @@ class CSocket
   public:
              CSocket( const int nSock = INVALID_SOCKET );
     virtual ~CSocket();
-  
+
+            bool     VerboseSet( bool bVerbose );
+
     virtual void     Create ();
     virtual void     Bind   ( const int         nPort );
     virtual void     Listen ()                            const;

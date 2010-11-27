@@ -54,7 +54,7 @@ bool        CSocketSSL::s_bSslInitialized = false;
 // The password code is not thread safe
 int CSocketSSL::PasswordCallback( char *pszBuffer, int nBufferSize, int nRWFlag, void* pUserData )
   {
-  std::cout << "PasswordCallback called" << std::endl;
+  if ( s_bVerbose ) std::cout << "PasswordCallback called" << std::endl;
 
   std::string sPassword = reinterpret_cast<CSocketSSL*>(pUserData)->PasswordGet();
   if ( nBufferSize < (int)sPassword.length()+1 )
@@ -111,7 +111,7 @@ CSocketSSL::CSocketSSL( const CSocketSSL& src )
   // SSL_set_accept_state()
   // + We are the server, so the SSL Methode is 'accept'
   ::SSL_set_accept_state( m_ptSsl );
-  std::cout << "Configured SSL to server mode" << std::endl;
+  if ( s_bVerbose ) std::cout << "Configured SSL to server mode" << std::endl;
 
   // SL_CTX_set_verify() sets the verification flags for ctx to be mode and
   // specifies the verify_callback function to be used. If no callback function
@@ -127,7 +127,7 @@ CSocketSSL::CSocketSSL( const CSocketSSL& src )
   // + Client identification is done to ensure the client has a certificate
   // + and so will be able to read messages left for him here on our server.
   ::SSL_set_verify( m_ptSsl, SSL_VERIFY_PEER, VerifyCallback );
-  std::cout << "SSL mode set to verify to force the client to send his certificate" << std::endl;
+  if ( s_bVerbose ) std::cout << "SSL mode set to verify to force the client to send his certificate" << std::endl;
 
   int nResult;
   int nError = SSL_ERROR_WANT_READ;
@@ -139,17 +139,17 @@ CSocketSSL::CSocketSSL( const CSocketSSL& src )
   switch( nError )
     {      
     case SSL_ERROR_NONE:
-      std::cout << "Connection Accepted" << std::endl;
+      if ( s_bVerbose ) std::cout << "Connection Accepted" << std::endl;
       break;
 
     case SSL_ERROR_SSL:
       throw CSocketException( "SSL accept problem: SSL_ERROR_SSL" );
       break;
     case SSL_ERROR_WANT_READ:
-      std::cout << "SSL accept problem: SSL_ERROR_WANT_READ" << std::endl;
+      if ( s_bVerbose ) std::cout << "SSL accept problem: SSL_ERROR_WANT_READ" << std::endl;
       break;
     case SSL_ERROR_WANT_WRITE:
-      std::cout << "SSL accept problem: SSL_ERROR_WANT_WRITE" << std::endl;
+      if ( s_bVerbose ) std::cout << "SSL accept problem: SSL_ERROR_WANT_WRITE" << std::endl;
       break;
     case SSL_ERROR_SYSCALL:
       throw CSocketException( "SSL accept problem: SSL_ERROR_SYSCALL" );
@@ -203,21 +203,21 @@ CSocketSSL::CSocketSSL( const std::string& rsHost,
   {
   if( !s_bSslInitialized )
     {
-    std::cout << "Load OpenSSL tools" << std::endl;
+    if ( s_bVerbose ) std::cout << "Load OpenSSL tools" << std::endl;
 
     // Global system initialization
     ::SSL_library_init();
     ::SSL_load_error_strings();
 
     s_bSslInitialized = true;
-    std::cout << "Initialize SSL" << std::endl;
+    if ( s_bVerbose ) std::cout << "Initialize SSL" << std::endl;
     }
 
   InitializeSslCtx();
-  std::cout << "Initialized SSL Context" << std::endl;
+  if ( s_bVerbose ) std::cout << "Initialized SSL Context" << std::endl;
 
   LoadDHParameters(FILE_DH1024);
-  std::cout << "DH Parameters loaded" << std::endl;
+  if ( s_bVerbose ) std::cout << "DH Parameters loaded" << std::endl;
 
   } // CSocketSSL::CSocketSSL( const std::string& rsHost, ...
 
@@ -238,8 +238,8 @@ CSocket* CSocketSSL::Accept () const
 void CSocketSSL::Connect()
   {
   inherited::Connect( m_sHost, m_sPort );
-  std::cout << "Simple TCP/IP connection to " + m_sHost + ":" + m_sPort
-            << ", Socket: " << m_nSock << std::endl;
+  if ( s_bVerbose ) std::cout << "Simple TCP/IP connection to " + m_sHost + 
+                         ":" + m_sPort << ", Socket: " << m_nSock << std::endl;
 
   if ( !isValid() )
     {
@@ -261,7 +261,7 @@ void CSocketSSL::Connect()
     //   See: openssl ciphers -tls1
     ::SSL_CTX_set_cipher_list( m_ptSslCtx, s_sCiphers.c_str() );
     }
-  std::cout << "Selected cipher list" << std::endl;
+  if ( s_bVerbose ) std::cout << "Selected cipher list" << std::endl;
 
 /* only server == here invalid
   int s_server_session_id_context = 1;
@@ -275,7 +275,7 @@ void CSocketSSL::Connect()
   // underlying context ctx: connection method (SSLv2/v3/TLSv1), options,
   // verification settings, timeout settings.
   m_ptSsl = ::SSL_new( m_ptSslCtx );
-  std::cout << "Created new SSL Context" << std::endl;
+  if ( s_bVerbose ) std::cout << "Created new SSL Context" << std::endl;
 
   // When the SSL_CTX object was created with SSL_CTX_new(3), it was either
   // assigned a dedicated client method, a dedicated server method, or a generic
@@ -286,12 +286,12 @@ void CSocketSSL::Connect()
   // be explicitly set in advance using either SSL_set_connect_state() or
   // SSL_set_accept_state()
   ::SSL_set_connect_state( m_ptSsl );
-  std::cout << "Configured SSL to client mode" << std::endl;
+  if ( s_bVerbose ) std::cout << "Configured SSL to client mode" << std::endl;
 
   // BIO_new_socket() returns a socket BIO using sock and close_flag. 
   // It returns the newly allocated BIO or NULL is an error occurred.
   BIO* ptSbio = ::BIO_new_socket( m_nSock, BIO_NOCLOSE );
-  std::cout << "Created SocketBIO" << std::endl;
+  if ( s_bVerbose ) std::cout << "Created SocketBIO" << std::endl;
 
   // SSL_set_bio() connects the BIOs rbio and wbio for the read and write
   // operations of the TLS/SSL (encrypted) side of ssl.
@@ -300,7 +300,7 @@ void CSocketSSL::Connect()
   // If there was already a BIO connected to ssl, BIO_free() will be called (for
   // both the reading and writing side, if different).
   ::SSL_set_bio( m_ptSsl, ptSbio, ptSbio );
-  std::cout << "Associated BIO with SSL" << std::endl;
+  if ( s_bVerbose ) std::cout << "Associated BIO with SSL" << std::endl;
 
   // Initiates the TLS/SSL handshake with a server. The communication channel
   // must already have been set and assigned to the ssl by setting an underlying
@@ -309,7 +309,7 @@ void CSocketSSL::Connect()
     {
     throw CSocketException("SSL_connect() error connecting to " + m_sHost);
     }
-  std::cout << "Connected with SSL" << std::endl;
+  if ( s_bVerbose ) std::cout << "Connected with SSL" << std::endl;
 
   // SSL_do_handshake() will wait for a SSL/TLS handshake to take place. If the
   // connection is in client mode, the handshake will be started. The handshake
@@ -317,11 +317,11 @@ void CSocketSSL::Connect()
   // SSL_set_connect_state() or SSL_set_accept_state().
   ::SSL_do_handshake( m_ptSsl );
 
-  if ( !CertificateCheck() )
+  if ( s_bVerbose && !CertificateCheck() )
     {
     std::cout << " ** Certificate did not pass check" << std::endl;
     }
-  std::cout << "Host is ok" << std::endl;
+  if ( s_bVerbose ) std::cout << "Host is ok" << std::endl;
   } // void CSocketSSL::Connect()
 
 
@@ -334,7 +334,7 @@ void CSocketSSL::Close()
   int nResult = ::SSL_shutdown( m_ptSsl );
   if( nResult != 1 )
     {
-    std::cout << "SSL_shutdown first  result: " << nResult << std::endl;
+    if ( s_bVerbose ) std::cout << "SSL_shutdown first  result: " << nResult << std::endl;
     // destroys the socket (?) after sending FIN/ACK regardless of the usage counter 
     ::shutdown( m_nSock, SHUT_RDWR );
     nResult = ::SSL_shutdown( m_ptSsl );
@@ -343,12 +343,12 @@ void CSocketSSL::Close()
   switch( nResult )
     {  
     case  1:
-      std::cout << "SSL_shutdown completed successful" << std::endl;
+      if ( s_bVerbose ) std::cout << "SSL_shutdown completed successful" << std::endl;
       break; // ok both sides negotiated the shutdown status (not neccessary)
     case  0:
     case -1:
     default:
-      std::cout << "SSL_shutdown second result: " << nResult << std::endl;
+      if ( s_bVerbose ) std::cout << "SSL_shutdown second result: " << nResult << std::endl;
 //      throw CSocketException("Shutdown failed");
       break;
     }
@@ -426,7 +426,7 @@ size_t CSocketSSL::Send( const std::string& s ) const
   switch( ::SSL_get_error(m_ptSsl, nError) )
     {      
     case SSL_ERROR_NONE:
-      if ( s.length() != nResult )
+      if ( s_bVerbose && s.length() != nResult )
         {
         std::cout << "Incomplete write!" << std::endl;
         }
@@ -502,7 +502,7 @@ bool CSocketSSL::InitializeSslCtx()
   // SSL_CTX_new() creates a new SSL_CTX object as framework to establish
   // TLS/SSL enabled connections.
   m_ptSslCtx = ::SSL_CTX_new( ptMethode );
-  std::cout << "SSL Context created" << std::endl;
+  if ( s_bVerbose ) std::cout << "SSL Context created" << std::endl;
 
   // loads a certificate chain from file into ctx. The certificates must be in
   // PEM format and must be sorted starting with the subject's certificate
@@ -514,7 +514,7 @@ bool CSocketSSL::InitializeSslCtx()
     {
     throw CSocketException("Can't read certificate file: " + m_sFileCertificate);
     }
-  std::cout << "Read certificate file: " + m_sFileCertificate << std::endl;
+  if ( s_bVerbose ) std::cout << "Read certificate file: " + m_sFileCertificate << std::endl;
 
   // sets the default password callback called when loading/storing a
   // PEM certificate with encryption.
@@ -534,23 +534,21 @@ bool CSocketSSL::InitializeSslCtx()
     {
     throw CSocketException("Can't read key file");
     }
-  std::cout << "Read key file" << std::endl;
+  if ( s_bVerbose ) std::cout << "Read key file" << std::endl;
 
   // Specifies the locations for ctx, at which CA certificates for verification
   // purposes are located. The certificates available via CAfile and CApath
   // are trusted.
   bool bHasCaChain  = m_sFileCaChainTrust.length() > 0;
   bool bHasTrustDir = m_sPathCaTrust.length()      > 0;
-  std::cout << "CA chain: " << m_sFileCaChainTrust << " " << bHasCaChain  << std::endl;
-  std::cout << "CA path : " << m_sPathCaTrust      << " " << bHasTrustDir << std::endl;
   if( ! ::SSL_CTX_load_verify_locations( m_ptSslCtx, 
                                (bHasCaChain)  ? m_sFileCaChainTrust.c_str() : 0,
                                (bHasTrustDir) ? m_sPathCaTrust.c_str()      : 0) )
     {
     throw CSocketException("Can't read CA list");
     }
-  std::cout << "Read verify CA chain :" << m_sFileCaChainTrust << std::endl;
-  std::cout << "Read verify CA path  :" << m_sPathCaTrust      << std::endl;
+  if ( s_bVerbose ) std::cout << "Read verify CA chain :" << m_sFileCaChainTrust << std::endl;
+  if ( s_bVerbose ) std::cout << "Read verify CA path  :" << m_sPathCaTrust      << std::endl;
 
   return true;
   } // bool CSocketSSL::InitializeSslCtx()

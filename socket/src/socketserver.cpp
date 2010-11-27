@@ -41,7 +41,8 @@ CSocketServer::CSocketServer( const std::string& rsHost,
                               const std::string& rsFileKey,
                               const std::string& rsPassword,
                               const std::string& rsFileCaChainTrust,
-                              const std::string& rsPathCaTrust )
+                              const std::string& rsPathCaTrust,
+                                         bool     bVerbose )
   : CSocketSSL( rsHost,
                 rsPort,
                 rsFileCertificate,
@@ -50,6 +51,7 @@ CSocketServer::CSocketServer( const std::string& rsHost,
                 rsFileCaChainTrust,
                 rsPathCaTrust )
   {
+  VerboseSet( bVerbose );
   Create();
   Bind( atoi( rsPort.c_str() ) );
   Listen();

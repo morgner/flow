@@ -34,6 +34,7 @@
 
 #include <iostream>
 
+
 // thread funciton performing client communication
 // the used object is left free into the open space,
 // so at the end of the thread, the used object is
@@ -56,11 +57,13 @@ CPartner::CPartner()
   pthread_mutex_init( &m_tMutex, 0 );
   }
 
+
 CPartner::~CPartner()
   {
   pthread_mutex_destroy(&m_tMutex);
   delete m_poSocket;
   } // CPartner::~CPartner()
+
 
 // start the thread
 void CPartner::Communicate( CSocket* poSocket ) 
@@ -74,6 +77,7 @@ void CPartner::Communicate( CSocket* poSocket )
     this->~CPartner();
     }  
   }
+
 
 // stopp the thread
 void CPartner::Stop()
@@ -99,7 +103,7 @@ void CPartner::Action()
       }
     catch ( CSocketException& e)
       {
-      std::cout << "Exception: " << e.Info() << std::endl;
+      std::cout << "ERROR: " << e.Info() << std::endl;
       if ( e.isFatal() ) break;
       }
     sClientData += sInput;
@@ -161,7 +165,7 @@ size_t CPartner::BuildContainers( const std::string& rsClientData )
        p1 = p2+1)
     {
     std::string s = rsClientData.substr(p1, p2-p1);
-    std::cout << s << std::endl;
+    if ( g_bVerbose ) std::cout << s << std::endl;
     // the first two chars of a line is the line content descriptor
     if ( s.find("s:") == 0 )
       {
@@ -182,28 +186,28 @@ size_t CPartner::BuildContainers( const std::string& rsClientData )
     if ( itf != g_oContainerMapByCLUID.end() )
       {
       (*it)->ServerSideIdSet( itf->second->ServerSideIdGet() );
-      std::cout << "replacing: " << sKey << " by " << (*it)->RGUIDGet() << "\n";
+      if ( g_bVerbose ) std::cout << "replacing: " << sKey << " by " << (*it)->RGUIDGet() << "\n";
       delete itf->second;
       g_oContainerMapByCLUID.erase(itf);
       }
     else
       {
-      std::cout << "appending: " << sKey << " as ";
+      if ( g_bVerbose ) std::cout << "appending: " << sKey << " as ";
       (*it)->ServerSideIdSet( to_string(++g_lLastRemoteId) );
-      std::cout << (*it)->RGUIDGet() << "\n";
+      if ( g_bVerbose ) std::cout << (*it)->RGUIDGet() << std::endl;
       }
     g_oContainerMapByCLUID[ sKey ] = *it;
 
     for ( CListString::iterator its=(*it)->begin(); its != (*it)->end(); ++its )
       {
-      std::cout << " *** " << *its << std::endl;
+      if ( g_bVerbose ) std::cout << " *** " << *its << std::endl;
       }
 
     pthread_mutex_unlock( &m_tMutex );
     }
 
-  std::cout << oContainerList.size() << " elements received ";
-  std::cout << g_oContainerMapByCLUID.size() << " elements total here." << std::endl;
+  if ( g_bVerbose ) std::cout << oContainerList.size() << " elements received ";
+  if ( g_bVerbose ) std::cout << g_oContainerMapByCLUID.size() << " elements total here." << std::endl;
   /* 
    for ( CContainerMapByCLUID::iterator it = g_oContainerMapByCLUID.begin(); 
    it != g_oContainerMapByCLUID.end(); 
