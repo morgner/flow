@@ -177,7 +177,7 @@ template<typename T>
 
     roStream << "===== to encrypt =====" << "\n";
     // content to encrypt for recipients
-    roStream << scn_class_name    << ":" << ClassNameGet()   << "\n";
+    roStream << scn_content_text << ":" << ClassNameGet()   << "\n";
     for ( CPulex::iterator it=begin(); it != end(); ++it )
       {
       // with SSL the server breaks down if '*it' is empty but piped from the client

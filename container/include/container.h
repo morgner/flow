@@ -86,12 +86,10 @@ class CContainer : public CListString
     static const char* scn_sender;
     static const char* scn_recipient;
     static const char* scn_destination;
-    static const char* scn_class_name;
     static const char* scn_local_id;
     static const char* scn_local_id_time;
     static const char* scn_remote_id;
     static const char* scn_content_text;
-    static const char* scn_content_binary;
 
   }; // class CContainer
 

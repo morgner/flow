@@ -181,12 +181,10 @@ bool CContainer::isFor( const std::string& rsRecipient )
 // indicators to be used to transport the pulex
 const char* CContainer::scn_sender         = "s";
 const char* CContainer::scn_recipient      = "e";
-const char* CContainer::scn_class_name     = "o";
 const char* CContainer::scn_local_id       = "l";
 const char* CContainer::scn_local_id_time  = "t";
 const char* CContainer::scn_remote_id      = "r";
 const char* CContainer::scn_content_text   = "x";
-const char* CContainer::scn_content_binary = "b";
 
 // e.g. "c:PULEX", "x:please read", "x:the manual"
 const std::string& CContainer::operator += ( const std::string& rsElement )
