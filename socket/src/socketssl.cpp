@@ -33,6 +33,9 @@
 
 #include <iostream>
 
+#include <openssl/rand.h>
+#include <fcntl.h> // open, read, close
+
 #define FILE_DH1024 "certificates/dh1024.pem"
 
 
@@ -723,6 +726,20 @@ const std::string& CSocketSSL::PasswordGet() const
   } // const std::string& CSocketSSL::PasswordGet() const
 
 
+// We try to call some random numbers. If it fails, we do nothing. This may
+// seem to be a bit odd, but perhaps, there are already random data in the
+// buffer after allocating it?
+void CSocketSSL::RandomGet( char* pcBuffer, int nBufferSize )
+  {
+  int fh = open( "/dev/urandom", 'r' );
+  if ( fh != -1 )
+    {
+    read( fh, pcBuffer, nBufferSize );
+    close( fh );
+    }
+  } // void CSocketSSL::RandomGet( ... )
+
+
 /* -------------------------
 
        SERVER SPECIFIC
@@ -765,13 +782,16 @@ void CSocketSSL::LoadDHParameters( const std::string& sParamsFile )
     }
   } // void CSocketSSL::LoadDHParameters( SSL_CTX* ptSslCtx, const std::...)
 
+// Generating a SSL session key
 void CSocketSSL::GenerateEphRsaKey()
   {
   // RSA *RSA_generate_key(int num, unsigned long e,
   //                       void (*callback)(int, int, void *), void *cb_arg);
   // Generates a key pair and returns it in a newly allocated RSA structure.
   // The pseudo-random number generator must be seeded prior to calling RSA_generate_key().
-  srand ( time(0) );
+  char acRandom[RANDOM_BUFFER_SIZE];
+  RandomGet( acRandom, sizeof(acRandom) );
+  RAND_seed( acRandom, sizeof(acRandom) );
   // The modulus size will be num bits, and the public exponent will be e. Key
   // sizes with num < 1024 should be considered insecure. The exponent is an
   // odd number, typically 3, 17 or 65537.

@@ -38,6 +38,9 @@
 
 #include <openssl/ssl.h>
 
+// Optional, may be used to declare local buffers for random gathering/seeding
+#define RANDOM_BUFFER_SIZE 1024
+
 class CSocketSSL : public CSocket
   {
   private:
@@ -92,8 +95,11 @@ class CSocketSSL : public CSocket
            const std::string& PasswordGet     () const;
     static       int          PasswordCallback( char* pszBuffer, int nBufferSize, int nRWFlag, void* pUserData );
 
+    // SSL specific
 
-  // server specific
+    void RandomGet( char* pcBuffer, int nBufferSize );
+
+    // server specific
 
     void LoadDHParameters ( const std::string& sParamsFile );
     void GenerateEphRsaKey();
