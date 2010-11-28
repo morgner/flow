@@ -731,7 +731,7 @@ const std::string& CSocketSSL::PasswordGet() const
 // buffer after allocating it?
 void CSocketSSL::RandomGet( char* pcBuffer, int nBufferSize )
   {
-  int fh = open( "/dev/urandom", 'r' );
+  int fh = open( "/dev/urandom", O_RDONLY );
   if ( fh != -1 )
     {
     read( fh, pcBuffer, nBufferSize );
