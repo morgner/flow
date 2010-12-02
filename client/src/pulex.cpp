@@ -140,33 +140,12 @@ std::string Fingerprint( const std::string& rsName )
     throw CSocketException( "Couldn't create fingerprint for: " + rsName );
     }
 
-  // Sorry, this is, how it seems it must be. Building the HEX form of the
-  // fingerprint
+  // Building the ASCII-HEX form of the fingerprint
   char pszHexSha1[ 41 ];
-  sprintf( pszHexSha1,
-     "%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X"
-     "%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X", 
-      ((unsigned char*)oSha1)[0x00],
-      ((unsigned char*)oSha1)[0x01],
-      ((unsigned char*)oSha1)[0x02],
-      ((unsigned char*)oSha1)[0x03],
-      ((unsigned char*)oSha1)[0x04],
-      ((unsigned char*)oSha1)[0x05],
-      ((unsigned char*)oSha1)[0x06],
-      ((unsigned char*)oSha1)[0x07],
-      ((unsigned char*)oSha1)[0x08],
-      ((unsigned char*)oSha1)[0x09],
-      ((unsigned char*)oSha1)[0x0A],
-      ((unsigned char*)oSha1)[0x0B],
-      ((unsigned char*)oSha1)[0x0C],
-      ((unsigned char*)oSha1)[0x0D],
-      ((unsigned char*)oSha1)[0x0E],
-      ((unsigned char*)oSha1)[0x0F],
-      ((unsigned char*)oSha1)[0x10],
-      ((unsigned char*)oSha1)[0x11],
-      ((unsigned char*)oSha1)[0x12],
-      ((unsigned char*)oSha1)[0x13] );
-
+  for ( int n = 0; n < 20; n++ )
+    {
+    sprintf( &pszHexSha1[ n << 1 ], "%02X", ((unsigned char*)oSha1)[ n ] );
+    }
   std::cout << pszHexSha1 << " for " << rsName << std::endl; 
   return pszHexSha1;
   }
