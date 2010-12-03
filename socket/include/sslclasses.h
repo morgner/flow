@@ -72,6 +72,6 @@ typedef TSslPointer< EVP_PKEY >      CEvpPkey;
 template<> void CX509::Delete( X509*& rpt );
 template<> void CRsa::Delete( RSA*& rpt );
 template<> void CBio::Delete( BIO*& rpt );
-template<> void CEvpPkey::Delete ( EVP_PKEY*& rpt );
+template<> void CEvpPkey::Delete( EVP_PKEY*& rpt );
 
 #endif // _SSL_CLASSES_H
