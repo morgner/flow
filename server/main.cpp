@@ -42,6 +42,8 @@
 #include "partner.h"
 #include "container.h"
 
+#include <openssl/err.h>
+
 #define SRV_HOST  "localhost"
 #define SRV_PORT  "30000"
 #define KEY_FILE  "certificates/server/localhost.key"
@@ -89,6 +91,7 @@ int main ( int argc, const char* argv[] )
   /// for convienice we create a local shortcut to the environment value of 'isVerbose()'
   bool g_bVerbose = oEnvironment.find("verbose") != oEnvironment.end();
 
+  ERR_load_crypto_strings(); // or: SSL_load_error_strings();
   try // server bind ...
     {
     CSocketServer server( oEnvironment["host"],
@@ -119,6 +122,7 @@ int main ( int argc, const char* argv[] )
     {
     std::cout << "Exception: " << e.Info() << "\nExiting.\n";
     } // catch  -  server bind ...
+  ERR_free_strings();
   
   return 0;
   } // main

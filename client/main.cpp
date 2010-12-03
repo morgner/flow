@@ -51,6 +51,7 @@
 
 #include "environment.h"
 
+#include <openssl/err.h>
 
 int main( int argc, const char* argv[] )
   {
@@ -128,6 +129,8 @@ int main( int argc, const char* argv[] )
   if ( bVerbose ) std::cout << *poPulex << std::endl;
 
   /// try to let all Pulexes jump to the server
+
+  ERR_load_crypto_strings(); // or: SSL_load_error_strings();
   try
     {
     if ( bVerbose ) std::cout << "HOST: " << oEnvironment["host"] << std::endl;
@@ -169,6 +172,7 @@ int main( int argc, const char* argv[] )
     {
     std::cout << "Exception: " << e.Info() << "\n";
     }
+  ERR_free_strings();
 
   return 0;
   } // int main( int argc, char* argv[] )
