@@ -48,8 +48,13 @@ openssl s_client -connect localhost:30000 \
                  -tls1 -verify 3
 
 
+extract the public key from private key
+---------------------------------------
+openssl rsa -pubout -in username.key
 
-openssl rsa -pubout -in username.key 
+extract the public key from certificate
+---------------------------------------
+openssl x509 -pubkey -in username.crt -noout
 
 openssl x509 -md5 -noout -in username.crt -fingerprint
 openssl dgst -md5 username.key

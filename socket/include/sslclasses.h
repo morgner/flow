@@ -63,13 +63,15 @@ template<typename T>
     }
 
 
-typedef TSslPointer< X509 > CX509;
-typedef TSslPointer< RSA >  CRsa;
-typedef TSslPointer< BIO >  CBio;
+typedef TSslPointer< X509 >          CX509;
+typedef TSslPointer< RSA >           CRsa;
+typedef TSslPointer< BIO >           CBio;
 typedef TSslPointer< unsigned char > CUChar;
+typedef TSslPointer< EVP_PKEY >      CEvpPkey;
 
-template<> void CX509::Delete( X509*& pt );
-template<> void CRsa::Delete ( RSA*&  pt );
-template<> void CBio::Delete ( BIO*&  pt );
+template<> void CX509::Delete( X509*& rpt );
+template<> void CRsa::Delete( RSA*& rpt );
+template<> void CBio::Delete( BIO*& rpt );
+template<> void CEvpPkey::Delete ( EVP_PKEY*& rpt );
 
 #endif // _SSL_CLASSES_H

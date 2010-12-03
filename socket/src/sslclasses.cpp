@@ -47,3 +47,9 @@ template <>
     {
     BIO_free( rpt );
     }
+
+template <>
+  void CEvpPkey::Delete ( EVP_PKEY*& rpt )
+    {
+    EVP_PKEY_free( rpt );
+    }
