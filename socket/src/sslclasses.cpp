@@ -1,5 +1,5 @@
 /***************************************************************************
- sslclasses.cpp description
+ sslclasses.cpp
  -----------------------
  begin                 : Mon 22 11 2010
  copyright             : Copyright (C) 2010 by Manfred Morgner
@@ -46,6 +46,12 @@ template <>
   void CBio::Delete( BIO*& rpt )
     {
     BIO_free( rpt );
+    }
+
+template <>
+  void CUChar::Delete( unsigned char*& rpt )
+    {
+    delete rpt;
     }
 
 template <>

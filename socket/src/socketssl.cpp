@@ -764,7 +764,7 @@ void CSocketSSL::LoadDHParameters( const std::string& sParamsFile )
   // BIO_new_file() creates a new file BIO with mode mode the meaning of mode
   // is the same as the stdio function fopen(). The BIO_CLOSE flag is set on
   // the returned BIO.
-  if ( (ptBio = ::BIO_new_file(sParamsFile.c_str(), "r")) == NULL)
+  if ( (ptBio = ::BIO_new_file(sParamsFile.c_str(), "r")) == NULL )
     {
     throw CSocketException( "Couldn't open DH file" );
     }
