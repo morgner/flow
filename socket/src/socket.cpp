@@ -244,10 +244,10 @@ size_t CSocket::Receive( std::string& s )
     }
   s.clear();
 
-  size_t nResult = ::recv( m_nSock,
-                           m_ovBuffer,
-                           m_ovBuffer.capacity() -1,
-                           0 );
+  ssize_t nResult = ::recv( m_nSock,
+                            m_ovBuffer,
+                            m_ovBuffer.capacity() -1,
+                            0 );
   if ( (nResult == -1) and ( errno != EAGAIN ) )
     {
     std::cout << "errno == " << errno << "  in CSocket::Receive\n";
@@ -256,7 +256,7 @@ size_t CSocket::Receive( std::string& s )
   else
     if ( nResult > 0 )
       {
-      m_ovBuffer[nResult] = 0;
+      m_ovBuffer[(size_t)nResult] = 0;
       s = m_ovBuffer;
       }
   return nResult;

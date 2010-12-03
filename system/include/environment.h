@@ -132,10 +132,10 @@ class CEnvironment : public std::map<std::string, std::string>
             {
             m_vsDefault.push_back(rsDefault);
             } // if ( (rsDefault.length() > 0) && (rsD ...
-          int n;
-          m_nLenMaxLongOpt = ( (n=strlen(rtOption.name)       ) > m_nLenMaxLongOpt ) ? n : m_nLenMaxLongOpt;
-          m_nLenMaxHelp    = ( (n=rsHelp.length()             ) > m_nLenMaxHelp    ) ? n : m_nLenMaxHelp;
-          m_nLenMaxDefault = ( (n=m_vsDefault.back().length() ) > m_nLenMaxDefault ) ? n : m_nLenMaxDefault;
+          size_t n;
+          m_nLenMaxLongOpt = ( (n = strlen(rtOption.name)       ) > m_nLenMaxLongOpt ) ? n : m_nLenMaxLongOpt;
+          m_nLenMaxHelp    = ( (n = rsHelp.length()             ) > m_nLenMaxHelp    ) ? n : m_nLenMaxHelp;
+          m_nLenMaxDefault = ( (n = m_vsDefault.back().length() ) > m_nLenMaxDefault ) ? n : m_nLenMaxDefault;
 
           m_sShortOpt += (char) rtOption.val;
           if ( rtOption.has_arg )
@@ -174,7 +174,7 @@ class CEnvironment : public std::map<std::string, std::string>
         void UsagePrint()
           {
           std::string space;
-          for ( int n = 0; n < m_nLenMaxLongOpt + 8; n++ ) space += " ";
+          for ( size_t n = 0; n < m_nLenMaxLongOpt + 8; n++ ) space += " ";
           std::vector<std::string>::iterator itH = m_vsHelp.begin();
           std::vector<std::string>::iterator itD = m_vsDefault.begin();
           for (iterator it = begin();
