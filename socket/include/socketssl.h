@@ -32,7 +32,7 @@
 #define _SOCKET_SSL_H
 
 #include "socket.h"
-#include "sslclasses.h"
+#include "ssltemplates.h"
 
 #include <string>
 

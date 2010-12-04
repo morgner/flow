@@ -1,5 +1,5 @@
 /***************************************************************************
- sslclasses.h description
+ ssltemplates.h
  -----------------------
  begin                 : Sun 21 11 2010
  copyright             : Copyright (C) 2010 by Manfred Morgner

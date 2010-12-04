@@ -1,5 +1,5 @@
 /***************************************************************************
- sslclasses.cpp
+ ssltemplates.cpp
  -----------------------
  begin                 : Mon 22 11 2010
  copyright             : Copyright (C) 2010 by Manfred Morgner
@@ -28,7 +28,7 @@
  ***************************************************************************/
 
 
-#include "sslclasses.h"
+#include "ssltemplates.h"
 
 template <>
   void CX509::Delete( X509*& rpt )

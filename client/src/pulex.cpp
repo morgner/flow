@@ -29,8 +29,8 @@
 
 #include "pulex.h"
 
+#include "ssltemplates.h"
 #include "socketexception.h"
-#include "sslclasses.h"
 
 
 #include <sys/time.h> // gettimeofday()

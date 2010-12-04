@@ -20,7 +20,7 @@ CFLAGS = -c -mtune=native -Wall -pedantic
 
 LDFLAGS  = -L.
 
-SOCKET_SRC=$(SOCKET_PATH)/src/socket.cpp $(SOCKET_PATH)/src/socketssl.cpp $(SOCKET_PATH)/src/sslclasses.cpp $(SOCKET_PATH)/src/socketclient.cpp $(SOCKET_PATH)/src/socketserver.cpp $(SOCKET_PATH)/src/socketexception.cpp
+SOCKET_SRC=$(SOCKET_PATH)/src/socket.cpp $(SOCKET_PATH)/src/socketssl.cpp $(SOCKET_PATH)/src/ssltemplates.cpp $(SOCKET_PATH)/src/socketclient.cpp $(SOCKET_PATH)/src/socketserver.cpp $(SOCKET_PATH)/src/socketexception.cpp
 SOCKET_OBJ=$(SOCKET_SRC:.cpp=.o)
 SOCKET=libflowsocket.a
 
