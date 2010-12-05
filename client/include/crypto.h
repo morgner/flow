@@ -76,8 +76,8 @@ class CCrypto
     void RsaKeyLoadPrivate( const std::string& rsFileRsaKey );
     void RsaKeyLoadFromCertificate( const std::string& rsFileCertificate );
 
-    CUCBuffer ConvertFromBase64( const std::string& rsBase64 );
-    CUCBuffer DecryptFromBase64( const std::string& rsBase64 );
+    std::string EncryptToBase64  ();
+    CUCBuffer   DecryptFromBase64( const std::string& rsBase64 );
 
   protected:
     void RandomSeed();
@@ -86,8 +86,8 @@ class CCrypto
     void RandomGet( CUCBuffer& roBuffer );
     void RandomGet( unsigned char* pucBuffer, size_t nBufferSize );
 
-    std::string ConvertToBase64();
-    std::string EncryptToBase64();
+    std::string ConvertToBase64  ();
+    CUCBuffer   ConvertFromBase64( const std::string& rsBase64 );
 
     std::string ConvertToBase64( const unsigned char* pucData, size_t nSize );
     std::string EncryptToBase64( const unsigned char* pucData, size_t nSize );

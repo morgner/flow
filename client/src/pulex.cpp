@@ -28,6 +28,7 @@
  ***************************************************************************/
 
 #include "pulex.h"
+#include "crypto.h"
 
 #include "ssltemplates.h"
 #include "socketexception.h"
@@ -37,6 +38,7 @@
 
 #include <openssl/ssl.h>
 #include <openssl/x509.h>
+
 
 // Stream operators to send the pulex to an output stream The streams differ,
 // but the methode keeps the sam by using a template for 'Send(...)'
@@ -146,7 +148,7 @@ std::string Fingerprint( const std::string& rsName )
     {
     sprintf( &pszHexSha1[ n << 1 ], "%02X", ((unsigned char*)oSha1)[ n ] );
     }
-  std::cout << pszHexSha1 << " for " << rsName << std::endl; 
+  if ( g_bVerbose ) std::cout << pszHexSha1 << " for " << rsName << std::endl; 
   return pszHexSha1;
   }
 
@@ -172,7 +174,23 @@ template<typename T>
     roStream << scn_local_id_time << ":" << ClientSideTmGet() << "\n";
     roStream << scn_remote_id     << ":" << ServerSideIdGet() << "\n";
 
-    roStream << "===== to encrypt =====" << "\n";
+    roStream << "===== message goes here =====" << "\n";
+
+    std::ostringstream sosBuffer;
+    sosBuffer << scn_content_text << ":" << ClassNameGet() << "\n";
+    for ( CPulex::iterator it=begin(); it != end(); ++it )
+      {
+      // with SSL the server breaks down if '*it' is empty but piped from the client
+      if ( it->length() )
+        sosBuffer << scn_content_text << ":" << *it << "\n";
+      else
+        sosBuffer << scn_content_text << ":" << "\n";
+      }
+
+    CCrypto oCrypto( sosBuffer.str() );
+    oCrypto.RsaKeyLoadFromCertificate( "certificates/client/" + *m_lsRecipients.begin() + ".crt" );
+    roStream << oCrypto.EncryptToBase64();
+/*
     // content to encrypt for recipients
     roStream << scn_content_text << ":" << ClassNameGet()   << "\n";
     for ( CPulex::iterator it=begin(); it != end(); ++it )
@@ -183,6 +201,7 @@ template<typename T>
       else
         roStream << scn_content_text << ":" << "\n";
       }
-    roStream << "===== to encrypt =====" << "\n";
+*/
+    roStream << "===== end of message =====" << "\n";
     return roStream;
     } // T& CPulex::Send( T& roStream )

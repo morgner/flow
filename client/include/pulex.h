@@ -44,6 +44,8 @@
 #include <iostream>
 
 
+extern bool g_bVerbose;
+
 // The Pulex class represents a neutral object containing client data to become
 // moved to other clients using a server able to move Container objects. To be
 // able to do so, a Container is able to move data wiht minimum amount of

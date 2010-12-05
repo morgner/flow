@@ -41,9 +41,8 @@
 
 #include <fcntl.h> // open, read, close => RandomGet()
 
-           bool            g_bVerbose   = true;
-const std::string CCrypto::s_sDelimiter = "===\n";
 
+const std::string CCrypto::s_sDelimiter = "===\n";
 
 // The content has to be initialized on contruction time
 CCrypto::CCrypto( const std::string& rsInput )

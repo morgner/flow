@@ -53,6 +53,9 @@
 
 #include <openssl/err.h>
 
+
+bool g_bVerbose = false;
+
 int main( int argc, const char* argv[] )
   {
   CEnvironment oEnvironment( argc, argv );
@@ -76,7 +79,7 @@ int main( int argc, const char* argv[] )
   /// we need to read the command line parameters
   oEnvironment.CommandlineRead();
   /// for convienice we create a local shortcut to the environment value of 'isVerbose()'
-  bool bVerbose = oEnvironment.find("verbose") != oEnvironment.end();
+  g_bVerbose = oEnvironment.find("verbose") != oEnvironment.end();
 
   /// the real operation starts here
   CDomain oDomain;
@@ -93,7 +96,7 @@ int main( int argc, const char* argv[] )
   /// the patter from before out manipulation to ensure normal behavior of  std::cin
   /// after the unblocked operation
   /// -- this methode (?) of deblocking std::cin not reliable for pipe input -- have to work on it !
-  if ( bVerbose ) std::cout << "===pipe-begin===" << std::endl;
+  if ( g_bVerbose ) std::cout << "===pipe-begin===" << std::endl;
   int flags = fcntl(fileno(stdin), F_GETFL, 0);
   fcntl(fileno(stdin), F_SETFL, flags | O_NONBLOCK);
     std::string s;
@@ -102,13 +105,13 @@ int main( int argc, const char* argv[] )
 //    while ( getline( std::cin, s ) )
     for ( getline( std::cin, s ); !std::cin.eof(); getline( std::cin, s ) )
       {
-      if ( bVerbose ) std::cout << s << std::endl;
+      if ( g_bVerbose ) std::cout << s << std::endl;
       *poPulex << s;
 //      if ( !std::cin.good() ) break;
       }
     fcntl(fileno(stdin), F_SETFL, flags);
   std::cin.clear();
-  if ( bVerbose ) std::cout << "===pipe-end===" << std::endl << std::endl;
+  if ( g_bVerbose ) std::cout << "===pipe-end===" << std::endl << std::endl;
 
   /// putting together defaults and command line input for the Pulex and the server parameters
   poPulex->SenderSet      ( oEnvironment["sender"] );
@@ -120,21 +123,21 @@ int main( int argc, const char* argv[] )
   std::string sSenderCrt = oEnvironment["cert-dir"] + poPulex->SenderGet() + ".crt";
   std::string sSenderKey = oEnvironment["cert-dir"] + poPulex->SenderGet() + ".key";
 
-  if ( bVerbose ) std::cout << sSenderCrt << std::endl;
-  if ( bVerbose ) std::cout << sSenderKey << std::endl;
-  if ( bVerbose ) std::cout << "*" << oEnvironment["password"] << "*" << std::endl;
-  if ( bVerbose ) std::cout << oEnvironment["trust-chain"] << std::endl;
-  if ( bVerbose ) std::cout << oEnvironment["trust-path"]  << std::endl;
+  if ( g_bVerbose ) std::cout << sSenderCrt << std::endl;
+  if ( g_bVerbose ) std::cout << sSenderKey << std::endl;
+  if ( g_bVerbose ) std::cout << "*" << oEnvironment["password"] << "*" << std::endl;
+  if ( g_bVerbose ) std::cout << oEnvironment["trust-chain"] << std::endl;
+  if ( g_bVerbose ) std::cout << oEnvironment["trust-path"]  << std::endl;
 
-  if ( bVerbose ) std::cout << *poPulex << std::endl;
+  if ( g_bVerbose ) std::cout << *poPulex << std::endl;
 
   /// try to let all Pulexes jump to the server
 
   ERR_load_crypto_strings(); // or: SSL_load_error_strings();
   try
     {
-    if ( bVerbose ) std::cout << "HOST: " << oEnvironment["host"] << std::endl;
-    if ( bVerbose ) std::cout << "PORT: " << oEnvironment["port"] << std::endl;
+    if ( g_bVerbose ) std::cout << "HOST: " << oEnvironment["host"] << std::endl;
+    if ( g_bVerbose ) std::cout << "PORT: " << oEnvironment["port"] << std::endl;
     CSocketClient oConnection( oEnvironment["host"],
                                oEnvironment["port"],
                                sSenderCrt,
@@ -166,7 +169,7 @@ int main( int argc, const char* argv[] )
       {
       std::cout << "Exception: " << e.Info() << "\n";
       }
-    if ( bVerbose ) std::cout << "Response from server:\n" << sServerReply << "\n";;
+    if ( g_bVerbose ) std::cout << "Response from server:\n" << sServerReply << "\n";;
     }
   catch ( CSocketException& e )
     {
