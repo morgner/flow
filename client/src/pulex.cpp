@@ -176,6 +176,8 @@ template<typename T>
 
     roStream << "===== message goes here =====" << "\n";
 
+    // this is not the final solution, data have to be able to flow into the
+    // Cropto object to miminzie memory footage
     std::ostringstream sosBuffer;
     sosBuffer << scn_content_text << ":" << ClassNameGet() << "\n";
     for ( CPulex::iterator it=begin(); it != end(); ++it )
@@ -190,18 +192,7 @@ template<typename T>
     CCrypto oCrypto( sosBuffer.str() );
     oCrypto.RsaKeyLoadFromCertificate( "certificates/client/" + *m_lsRecipients.begin() + ".crt" );
     roStream << oCrypto.EncryptToBase64();
-/*
-    // content to encrypt for recipients
-    roStream << scn_content_text << ":" << ClassNameGet()   << "\n";
-    for ( CPulex::iterator it=begin(); it != end(); ++it )
-      {
-      // with SSL the server breaks down if '*it' is empty but piped from the client
-      if ( it->length() )
-        roStream << scn_content_text << ":" << *it << "\n";
-      else
-        roStream << scn_content_text << ":" << "\n";
-      }
-*/
+
     roStream << "===== end of message =====" << "\n";
     return roStream;
     } // T& CPulex::Send( T& roStream )

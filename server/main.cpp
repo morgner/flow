@@ -123,6 +123,6 @@ int main ( int argc, const char* argv[] )
     std::cout << "Exception: " << e.Info() << "\nExiting.\n";
     } // catch  -  server bind ...
   ERR_free_strings();
-  
+
   return 0;
   } // main

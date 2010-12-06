@@ -44,11 +44,13 @@
 
 const std::string CCrypto::s_sDelimiter = "===\n";
 
+
 // The content has to be initialized on contruction time
 CCrypto::CCrypto( const std::string& rsInput )
   : m_pX509(0)
   {
-  m_pfCipher = EVP_des_ede3_cfb();
+  m_pfCipher = ::EVP_des_ede3_cfb();
+  m_pfDigest = ::EVP_sha1();
 
   if ( rsInput.length() )
     {
@@ -125,13 +127,13 @@ void CCrypto::RsaKeyLoadPrivate( const std::string& rsFileRsaKey )
   if ( !oBio.isValid() )
     {
     throw CCryptoException( "Couldn't open key file " + rsFileRsaKey + " - "
-                            + ERR_error_string(ERR_get_error(), 0) );
+                            + ::ERR_error_string(ERR_get_error(), 0) );
     }
     
   if ( !::PEM_read_bio_RSAPrivateKey(oBio, m_oRsa, NULL, NULL) )
     {
     throw CCryptoException( "Couldn't read key file " + rsFileRsaKey + " - "
-                            + ERR_error_string(ERR_get_error(), 0) );
+                            + ::ERR_error_string(ERR_get_error(), 0) );
     }
   } // void CCrypto::RsaKeyLoadPrivate( const std::string& rsFileRsaKey )
 
@@ -145,13 +147,13 @@ void CCrypto::RsaKeyLoadPublic( const std::string& rsFileRsaKey )
   if ( !oBio.isValid() )
     {
     throw CCryptoException( "Couldn't open key file " + rsFileRsaKey + " - "
-                            + ERR_error_string(ERR_get_error(), 0) );
+                            + ::ERR_error_string(ERR_get_error(), 0) );
     }
     
   if ( !::PEM_read_bio_RSAPublicKey(oBio, m_oRsa, NULL, NULL) )
     {
     throw CCryptoException( "Couldn't read key file " + rsFileRsaKey + " - "
-                            + ERR_error_string(ERR_get_error(), 0) );
+                            + ::ERR_error_string(ERR_get_error(), 0) );
     }
   } // void CCrypto::RsaKeyLoadPublic( const std::string& rsFileRsaKey )
 
@@ -165,21 +167,21 @@ void CCrypto::RsaKeyLoadFromCertificate( const std::string& rsFileCertificate )
     {
     throw CCryptoException( "Couldn't open certificate file "
                             + rsFileCertificate + " - "
-                            + ERR_error_string(ERR_get_error(), 0) );
+                            + ::ERR_error_string(ERR_get_error(), 0) );
     }
 
   if ( !::PEM_read_bio_X509_AUX(oBio, &m_pX509, NULL, NULL) )
     {
     throw CCryptoException( "Couldn't read certificate file "
                             + rsFileCertificate + " - "
-                            + ERR_error_string(ERR_get_error(), 0) );
+                            + ::ERR_error_string(ERR_get_error(), 0) );
     }
     
   m_oEvpPkey.Delete();
   m_oEvpPkey = ::X509_get_pubkey( m_pX509 );
 
   m_oRsa.Delete();
-  m_oRsa = EVP_PKEY_get1_RSA( m_oEvpPkey );
+  m_oRsa = ::EVP_PKEY_get1_RSA( m_oEvpPkey );
   }
 
 
@@ -195,7 +197,7 @@ bool CCrypto::EncryptRsaPublic( CUCBuffer& roBuffer )
   // RSA_public_encrypt().
   RandomSeed();
 
-  int            nRsaSize     = RSA_size(m_oRsa);
+  int            nRsaSize     = ::RSA_size(m_oRsa);
   unsigned char* pucInput     = &roBuffer[0];
   unsigned char* pucEncrypted = new unsigned char[nRsaSize];
 
@@ -219,15 +221,15 @@ bool CCrypto::EncryptRsaPublic( CUCBuffer& roBuffer )
       {
       nLen = nSize - nPos;
       }
-    int nEncrypted = RSA_public_encrypt( nLen,
-                                         pucInput,
-                                         pucEncrypted,
-                                         m_oRsa,
-                                         nPadding );
+    int nEncrypted = ::RSA_public_encrypt( nLen,
+                                           pucInput,
+                                           pucEncrypted,
+                                           m_oRsa,
+                                           nPadding );
     if ( 0 > nEncrypted )
       {
       throw CCryptoException( std::string("Couldn't public RSA encrypt - ")
-                              + ERR_error_string(ERR_get_error(), 0) );
+                              + ::ERR_error_string(ERR_get_error(), 0) );
       }
     nPos     += nLen;
     pucInput += nLen;
@@ -254,7 +256,7 @@ bool CCrypto::DecryptRsaPrivate( CUCBuffer& roBuffer )
     return false;
     }
 
-  int            nRsaSize     = RSA_size(m_oRsa);
+  int            nRsaSize     = ::RSA_size(m_oRsa);
   unsigned char* pucInput     = &roBuffer[0];
   unsigned char* pucDecrypted = new unsigned char[nRsaSize];
 
@@ -275,15 +277,15 @@ bool CCrypto::DecryptRsaPrivate( CUCBuffer& roBuffer )
       {
       nLen = nSize - nPos;
       }
-    int nDecrypted = RSA_private_decrypt( nLen,
-                                          pucInput,
-                                          pucDecrypted,
-                                          m_oRsa,
-                                          nPadding );
+    int nDecrypted = ::RSA_private_decrypt( nLen,
+                                            pucInput,
+                                            pucDecrypted,
+                                            m_oRsa,
+                                            nPadding );
     if ( 0 > nDecrypted )
       {
       throw CCryptoException( std::string("Couldn't private RSA decrypt - ")
-                              + ERR_error_string(ERR_get_error(), 0) );
+                              + ::ERR_error_string(ERR_get_error(), 0) );
       }
     nPos     += nLen;
     pucInput += nLen;
@@ -317,14 +319,14 @@ int CCrypto::SymetricKeyMake( const EVP_CIPHER* pfCipher,
   RandomGet( m_aucKey, EVP_MAX_KEY_LENGTH );
   RandomGet( m_aucIv,  EVP_MAX_IV_LENGTH  );
 
-  return EVP_BytesToKey( m_pfCipher,
-                         m_pfDigest,
-                         m_aucSalt,
-                         aucKeyBytes,
-                         sizeof(aucKeyBytes),
-                         16,
-                         m_aucKey,
-                         m_aucIv );
+  return ::EVP_BytesToKey( m_pfCipher,
+                           m_pfDigest,
+                           m_aucSalt,
+                           aucKeyBytes,
+                           sizeof(aucKeyBytes),
+                           16,
+                           m_aucKey,
+                           m_aucIv );
   } // int CCrypto::SymetricKeyMake( const EVP_CIPHER* pfCipher, ...
 
 
@@ -358,17 +360,17 @@ std::string CCrypto::ConvertToBase64()
 
 std::string CCrypto::ConvertToBase64( const unsigned char* pucData, size_t nSize )
   {
-  BIO* pBio64 = BIO_new(BIO_f_base64());
-  BIO* pBio   = BIO_new(BIO_s_mem());
-       pBio   = BIO_push(pBio64, pBio);
-  BIO_write(pBio, pucData, nSize);
+  BIO* pBio64 = ::BIO_new(BIO_f_base64());
+  BIO* pBio   = ::BIO_new(BIO_s_mem());
+       pBio   = ::BIO_push(pBio64, pBio);
+  ::BIO_write(pBio, pucData, nSize);
   int nResult = BIO_flush(pBio);
   if ( 1 != nResult )
     {
     throw CCryptoException( "BIO_flush in ConvertToBase64" ); 
     }
   BUF_MEM* ptBuffer;
-  BIO_get_mem_ptr(pBio, &ptBuffer);
+  ::BIO_get_mem_ptr(pBio, &ptBuffer);
 
   char* buff = new char[ptBuffer->length+1];
   memcpy(buff, ptBuffer->data, ptBuffer->length);
@@ -378,7 +380,7 @@ std::string CCrypto::ConvertToBase64( const unsigned char* pucData, size_t nSize
 
 //- NOT: std::string sResult = (char*)ptBuffer->data;
 
-  BIO_free_all(pBio); // frees ptBuffer too
+  ::BIO_free_all(pBio); // frees ptBuffer too
 
   return sResult;
   } // std::string CCrypto::ConvertToBase64( unsigned char* pucData, int nSize )
@@ -399,21 +401,21 @@ std::string CCrypto::EncryptToBase64( const unsigned char* pucData, size_t nSize
   {
   SymetricKeyMake( m_pfCipher );
 
-  BIO* pBioEnc = BIO_new ( BIO_f_cipher() );
-  BIO* pBio64  = BIO_new ( BIO_f_base64() );
-  BIO* pBio    = BIO_new ( BIO_s_mem() );
-       pBio    = BIO_push( pBio64,  pBio );
-       pBio    = BIO_push( pBioEnc, pBio );
+  BIO* pBioEnc = ::BIO_new ( BIO_f_cipher() );
+  BIO* pBio64  = ::BIO_new ( BIO_f_base64() );
+  BIO* pBio    = ::BIO_new ( BIO_s_mem() );
+       pBio    = ::BIO_push( pBio64,  pBio );
+       pBio    = ::BIO_push( pBioEnc, pBio );
 
-  BIO_set_cipher(pBio, m_pfCipher, m_aucKey, m_aucIv, 1);
-  BIO_write( pBio, pucData, nSize );
+  ::BIO_set_cipher(pBio, m_pfCipher, m_aucKey, m_aucIv, 1);
+  ::BIO_write( pBio, pucData, nSize );
   int nResult = BIO_flush( pBio );
   if ( 1 != nResult )
     {
     throw CCryptoException( "BIO_flush in EncryptToBase64" ); 
     }
   BUF_MEM* ptBuffer;
-  BIO_get_mem_ptr(pBio, &ptBuffer);
+  ::BIO_get_mem_ptr(pBio, &ptBuffer);
 
   char* buff = new char[ptBuffer->length+1];
   memcpy(buff, ptBuffer->data, ptBuffer->length);
@@ -423,30 +425,31 @@ std::string CCrypto::EncryptToBase64( const unsigned char* pucData, size_t nSize
 
 //- NOT: std::string sResult = (char*)ptBuffer->data;
 
-  BIO_free_all(pBio);
+  ::BIO_free_all(pBio);
 
   return SymetricKeyRsaPublicEncrypt() + s_sDelimiter + sResult;
   } // std::string CCrypto::EncryptToBase64( unsigned char* pucData, int nSize );
 
 
-// Convert BASE64 input to binary output, should spill out simple strings ;-)
-CUCBuffer CCrypto::ConvertFromBase64( const std::string& rsBase64 )
+// Convert BASE64 input to binary output, may spill out simple strings (mostly)
+const CUCBuffer& CCrypto::ConvertFromBase64( const std::string& rsBase64 )
   {
-  CUCBuffer     oOutput;
+  m_oData.clear();
+  m_oData.reserve( rsBase64.length()/2 );
   unsigned char uc;
 
-  BIO* pBio64 = BIO_new(BIO_f_base64()); // may yield 0!
-  BIO* pBio   = BIO_new_mem_buf( (void*)rsBase64.c_str(), -1 );
-       pBio   = BIO_push(pBio64, pBio);
-  while ( BIO_read(pBio, &uc, 1) > 0 )
+  BIO* pBio64 = ::BIO_new(BIO_f_base64()); // may yield 0!
+  BIO* pBio   = ::BIO_new_mem_buf( (void*)rsBase64.c_str(), -1 );
+       pBio   = ::BIO_push(pBio64, pBio);
+  while ( ::BIO_read(pBio, &uc, 1) > 0 )
     {
-    oOutput.push_back(uc);
+    m_oData.push_back(uc);
     }
 
-  BIO_free_all(pBio);
+  ::BIO_free_all(pBio);
 
-  return oOutput;
-  } // CUCBuffer CCrypto::ConvertFromBase64( const std::string& sBase64 )
+  return m_oData;
+  } // const CUCBuffer& CCrypto::ConvertFromBase64( const std::string& sBase64 )
 
 
 // Decrypt a symetric key using RSA asymetric decryption
@@ -466,32 +469,32 @@ bool CCrypto::SymetricKeyRsaPrivateDecrypt( const std::string& rsEncrypted )
 // Split an encrypted 'BASE64' package to key and content blocks
 // Decrypt the symetric key by asymetric RSA decryption
 // Decrypt the symetric encrypted content using the decrypted key encrypted key
-CUCBuffer CCrypto::DecryptFromBase64( const std::string& rsBase64 )
+const CUCBuffer& CCrypto::DecryptFromBase64( const std::string& rsBase64 )
   {
   std::string sKey = rsBase64.substr(0, rsBase64.find(s_sDelimiter));
-//  std::cout << "KEY-BASE64" << std::endl << sKey << std::endl;
+  if ( g_bVerbose ) std::cout << "KEY-BASE64" << std::endl << sKey << std::endl;
   SymetricKeyRsaPrivateDecrypt( sKey );
-    
-  CUCBuffer     oOutput;
+
   unsigned char uc;
 
   std::string sData = rsBase64.substr( rsBase64.find(s_sDelimiter)
                                                      + s_sDelimiter.length() );
-//  std::cout << "DATA-BASE64" << std::endl << sData << std::endl;
-  oOutput.reserve( sData.length() );
+  if ( g_bVerbose )  std::cout << "DATA-BASE64" << std::endl << sData << std::endl;
+  m_oData.clear();
+  m_oData.reserve( rsBase64.length()/2 );
 
-  BIO* pBioEnc = BIO_new( BIO_f_cipher() );
-  BIO* pBio64  = BIO_new( BIO_f_base64() ); // may yield 0!
-  BIO* pBio    = BIO_new_mem_buf( (void*)sData.c_str(), -1 );
-       pBio    = BIO_push( pBio64,  pBio);
-       pBio    = BIO_push( pBioEnc, pBio );
-  BIO_set_cipher(pBio, m_pfCipher, m_aucKey, m_aucIv, 0);
-  while ( BIO_read(pBio, &uc, 1) > 0 )
+  BIO* pBioEnc = ::BIO_new( BIO_f_cipher() ); // may yield 0!
+  BIO* pBio64  = ::BIO_new( BIO_f_base64() ); // may yield 0!
+  BIO* pBio    = ::BIO_new_mem_buf( (void*)sData.c_str(), -1 );
+       pBio    = ::BIO_push( pBio64,  pBio);
+       pBio    = ::BIO_push( pBioEnc, pBio );
+  ::BIO_set_cipher(pBio, m_pfCipher, m_aucKey, m_aucIv, 0);
+  while ( ::BIO_read(pBio, &uc, 1) > 0 )
     {
-    oOutput.push_back( uc );
+    m_oData.push_back( uc );
     }
 
-  BIO_free_all(pBio);
+  ::BIO_free_all(pBio);
 
-  return oOutput;
-  } // CUCBuffer CCrypto::ConvertFromBase64( const std::string& sBase64 )
+  return m_oData;
+  } // const CUCBuffer& CCrypto::ConvertFromBase64( const std::string& sBase64 )
