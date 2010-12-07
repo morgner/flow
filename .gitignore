@@ -2,6 +2,11 @@ log/*.log
 tmp/**/*
 *.tmproj
 
+*.aux
+*.log
+*.synctex.gz
+*.toc
+
 flowclient
 flowserver
 

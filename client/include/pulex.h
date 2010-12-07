@@ -31,13 +31,7 @@
 #ifndef _PULEX_H
 #define _PULEX_H
 
-#if _MSC_VER > 1000
-#pragma once
-#pragma warning (disable:4786)
-#endif // _MSC_VER > 1000
-
 #include "container.h"
-
 #include "socket.h"
 
 #include <list>

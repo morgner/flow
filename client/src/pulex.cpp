@@ -33,7 +33,6 @@
 #include "ssltemplates.h"
 #include "socketexception.h"
 
-
 #include <sys/time.h> // gettimeofday()
 
 #include <openssl/ssl.h>
