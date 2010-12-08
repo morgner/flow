@@ -33,150 +33,174 @@
 #include <iostream>
 #include <stdlib.h>
 
-const std::string CContainer::s_sClassName = "FLOW.CONTAINER";
+#include <sys/time.h> // gettimeofday()
+
+
+using namespace std;
+
+const string CContainer::s_sClassName = "FLOW.CONTAINER";
 
 
 CContainer::CContainer()
+  : m_bHasId( false )
   {
-  }
+  timeval time;
+  gettimeofday( &time, 0 );
+  m_tClientSideId = time.tv_sec;
+  } // CContainer::CContainer()
 
 CContainer::~CContainer()
   {
-//  std::cout << " ** destruction of " << RGUIDGet() << std::endl;
-  }
+//  cout << " ** destruction of " << RGUIDGet() << endl;
+  } // CContainer::~CContainer()
 
 
 
-const std::string& CContainer::SenderSet( const std::string& rsSender )
+const string& CContainer::SenderSet( const string& rsSender )
   {
   return m_sSender = rsSender;
-  }
+  } // const string& CContainer::SenderSet( const string& rsSender )
 
 
-const std::string& CContainer::SenderGet() const
+const string& CContainer::SenderGet() const
   {
   return m_sSender;
-  }
+  } // const string& CContainer::SenderGet() const
 
 
 // add the recipient to the recipient list
-size_t CContainer::RecipientAdd( const std::string& rsRecipient )
+size_t CContainer::RecipientAdd( const string& rsRecipient )
   {
   for ( CListString::iterator it  = m_lsRecipients.begin();
-                             it != m_lsRecipients.end();
-                           ++it )
+                              it != m_lsRecipients.end();
+                            ++it )
     {
     if ( *it == rsRecipient ) return m_lsRecipients.size();
     }
   m_lsRecipients.push_back( rsRecipient );
   return m_lsRecipients.size();
-  }
+  } // size_t CContainer::RecipientAdd( const string& rsRecipient )
 
 
 // remove all recipient entries for the given alias
-size_t CContainer::RecipientDel( const std::string& rsRecipient )
+size_t CContainer::RecipientDel( const string& rsRecipient )
   {
   m_lsRecipients.remove( rsRecipient );
   return m_lsRecipients.size();
-  }
+  } // size_t CContainer::RecipientDel( const string& rsRecipient )
 
 
 long CContainer::ClientSideTmGet() const
   {
   return m_tClientSideId;
-  }
+  } // long CContainer::ClientSideTmGet() const
 
 
 long CContainer::ClientSideTmSet( long nClientSideTm )
   {
   return m_tClientSideId = nClientSideTm;
-  }
+  } // long CContainer::ClientSideTmSet( long nClientSideTm )
 
 
-long CContainer::ClientSideTmSet( const std::string& rsClientSideTm )
+long CContainer::ClientSideTmSet( const string& rsClientSideTm )
   {
   return m_tClientSideId = atol( rsClientSideTm.c_str() );
-  }
+  } // long CContainer::ClientSideTmSet( const string& rsClientSideTm )
 
 
-long CContainer::ClientSideIdGet() const
+// The unique client ID for a Container object
+long CContainer::ClientSideIdGet()
   {
-  return m_nClientSideId;
-  }
+  static int nClientSideId = 0;
+  if ( m_bHasId )
+    {
+    return m_nClientSideId;
+    }
+  else
+    {
+    m_bHasId = true;
+    return m_nClientSideId = ++nClientSideId;
+    }
+  } // long CContainer::ClientSideIdGet()
 
 
 long CContainer::ClientSideIdSet( long nClientSideId )
   {
+  m_bHasId = true;
   return m_nClientSideId = nClientSideId;
-  }
+  } // long CContainer::ClientSideIdSet( long nClientSideId )
 
 
-long CContainer::ClientSideIdSet( const std::string& rsClientSideId )
+long CContainer::ClientSideIdSet( const string& rsClientSideId )
   {
   return m_nClientSideId = atol( rsClientSideId.c_str() );
-  }
+  } // long CContainer::ClientSideIdSet( const string& rsClientSideId )
 
 
 long CContainer::ServerSideIdGet() const
   {
   return m_nServerSideId;
-  }
+  } // long CContainer::ServerSideIdGet() const
 
 
 long CContainer::ServerSideIdSet( long rnServerSideId )
   {
   return m_nServerSideId = rnServerSideId;
-  }
+  } // long CContainer::ServerSideIdSet( long rnServerSideId )
 
 
-long CContainer::ServerSideIdSet( const std::string& rsServerSideId )
+long CContainer::ServerSideIdSet( const string& rsServerSideId )
   {
   return m_nServerSideId = atol( rsServerSideId.c_str() );
-  }
+  } // long CContainer::ServerSideIdSet( const string& rsServerSideId )
 
 
 
 #include <sstream>
 template <typename T>
-  std::string to_string(const T& val)
+  string to_string(const T& val)
     {
-    std::ostringstream sout;
+    ostringstream sout;
     sout << val;
     return sout.str();
-    }
+    } // template <typename T> string to_string(const T& val)
 
-std::string CContainer::RGUIDGet() const
+string CContainer::RGUIDGet()
   {
-  std::ostringstream sout;
-  sout << "RGUID"         << ":"
-       << m_nClientSideId << ":"
-       << m_tClientSideId << ":"
-       << m_nServerSideId;
+  ostringstream sout;
+  sout << "RGUID"           << ":"
+       << ClientSideIdGet() << ":"
+       << ClientSideTmGet() << ":"
+       << ServerSideIdGet();
   return sout.str();
-  }
+  } // string CContainer::RGUIDGet()
 
-std::string CContainer::CLUIDGet() const
+
+string CContainer::CLUIDGet()
   {
-  std::ostringstream sout;
+  ostringstream sout;
   sout << "CLUID"         << ":"
        << m_sSender       << ":"
-       << m_nClientSideId;
+       << ClientSideIdGet();
   return sout.str();
-  }
+  } // string CContainer::CLUIDGet()
 
-const std::string& CContainer::OwnerGet() const
+
+const string& CContainer::OwnerGet() const
   {
   return m_sSender;
-  }
+  } // const string& CContainer::OwnerGet() const
 
-bool CContainer::isFor( const std::string& rsRecipient )
+
+bool CContainer::isFor( const string& rsRecipient )
   {
   for ( CListString::iterator it = m_lsRecipients.begin(); it != m_lsRecipients.end(); ++it)
     {
     if ( *it == rsRecipient ) return true;
     }
   return false;
-  }
+  } // bool CContainer::isFor( const string& rsRecipient )
+
 
 // indicators to be used to transport the pulex
 const char* CContainer::scn_sender         = "s";
@@ -187,7 +211,7 @@ const char* CContainer::scn_remote_id      = "r";
 const char* CContainer::scn_content_text   = "x";
 
 // e.g. "c:PULEX", "x:please read", "x:the manual"
-const std::string& CContainer::operator += ( const std::string& rsElement )
+const string& CContainer::operator += ( const string& rsElement )
   {
   if ( rsElement[1] == ':' )
     switch ( rsElement[0] )
@@ -202,5 +226,4 @@ const std::string& CContainer::operator += ( const std::string& rsElement )
       }
 
   return rsElement;
-  }
-
+  } // const string& CContainer::operator += ( const string& rsElement )

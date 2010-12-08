@@ -66,8 +66,6 @@ class CPulex : public CContainer
              CPulex();
     virtual ~CPulex();
 
-    virtual const std::string& ClassNameGet() const;
-
     // May be this is not a good idea at all, but enables compact code, which
     // also may not be good idea. This operator appends data to the object as
     // if it were a data sink which it is ;-)
@@ -82,7 +80,7 @@ class CPulex : public CContainer
       T& Send( T& roStream );
 
   protected:
-    long ClientSideIDGet();
+    virtual const std::string& ClassNameGet() const;
 
   }; // class CPulex
 

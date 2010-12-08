@@ -33,17 +33,17 @@
 #include "ssltemplates.h"
 #include "socketexception.h"
 
-#include <sys/time.h> // gettimeofday()
-
 #include <openssl/ssl.h>
 #include <openssl/x509.h>
 
+
+using namespace std;
 
 // Stream operators to send the pulex to an output stream The streams differ,
 // but the methode keeps the sam by using a template for 'Send(...)'
 
 // Send the pulex to a generic ostream
-std::ostream& operator << ( std::ostream& roStream, CPulex& roPulex )
+ostream& operator << ( ostream& roStream, CPulex& roPulex )
   {
   return roPulex.Send( roStream );
   }
@@ -58,17 +58,13 @@ CSocket& operator << ( CSocket& roStream, CPulex& roPulex )
 // Static const members of the pulex
 
 // The name of the class 'CPulex' in the transport stream for reconstruction
-const std::string CPulex::s_sClassName = "FLOW.PULEX";
+const string CPulex::s_sClassName = "FLOW.PULEX";
 
 
 // A Pulx object has its time tag and its ID
 // This way it should be unique
 CPulex::CPulex()
   {
-  timeval time;
-  gettimeofday( &time, 0 );
-  m_tClientSideId = time.tv_sec;
-  m_nClientSideId = ClientSideIDGet();
   }
 
 // No ressources allocated, nothings to free
@@ -77,23 +73,16 @@ CPulex::~CPulex()
   }
 
 
-// The unique client ID for a Pulex object instance
-long CPulex::ClientSideIDGet()
-  {
-  static int nClientSideId = 0;
-  return ++nClientSideId;
-  }
-
 
 // The class name for reconstruction
-const std::string& CPulex::ClassNameGet() const
+const string& CPulex::ClassNameGet() const
   {
   return s_sClassName;
   }
 
 
 // Accumulating data in the objectc
-const std::string& CPulex::operator << ( const std::string& rsData )
+const string& CPulex::operator << ( const string& rsData )
   {
   push_back(rsData);
   return rsData;
@@ -101,12 +90,12 @@ const std::string& CPulex::operator << ( const std::string& rsData )
 
 
 // Creating the SHA1 checksum of the certificate directed to by rsName
-std::string Fingerprint( const std::string& rsName )
+string Fingerprint( const string& rsName )
   {
   if ( !rsName.length() ) return "no-name";
 
   // This is where we expect the certificate to live
-  std::string sFileName = "certificates/client/" + rsName + ".crt";
+  string sFileName = "certificates/client/" + rsName + ".crt";
 
   // Opens a file based readonly BIO to read from the certificate file
   CBio oBio = ::BIO_new_file( sFileName.c_str(),"r");
@@ -147,9 +136,9 @@ std::string Fingerprint( const std::string& rsName )
     {
     sprintf( &pszHexSha1[ n << 1 ], "%02X", ((unsigned char*)oSha1)[ n ] );
     }
-  if ( g_bVerbose ) std::cout << pszHexSha1 << " for " << rsName << std::endl; 
+  if ( g_bVerbose ) cout << pszHexSha1 << " for " << rsName << endl; 
   return pszHexSha1;
-  }
+  } // string Fingerprint( const string& rsName )
 
 
 // Generic stream sending methode, we may use different stream types but we
@@ -175,9 +164,9 @@ template<typename T>
 
     roStream << "===== message goes here =====" << "\n";
 
-    // this is not the final solution, data have to be able to flow into the
+    // This is not the final solution, data have to be able to flow into the
     // Cropto object to miminzie memory footage
-    std::ostringstream sosBuffer;
+    ostringstream sosBuffer;
     sosBuffer << scn_content_text << ":" << ClassNameGet() << "\n";
     for ( CPulex::iterator it=begin(); it != end(); ++it )
       {
