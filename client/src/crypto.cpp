@@ -42,29 +42,31 @@
 #include <fcntl.h> // open, read, close => RandomGet()
 
 
-const std::string CCrypto::s_sDelimiter = "===\n";
+using namespace std;
+
+const string CCrypto::s_sDelimiter = "===\n";
 
 
 // The content has to be initialized on contruction time
-CCrypto::CCrypto( const std::string& rsInput )
-  : m_pX509(0)
+CCrypto::CCrypto( const string& rsInput )
+  : m_pX509( 0 )
   {
   m_pfCipher = ::EVP_des_ede3_cfb();
   m_pfDigest = ::EVP_sha1();
 
   if ( rsInput.length() )
     {
-    m_oData.resize(rsInput.length()+1);
+    m_oData.resize( rsInput.length()+1 );
     memcpy( &m_oData[0], rsInput.c_str(), rsInput.length() );
     m_oData[ rsInput.length() ] = 0;
     }
-  }
+  } // CCrypto::CCrypto( const string& rsInput )
 
 
 // Anything frees itself on the close
 CCrypto::~CCrypto()
   {
-  }
+  } // CCrypto::~CCrypto()
 
 
 // Call some random data into the buffer, if there are no
@@ -75,21 +77,24 @@ void CCrypto::RandomGet( CUCBuffer& roBuffer )
   RandomGet( &roBuffer[0], roBuffer.size() );
   } // void CCrypto::RandomGet( CUCBuffer& roBuffer )
 
+// Fill the buffer with random data
 void CCrypto::RandomGet( unsigned char* pucBuffer, size_t nBufferSize )
   {
   if ( !pucBuffer )
     {
     return;
     }
-  int fh = open( "/dev/urandom", O_RDONLY );
+  int fh = ::open( "/dev/urandom", O_RDONLY );
+  // Could we open the 'urandom' device?
   if ( fh == -1 )
     {
-    fh = open( "/dev/random", O_RDONLY );
+    fh = ::open( "/dev/random", O_RDONLY );
     }
+  // Could we open the 'urandom' or 'random'?
   if ( fh != -1 )
     {
-    read( fh, pucBuffer, nBufferSize );
-    close( fh );
+    ::read( fh, pucBuffer, nBufferSize );
+    ::close( fh );
     }
   } // void CCrypto::RandomGet( CUCBuffer& roBuffer )
 
@@ -100,9 +105,9 @@ void CCrypto::RandomSeed()
   // Generates a key pair and returns it in a newly allocated RSA structure.
   // The pseudo random number generator must be seeded prior to calling
   // RSA_generate_key().
-  unsigned char aucRandom[RANDOM_BUFFER_SIZE];
+  unsigned char aucRandom[ RANDOM_BUFFER_SIZE ];
   RandomGet( aucRandom, sizeof(aucRandom) );
-  RAND_seed( aucRandom, sizeof(aucRandom) );
+  ::RAND_seed( aucRandom, sizeof(aucRandom) );
   }
 
 
@@ -120,46 +125,46 @@ void CCrypto::RsaKeyGenerate()
 
 
 // Load a private RSA key from PEM file
-void CCrypto::RsaKeyLoadPrivate( const std::string& rsFileRsaKey )
+void CCrypto::RsaKeyLoadPrivate( const string& rsFileRsaKey )
   {
   CBio oBio = ::BIO_new_file( rsFileRsaKey.c_str(), "r" );
-    
+
   if ( !oBio.isValid() )
     {
     throw CCryptoException( "Couldn't open key file " + rsFileRsaKey + " - "
                             + ::ERR_error_string(ERR_get_error(), 0) );
     }
-    
+
   if ( !::PEM_read_bio_RSAPrivateKey(oBio, m_oRsa, NULL, NULL) )
     {
     throw CCryptoException( "Couldn't read key file " + rsFileRsaKey + " - "
                             + ::ERR_error_string(ERR_get_error(), 0) );
     }
-  } // void CCrypto::RsaKeyLoadPrivate( const std::string& rsFileRsaKey )
+  } // void CCrypto::RsaKeyLoadPrivate( const string& rsFileRsaKey )
 
 
 // Load a public RSA key from PEM file
 //!? does not work - currently 
-void CCrypto::RsaKeyLoadPublic( const std::string& rsFileRsaKey )
+void CCrypto::RsaKeyLoadPublic( const string& rsFileRsaKey )
   {
   CBio oBio = ::BIO_new_file( rsFileRsaKey.c_str(), "r" );
-    
+
   if ( !oBio.isValid() )
     {
     throw CCryptoException( "Couldn't open key file " + rsFileRsaKey + " - "
                             + ::ERR_error_string(ERR_get_error(), 0) );
     }
-    
+
   if ( !::PEM_read_bio_RSAPublicKey(oBio, m_oRsa, NULL, NULL) )
     {
     throw CCryptoException( "Couldn't read key file " + rsFileRsaKey + " - "
                             + ::ERR_error_string(ERR_get_error(), 0) );
     }
-  } // void CCrypto::RsaKeyLoadPublic( const std::string& rsFileRsaKey )
+  } // void CCrypto::RsaKeyLoadPublic( const string& rsFileRsaKey )
 
 
 // Load the public RSA key from the recipients certificate
-void CCrypto::RsaKeyLoadFromCertificate( const std::string& rsFileCertificate )
+void CCrypto::RsaKeyLoadFromCertificate( const string& rsFileCertificate )
   {
   CBio oBio = ::BIO_new_file( rsFileCertificate.c_str(), "r" );
 
@@ -176,7 +181,7 @@ void CCrypto::RsaKeyLoadFromCertificate( const std::string& rsFileCertificate )
                             + rsFileCertificate + " - "
                             + ::ERR_error_string(ERR_get_error(), 0) );
     }
-    
+
   m_oEvpPkey.Delete();
   m_oEvpPkey = ::X509_get_pubkey( m_pX509 );
 
@@ -191,15 +196,15 @@ bool CCrypto::EncryptRsaPublic( CUCBuffer& roBuffer )
   if ( (!m_oRsa.isValid()) || (!m_oRsa->n) )
     {
     return false;
-    }
+    } // if ( (!m_oRsa.isValid()) || (!m_oRsa->n) )
 
   // The pseudo random number generator (PRNG) must be seeded prior to calling
   // RSA_public_encrypt().
   RandomSeed();
 
-  int            nRsaSize     = ::RSA_size(m_oRsa);
-  unsigned char* pucInput     = &roBuffer[0];
-  unsigned char* pucEncrypted = new unsigned char[nRsaSize];
+  int            nRsaSize     = ::RSA_size( m_oRsa );
+  unsigned char* pucInput     = &roBuffer[ 0 ];
+  unsigned char* pucEncrypted = new unsigned char[ nRsaSize ];
 
   CUCBuffer oOutput;
 
@@ -213,8 +218,8 @@ bool CCrypto::EncryptRsaPublic( CUCBuffer& roBuffer )
 
   oOutput.reserve( (nSize/nStep +1) * nRsaSize );
 
-  int nPos  = 0;
-  int nLen  = nStep;
+  int nPos = 0;
+  int nLen = nStep;
   while ( nPos < nSize )
     {
     if ( nPos + nStep > nSize )
@@ -228,7 +233,7 @@ bool CCrypto::EncryptRsaPublic( CUCBuffer& roBuffer )
                                            nPadding );
     if ( 0 > nEncrypted )
       {
-      throw CCryptoException( std::string("Couldn't public RSA encrypt - ")
+      throw CCryptoException( string("Couldn't public RSA encrypt - ")
                               + ::ERR_error_string(ERR_get_error(), 0) );
       }
     nPos     += nLen;
@@ -238,9 +243,9 @@ bool CCrypto::EncryptRsaPublic( CUCBuffer& roBuffer )
       {
       oOutput.push_back( pucEncrypted[n] );
       }
-    }
+    } // while ( nPos < nSize )
 
-  if (g_bVerbose) std::cout << "Encrypted size: " << oOutput.size() << std::endl;
+  if ( g_bVerbose ) cout << "Encrypted size: " << oOutput.size() << endl;
 
   roBuffer = oOutput;
 
@@ -256,9 +261,9 @@ bool CCrypto::DecryptRsaPrivate( CUCBuffer& roBuffer )
     return false;
     }
 
-  int            nRsaSize     = ::RSA_size(m_oRsa);
-  unsigned char* pucInput     = &roBuffer[0];
-  unsigned char* pucDecrypted = new unsigned char[nRsaSize];
+  int            nRsaSize     = ::RSA_size( m_oRsa );
+  unsigned char* pucInput     = &roBuffer[ 0 ];
+  unsigned char* pucDecrypted = new unsigned char[ nRsaSize ];
 
   CUCBuffer oOutput;
 
@@ -269,8 +274,8 @@ bool CCrypto::DecryptRsaPrivate( CUCBuffer& roBuffer )
 
   oOutput.reserve( nSize );
 
-  int nPos  = 0;
-  int nLen  = nStep;
+  int nPos = 0;
+  int nLen = nStep;
   while ( nPos < nSize )
     {
     if ( nPos + nStep > nSize )
@@ -284,7 +289,7 @@ bool CCrypto::DecryptRsaPrivate( CUCBuffer& roBuffer )
                                             nPadding );
     if ( 0 > nDecrypted )
       {
-      throw CCryptoException( std::string("Couldn't private RSA decrypt - ")
+      throw CCryptoException( string("Couldn't private RSA decrypt - ")
                               + ::ERR_error_string(ERR_get_error(), 0) );
       }
     nPos     += nLen;
@@ -294,9 +299,9 @@ bool CCrypto::DecryptRsaPrivate( CUCBuffer& roBuffer )
       {
       oOutput.push_back( pucDecrypted[n] );
       }
-    }
+    } // while ( nPos < nSize )
 
-  if (g_bVerbose) std::cout << "Encrypted size: " << oOutput.size() << std::endl;
+  if ( g_bVerbose ) cout << "Encrypted size: " << oOutput.size() << endl;
 
   roBuffer = oOutput;
 
@@ -311,11 +316,11 @@ int CCrypto::SymetricKeyMake( const EVP_CIPHER* pfCipher,
   m_pfCipher = pfCipher;
   m_pfDigest = pfDigest;
 
-  unsigned char aucKeyBytes[256];
+  unsigned char aucKeyBytes[ 256 ];
   RandomGet( aucKeyBytes, sizeof(aucKeyBytes) );
 
-  strncpy((char*)m_aucSalt, "flowencrypto", PKCS5_SALT_LEN);
-    
+  strncpy( (char*)m_aucSalt, "flowencrypto", PKCS5_SALT_LEN );
+
   RandomGet( m_aucKey, EVP_MAX_KEY_LENGTH );
   RandomGet( m_aucIv,  EVP_MAX_IV_LENGTH  );
 
@@ -331,7 +336,7 @@ int CCrypto::SymetricKeyMake( const EVP_CIPHER* pfCipher,
 
 
 // Encrypt the symetric key using RSA encryption
-std::string CCrypto::SymetricKeyRsaPublicEncrypt()
+string CCrypto::SymetricKeyRsaPublicEncrypt()
   {
   CUCBuffer oBuffer;
   oBuffer.resize( sizeof(m_aucKey) + sizeof(m_aucIv), 0 );
@@ -339,75 +344,87 @@ std::string CCrypto::SymetricKeyRsaPublicEncrypt()
   memcpy( &oBuffer[0],                m_aucKey, sizeof(m_aucKey) );
   memcpy( &oBuffer[sizeof(m_aucKey)], m_aucIv,  sizeof(m_aucIv)  );
 
-  if ( !EncryptRsaPublic( oBuffer ) )
+  if ( !EncryptRsaPublic(oBuffer) )
     {
     return "";
     }
 
-  std::string sResult = ConvertToBase64( &oBuffer[0], oBuffer.size() );
+  string sResult = ConvertToBase64( &oBuffer[0], oBuffer.size() );
 
-  if ( g_bVerbose ) std::cout << "TransportKey64: " << std::endl << sResult << std::endl;
+  if ( g_bVerbose ) cout << "TransportKey64: " << endl << sResult << endl;
 
   return sResult;
-  } // std::string CCrypto::SymetricKeyRsaPublicEncrypt( CRsa& roRsa )
+  } // string CCrypto::SymetricKeyRsaPublicEncrypt( CRsa& roRsa )
 
 
 // Convert Buffer to BASE64 format
-std::string CCrypto::ConvertToBase64()
+string CCrypto::ConvertToBase64()
   {
   return ConvertToBase64( &m_oData[0], m_oData.size() );
-  } // std::string CCrypto::ConvertToBase64( const CUCBuffer& roBuffer )
+  } // string CCrypto::ConvertToBase64( const CUCBuffer& roBuffer )
 
-std::string CCrypto::ConvertToBase64( const unsigned char* pucData, size_t nSize )
+string CCrypto::ConvertToBase64( const unsigned char* pucData, size_t nSize )
   {
-  BIO* pBio64 = ::BIO_new(BIO_f_base64());
-  BIO* pBio   = ::BIO_new(BIO_s_mem());
-       pBio   = ::BIO_push(pBio64, pBio);
-  ::BIO_write(pBio, pucData, nSize);
-  int nResult = BIO_flush(pBio);
+  BIO* pBio64 = ::BIO_new ( BIO_f_base64() ); // may yield 0!
+  BIO* pBio   = ::BIO_new ( BIO_s_mem() );    // may yield 0!
+       pBio   = ::BIO_push( pBio64, pBio );
+  ::BIO_write( pBio, pucData, nSize );
+  int nResult = BIO_flush( pBio );
   if ( 1 != nResult )
     {
     throw CCryptoException( "BIO_flush in ConvertToBase64" ); 
     }
   BUF_MEM* ptBuffer;
-  ::BIO_get_mem_ptr(pBio, &ptBuffer);
+  ::BIO_get_mem_ptr( pBio, &ptBuffer );
 
-  char* buff = new char[ptBuffer->length+1];
-  memcpy(buff, ptBuffer->data, ptBuffer->length);
-  buff[ptBuffer->length] = 0;
-  std::string sResult = buff;
-  delete buff;
+  string sResult( ptBuffer->length+1, 0 );
+  memcpy( &sResult[0], ptBuffer->data, ptBuffer->length );
 
-//- NOT: std::string sResult = (char*)ptBuffer->data;
-
-  ::BIO_free_all(pBio); // frees ptBuffer too
+  ::BIO_free_all( pBio ); // frees ptBuffer too
 
   return sResult;
-  } // std::string CCrypto::ConvertToBase64( unsigned char* pucData, int nSize )
+  } // string CCrypto::ConvertToBase64( unsigned char* pucData, int nSize )
 
+string CCrypto::BuildTransportPackage()
+  {
+  return SymetricKeyRsaPublicEncrypt() + s_sDelimiter + EncryptToBase64();
+  } // string CCrypto::BuildTransportPackage()
+
+const CUCBuffer& CCrypto::SolveTransportPackage( const std::string& rsBase64 )
+  {
+  string sKey = rsBase64.substr( 0, rsBase64.find(s_sDelimiter) );
+  if ( g_bVerbose ) cout << "KEY-BASE64" << endl << sKey << endl;
+  SymetricKeyRsaPrivateDecrypt( sKey );
+
+  string sData = rsBase64.substr( rsBase64.find(s_sDelimiter)
+                                              + s_sDelimiter.length() );
+  if ( g_bVerbose ) cout << "DATA-BASE64" << endl << sData << endl;
+
+  return DecryptFromBase64( sData );
+  } // const CUCBuffer& CCrypto::SolveTransportPackage( const std::string& rsBase64 )
 
 // See next methode
-std::string CCrypto::EncryptToBase64()
+string CCrypto::EncryptToBase64()
   {
   return EncryptToBase64( &m_oData[0], m_oData.size() );
-  } // std::string CCrypto::EncryptToBase64( const CUCBuffer& roBuffer )
+  } // string CCrypto::EncryptToBase64( const CUCBuffer& roBuffer )
 
 // Generate a symetric key
 // Encrypt the data
 // Encrypt the symtric key asymetrically
 // Convert both to BASE64
 // Combine the output with a seperator
-std::string CCrypto::EncryptToBase64( const unsigned char* pucData, size_t nSize )
+string CCrypto::EncryptToBase64( const unsigned char* pucData, size_t nSize )
   {
   SymetricKeyMake( m_pfCipher );
 
-  BIO* pBioEnc = ::BIO_new ( BIO_f_cipher() );
-  BIO* pBio64  = ::BIO_new ( BIO_f_base64() );
-  BIO* pBio    = ::BIO_new ( BIO_s_mem() );
+  BIO* pBioEnc = ::BIO_new ( BIO_f_cipher() ); // may yield 0!
+  BIO* pBio64  = ::BIO_new ( BIO_f_base64() ); // may yield 0!
+  BIO* pBio    = ::BIO_new ( BIO_s_mem() );    // may yield 0!
        pBio    = ::BIO_push( pBio64,  pBio );
        pBio    = ::BIO_push( pBioEnc, pBio );
 
-  ::BIO_set_cipher(pBio, m_pfCipher, m_aucKey, m_aucIv, 1);
+  ::BIO_set_cipher( pBio, m_pfCipher, m_aucKey, m_aucIv, 1 );
   ::BIO_write( pBio, pucData, nSize );
   int nResult = BIO_flush( pBio );
   if ( 1 != nResult )
@@ -415,86 +432,74 @@ std::string CCrypto::EncryptToBase64( const unsigned char* pucData, size_t nSize
     throw CCryptoException( "BIO_flush in EncryptToBase64" ); 
     }
   BUF_MEM* ptBuffer;
-  ::BIO_get_mem_ptr(pBio, &ptBuffer);
+  ::BIO_get_mem_ptr( pBio, &ptBuffer );
 
-  char* buff = new char[ptBuffer->length+1];
-  memcpy(buff, ptBuffer->data, ptBuffer->length);
-  buff[ptBuffer->length] = 0;
-  std::string sResult = buff;
-  delete buff;
+  string sResult( ptBuffer->length+1, 0 );
+  memcpy( &sResult[0], ptBuffer->data, ptBuffer->length );
 
-//- NOT: std::string sResult = (char*)ptBuffer->data;
+  ::BIO_free_all( pBio );
 
-  ::BIO_free_all(pBio);
-
-  return SymetricKeyRsaPublicEncrypt() + s_sDelimiter + sResult;
-  } // std::string CCrypto::EncryptToBase64( unsigned char* pucData, int nSize );
+  return sResult;
+  } // string CCrypto::EncryptToBase64( unsigned char* pucData, int nSize );
 
 
 // Convert BASE64 input to binary output, may spill out simple strings (mostly)
-const CUCBuffer& CCrypto::ConvertFromBase64( const std::string& rsBase64 )
+const CUCBuffer& CCrypto::ConvertFromBase64( const string& rsBase64 )
   {
   m_oData.clear();
   m_oData.reserve( rsBase64.length()/2 );
   unsigned char uc;
 
-  BIO* pBio64 = ::BIO_new(BIO_f_base64()); // may yield 0!
+  BIO* pBio64 = ::BIO_new ( ::BIO_f_base64() ); // may yield 0!
   BIO* pBio   = ::BIO_new_mem_buf( (void*)rsBase64.c_str(), -1 );
-       pBio   = ::BIO_push(pBio64, pBio);
-  while ( ::BIO_read(pBio, &uc, 1) > 0 )
-    {
-    m_oData.push_back(uc);
-    }
-
-  ::BIO_free_all(pBio);
-
-  return m_oData;
-  } // const CUCBuffer& CCrypto::ConvertFromBase64( const std::string& sBase64 )
-
-
-// Decrypt a symetric key using RSA asymetric decryption
-bool CCrypto::SymetricKeyRsaPrivateDecrypt( const std::string& rsEncrypted )
-  {
-  CUCBuffer oBuffer = ConvertFromBase64( rsEncrypted );
-
-  DecryptRsaPrivate( oBuffer );
-
-  memcpy(m_aucKey, &oBuffer[0],                sizeof(m_aucKey) );
-  memcpy(m_aucIv,  &oBuffer[sizeof(m_aucKey)], sizeof(m_aucIv)  );
-
-  return true;
-  } // bool CCrypto::SymetricKeyRsaPrivateDecrypt( const std::string& rsEncrypted )
-
-
-// Split an encrypted 'BASE64' package to key and content blocks
-// Decrypt the symetric key by asymetric RSA decryption
-// Decrypt the symetric encrypted content using the decrypted key encrypted key
-const CUCBuffer& CCrypto::DecryptFromBase64( const std::string& rsBase64 )
-  {
-  std::string sKey = rsBase64.substr(0, rsBase64.find(s_sDelimiter));
-  if ( g_bVerbose ) std::cout << "KEY-BASE64" << std::endl << sKey << std::endl;
-  SymetricKeyRsaPrivateDecrypt( sKey );
-
-  unsigned char uc;
-
-  std::string sData = rsBase64.substr( rsBase64.find(s_sDelimiter)
-                                                     + s_sDelimiter.length() );
-  if ( g_bVerbose )  std::cout << "DATA-BASE64" << std::endl << sData << std::endl;
-  m_oData.clear();
-  m_oData.reserve( rsBase64.length()/2 );
-
-  BIO* pBioEnc = ::BIO_new( BIO_f_cipher() ); // may yield 0!
-  BIO* pBio64  = ::BIO_new( BIO_f_base64() ); // may yield 0!
-  BIO* pBio    = ::BIO_new_mem_buf( (void*)sData.c_str(), -1 );
-       pBio    = ::BIO_push( pBio64,  pBio);
-       pBio    = ::BIO_push( pBioEnc, pBio );
-  ::BIO_set_cipher(pBio, m_pfCipher, m_aucKey, m_aucIv, 0);
+       pBio   = ::BIO_push( pBio64, pBio );
   while ( ::BIO_read(pBio, &uc, 1) > 0 )
     {
     m_oData.push_back( uc );
     }
 
-  ::BIO_free_all(pBio);
+  ::BIO_free_all( pBio );
 
   return m_oData;
-  } // const CUCBuffer& CCrypto::ConvertFromBase64( const std::string& sBase64 )
+  } // const CUCBuffer& CCrypto::ConvertFromBase64( const string& sBase64 )
+
+
+// Decrypt a symetric key using RSA asymetric decryption
+bool CCrypto::SymetricKeyRsaPrivateDecrypt( const string& rsEncrypted )
+  {
+  CUCBuffer oBuffer = ConvertFromBase64( rsEncrypted );
+
+  DecryptRsaPrivate( oBuffer );
+
+  memcpy( m_aucKey, &oBuffer[0],                sizeof(m_aucKey) );
+  memcpy( m_aucIv,  &oBuffer[sizeof(m_aucKey)], sizeof(m_aucIv)  );
+
+  return true;
+  } // bool CCrypto::SymetricKeyRsaPrivateDecrypt( const string& rsEncrypted )
+
+
+// Split an encrypted 'BASE64' package to key and content blocks
+// Decrypt the symetric key by asymetric RSA decryption
+// Decrypt the symetric encrypted content using the decrypted key encrypted key
+const CUCBuffer& CCrypto::DecryptFromBase64( const string& rsBase64 )
+  {
+  m_oData.clear();
+  m_oData.reserve( rsBase64.length()/2 );
+
+  BIO* pBioEnc = ::BIO_new ( BIO_f_cipher() ); // may yield 0!
+  BIO* pBio64  = ::BIO_new ( BIO_f_base64() ); // may yield 0!
+  BIO* pBio    = ::BIO_new_mem_buf( (void*)rsBase64.c_str(), -1 );
+       pBio    = ::BIO_push( pBio64,  pBio );
+       pBio    = ::BIO_push( pBioEnc, pBio );
+  ::BIO_set_cipher( pBio, m_pfCipher, m_aucKey, m_aucIv, 0 );
+
+  unsigned char uc;
+  while ( ::BIO_read(pBio, &uc, 1) > 0 )
+    {
+    m_oData.push_back( uc );
+    }
+
+  ::BIO_free_all( pBio );
+
+  return m_oData;
+  } // const CUCBuffer& CCrypto::ConvertFromBase64( const string& sBase64 )

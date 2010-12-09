@@ -186,12 +186,6 @@ string CContainer::CLUIDGet()
   } // string CContainer::CLUIDGet()
 
 
-const string& CContainer::OwnerGet() const
-  {
-  return m_sSender;
-  } // const string& CContainer::OwnerGet() const
-
-
 bool CContainer::isFor( const string& rsRecipient )
   {
   for ( CListString::iterator it = m_lsRecipients.begin(); it != m_lsRecipients.end(); ++it)

@@ -56,6 +56,8 @@
 
 bool g_bVerbose = false;
 
+using namespace std;
+
 int main( int argc, const char* argv[] )
   {
   CEnvironment oEnvironment( argc, argv );
@@ -76,68 +78,71 @@ int main( int argc, const char* argv[] )
   oEnvironment.OptionAppend( "trust-path",  required_argument, 0, 't', "Path to trusted certificates",                  CA_PATH );
   oEnvironment.OptionAppend( "call",        optional_argument, 0, 'c', "Call message(s) from the server",               "" );
 
-  /// we need to read the command line parameters
+  // we need to read the command line parameters
   oEnvironment.CommandlineRead();
-  /// for convienice we create a local shortcut to the environment value of 'isVerbose()'
+  // being verbose?
   g_bVerbose = oEnvironment.find("verbose") != oEnvironment.end();
 
-  /// the real operation starts here
+  // the real operation starts here
   CDomain oDomain;
   CPulex* poPulex;
-  /// our domain starts with only one Pulex
+  // our domain starts with only one Pulex
   oDomain += poPulex = new CPulex();
 
 
-  /// reading the (potentially given) piped input'directly' into the pulex object
-  /// the operation is a bit tricky because of a little problem with std::cin
-  /// we need to read unblocked for several reanson. one of the is the fact that
-  /// we can't be certain, tha piped input is presented anyway
-  /// possibly importand is the operation to set the file control flags back to
-  /// the patter from before out manipulation to ensure normal behavior of  std::cin
-  /// after the unblocked operation
-  /// -- this methode (?) of deblocking std::cin not reliable for pipe input -- have to work on it !
-  if ( g_bVerbose ) std::cout << "===pipe-begin===" << std::endl;
-  int flags = fcntl(fileno(stdin), F_GETFL, 0);
-  fcntl(fileno(stdin), F_SETFL, flags | O_NONBLOCK);
-    std::string s;
-    std::cin.clear();
-//    for ( getline( std::cin, s ); std::cin.good(); getline( std::cin, s ) )
-//    while ( getline( std::cin, s ) )
-    for ( getline( std::cin, s ); !std::cin.eof(); getline( std::cin, s ) )
+  // reading the (potentially given) piped input'directly' into the pulex object
+  // the operation is a bit tricky because of a little problem with cin we need
+  // to read unblocked for several reanson. one of the is the fact that we can't
+  // be certain, tha piped input is presented anyway possibly importand is the
+  // operation to set the file control flags back to the patter from before out
+  // manipulation to ensure normal behavior of  cin after the unblocked operation
+  // --
+  // -- this methode (?) of deblocking cin not reliable for pipe input
+  // -- have to work on it !
+  if ( g_bVerbose ) cout << "===pipe-begin===" << endl;
+  int flags = ::fcntl(fileno(stdin), F_GETFL, 0);
+  ::fcntl( ::fileno(stdin), F_SETFL, flags | O_NONBLOCK );
+    string s;
+    cin.clear();
+//    for ( getline(cin, s); cin.good(); getline(cin, s) )
+//    while ( getline(cin, s) )
+    for ( getline( cin, s ); !cin.eof(); getline(cin, s) )
       {
-      if ( g_bVerbose ) std::cout << s << std::endl;
+      if ( g_bVerbose ) cout << s << endl;
       *poPulex << s;
-//      if ( !std::cin.good() ) break;
+//      if ( !cin.good() ) break;
       }
-    fcntl(fileno(stdin), F_SETFL, flags);
-  std::cin.clear();
-  if ( g_bVerbose ) std::cout << "===pipe-end===" << std::endl << std::endl;
+    ::fcntl( ::fileno(stdin), F_SETFL, flags );
+  cin.clear();
+  if ( g_bVerbose ) cout << "===pipe-end===" << endl << endl;
 
-  /// putting together defaults and command line input for the Pulex and the server parameters
+  // putting together defaults and command line input for the Pulex
   poPulex->SenderSet      ( oEnvironment["sender"] );
   poPulex->RecipientAdd   ( oEnvironment["recipient"] );
   poPulex->ClientSideIdSet( atoi(oEnvironment["cluid"].c_str()) );
 
   *poPulex << oEnvironment["message"];
 
-  std::string sSenderCrt = oEnvironment["cert-dir"] + poPulex->SenderGet() + ".crt";
-  std::string sSenderKey = oEnvironment["cert-dir"] + poPulex->SenderGet() + ".key";
+  string sSenderCrt = oEnvironment["cert-dir"] + poPulex->SenderGet() + ".crt";
+  string sSenderKey = oEnvironment["cert-dir"] + poPulex->SenderGet() + ".key";
 
-  if ( g_bVerbose ) std::cout << sSenderCrt << std::endl;
-  if ( g_bVerbose ) std::cout << sSenderKey << std::endl;
-  if ( g_bVerbose ) std::cout << "*" << oEnvironment["password"] << "*" << std::endl;
-  if ( g_bVerbose ) std::cout << oEnvironment["trust-chain"] << std::endl;
-  if ( g_bVerbose ) std::cout << oEnvironment["trust-path"]  << std::endl;
+  if ( g_bVerbose )
+    {
+    cout << sSenderCrt << endl;
+    cout << sSenderKey << endl;
+    cout << "*" << oEnvironment["password"] << "*" << endl;
+    cout << oEnvironment["trust-chain"] << endl;
+    cout << oEnvironment["trust-path"]  << endl;
+    cout << *poPulex << endl;
+    cout << "HOST: " << oEnvironment["host"] << endl;
+    cout << "PORT: " << oEnvironment["port"] << endl;
+    }
 
-  if ( g_bVerbose ) std::cout << *poPulex << std::endl;
-
-  /// try to let all Pulexes jump to the server
+  // try to let all Pulexes jump to the server
 
   ERR_load_crypto_strings(); // or: SSL_load_error_strings();
   try
     {
-    if ( g_bVerbose ) std::cout << "HOST: " << oEnvironment["host"] << std::endl;
-    if ( g_bVerbose ) std::cout << "PORT: " << oEnvironment["port"] << std::endl;
     CSocketClient oConnection( oEnvironment["host"],
                                oEnvironment["port"],
                                sSenderCrt,
@@ -146,34 +151,37 @@ int main( int argc, const char* argv[] )
                                oEnvironment["trust-chain"],
                                oEnvironment["trust-path"] );
 
-    std::string sServerReply;
-    /// iterate over all Pulexes in our Domain and let them jump
+    string sServerReply;
+    // iterate over all Pulexes in our Domain and let them jump
     try
       {
-      for (CDomain::iterator it=oDomain.begin(); it != oDomain.end(); ++it)
+      for ( CDomain::iterator it  = oDomain.begin();
+                              it != oDomain.end();
+                            ++it )
         {
         oConnection << **it ;
+//        cout << **it ;
 //        oConnection << "c:all" ;
         }
       oConnection << ".\r";
 
-      /// collect the answer from the server (regarding ALL jumped Pulexes)
-      std::string sInput;
+      // collect the answer from the server (regarding ALL jumped Pulexes)
+      string sInput;
       do
         {
         oConnection >> sInput;
         sServerReply += sInput;
-        } while ( sInput.rfind(".\r") == std::string::npos );
+        } while ( sInput.rfind(".\r") == string::npos );
       }
     catch ( CSocketException& e )
       {
-      std::cout << "Exception: " << e.Info() << "\n";
+      cout << "Exception: " << e.Info() << "\n";
       }
-    if ( g_bVerbose ) std::cout << "Response from server:\n" << sServerReply << "\n";;
+    if ( g_bVerbose ) cout << "Response from server:\n" << sServerReply << "\n";;
     }
   catch ( CSocketException& e )
     {
-    std::cout << "Exception: " << e.Info() << "\n";
+    cout << "Exception: " << e.Info() << "\n";
     }
   ERR_free_strings();
 

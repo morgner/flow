@@ -74,11 +74,10 @@ class CContainer : public CListString
     virtual long ServerSideIdSet( long rnServerSideId );
     virtual long ServerSideIdSet( const std::string& rsServerSideId );
                   
-          std::string  RGUIDGet();
-          std::string  CLUIDGet();
-    const std::string& OwnerGet() const;
+    virtual std::string  RGUIDGet();
+    virtual std::string  CLUIDGet();
 
-          bool         isFor( const std::string& rsRecipient );
+    virtual bool isFor( const std::string& rsRecipient );
 
     // e.g. "c:PULEX", "x:please read", "x:the manual"
     const std::string& operator += ( const std::string& rsElement );

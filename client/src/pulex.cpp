@@ -86,7 +86,7 @@ const string& CPulex::operator << ( const string& rsData )
   {
   push_back(rsData);
   return rsData;
-  }
+  } // const string& CPulex::operator << ( const string& rsData )
 
 
 // Creating the SHA1 checksum of the certificate directed to by rsName
@@ -179,8 +179,9 @@ template<typename T>
 
     CCrypto oCrypto( sosBuffer.str() );
     oCrypto.RsaKeyLoadFromCertificate( "certificates/client/" + *m_lsRecipients.begin() + ".crt" );
-    roStream << oCrypto.EncryptToBase64();
+//    roStream << oCrypto.EncryptToBase64();
+    roStream << oCrypto.BuildTransportPackage();
 
     roStream << "===== end of message =====" << "\n";
     return roStream;
-    } // T& CPulex::Send( T& roStream )
+    } // template<typename T> T& CPulex::Send( T& roStream )

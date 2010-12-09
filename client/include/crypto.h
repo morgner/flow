@@ -76,6 +76,9 @@ class CCrypto
     void RsaKeyLoadPrivate( const std::string& rsFileRsaKey );
     void RsaKeyLoadFromCertificate( const std::string& rsFileCertificate );
 
+    std::string      BuildTransportPackage();
+    const CUCBuffer& SolveTransportPackage( const std::string& rsBase64 );
+
     std::string      EncryptToBase64  ();
     const CUCBuffer& DecryptFromBase64( const std::string& rsBase64 );
 
