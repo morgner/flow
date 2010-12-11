@@ -1,5 +1,5 @@
 /***************************************************************************
- rsapadding.h
+ rsapadding.cpp
  -----------------------
  begin                 : Sat Dec 11 2010
  copyright             : Copyright (C) 2010 by Manfred Morgner
@@ -28,33 +28,43 @@
  ***************************************************************************/
 
 
-#ifndef _RSA_PADDING_H
-#define _RSA_PADDING_H
+#include "rsapadding.h"
 
 
-#include <openssl/rsa.h>
+CRsaPadding::CRsaPadding( int nPadding )
+  : m_nPadding(nPadding)
+  {}
 
 
-// flen must be
-// less than RSA_size(rsa) - 11 for RSA_PKCS1_PADDING or RSA_SSLV23_PADDING,
-// less than RSA_size(rsa) - 41 for RSA_PKCS1_OAEP_PADDING and
-//   exactly RSA_size(rsa)      for RSA_NO_PADDING.
-class CRsaPadding
+int CRsaPadding::PaddingGet()
   {
-  protected:
-    int m_nPadding;
+  return m_nPadding;
+  }
 
-  public:
-    CRsaPadding( int nPadding = RSA_PKCS1_OAEP_PADDING );
 
-    // Get the padding value of the object
-    int PaddingGet();
-    // full size of the RSA thing
-    int  RsaEncSizeGet( const RSA* pRsa );
-    // by padding reduced size of the RSA thing
-    int  RsaPadSizeGet( const RSA* pRsa );
-    long ResultSizeGet( int nSize, int nRsaSize );
+int CRsaPadding::RsaEncSizeGet( const RSA* pRsa )
+  {
+  return ::RSA_size( pRsa );
+  }
 
-  }; // class CRsaPadding
 
-#endif // _RSA_PADDING_H
+int CRsaPadding::RsaPadSizeGet( const RSA* pRsa )
+  {
+  int nRsaSize = RsaEncSizeGet( pRsa );
+  switch ( m_nPadding )
+    {
+    case RSA_PKCS1_PADDING:
+    case RSA_SSLV23_PADDING:
+      return nRsaSize -12;
+    case RSA_PKCS1_OAEP_PADDING:
+      return nRsaSize -42;
+    default:
+      return nRsaSize;
+    } // switch ( m_nPadding )
+  } // int MaxSizeGet( const RSA* pRsa )
+
+long CRsaPadding::ResultSizeGet( int nSize, int nRsaSize )
+  {
+  int nRest = ( nSize % nRsaSize > 0) ? 1 : 0;
+  return ( nSize/nRsaSize + nRest ) * nRsaSize;
+  }

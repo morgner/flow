@@ -32,7 +32,7 @@ SERVER_SRC=$(SERVER_PATH)/src/partner.cpp $(SERVER_PATH)/main.cpp
 SERVER_OBJ=$(SERVER_SRC:.cpp=.o)
 SERVER=flowserver
 
-CLIENT_SRC=$(CLIENT_PATH)/src/pulex.cpp $(CLIENT_PATH)/src/domain.cpp $(CLIENT_PATH)/src/crypto.cpp $(CLIENT_PATH)/src/cryptoexception.cpp $(CLIENT_PATH)/main.cpp
+CLIENT_SRC=$(CLIENT_PATH)/src/pulex.cpp $(CLIENT_PATH)/src/domain.cpp $(CLIENT_PATH)/src/rsapadding.cpp $(CLIENT_PATH)/src/crypto.cpp $(CLIENT_PATH)/src/cryptoexception.cpp $(CLIENT_PATH)/main.cpp
 CLIENT_OBJ=$(CLIENT_SRC:.cpp=.o)
 CLIENT=flowclient
 
