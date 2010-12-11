@@ -45,8 +45,8 @@
 #define PASSWORD  ""
 
 
-#include <stdlib.h> // for atoi(), exit()
-#include <stdio.h>  // for EOF
+// #include <stdlib.h> // for atol(), exit()
+// #include <stdio.h>  // for EOF
 #include <fcntl.h>  // for fnctl()
 
 #include "environment.h"
@@ -58,11 +58,39 @@ bool g_bVerbose = false;
 
 using namespace std;
 
+// A class to load and unload ERR texts from OpenSSL
+class COpenSslError
+  {
+  protected:
+    static bool s_bLoaded;
+  public:
+    COpenSslError()
+      {
+      if ( !s_bLoaded )
+        {
+        ERR_load_crypto_strings(); // or: SSL_load_error_strings();
+        s_bLoaded = true;
+        } // if ( !s_bLoaded )
+      } // COpenSslError()
+
+    virtual ~COpenSslError()
+      {
+      if ( s_bLoaded )
+        {
+        ERR_free_strings();
+        s_bLoaded = false;
+        } // if ( !s_bLoaded )
+      }
+  }; // class COpenSslError
+
+bool COpenSslError::s_bLoaded = false;
+
+
 int main( int argc, const char* argv[] )
   {
   CEnvironment oEnvironment( argc, argv );
 
-  /// these are the command line options                           
+  /// these are the command line options
   oEnvironment.OptionAppend( "help",        no_argument,       0, 'H', "Show this help text",                           "" );
   oEnvironment.OptionAppend( "version",     no_argument,       0, 'V', "Show version information",                      "" );
   oEnvironment.OptionAppend( "verbose",     no_argument,       0, 'v', "Act verbose",                                   "" );
@@ -119,7 +147,7 @@ int main( int argc, const char* argv[] )
   // putting together defaults and command line input for the Pulex
   poPulex->SenderSet      ( oEnvironment["sender"] );
   poPulex->RecipientAdd   ( oEnvironment["recipient"] );
-  poPulex->ClientSideIdSet( atoi(oEnvironment["cluid"].c_str()) );
+  poPulex->ClientSideIdSet( atol(oEnvironment["cluid"].c_str()) );
 
   *poPulex << oEnvironment["message"];
 
@@ -128,19 +156,18 @@ int main( int argc, const char* argv[] )
 
   if ( g_bVerbose )
     {
-    cout << sSenderCrt << endl;
-    cout << sSenderKey << endl;
-    cout << "*" << oEnvironment["password"] << "*" << endl;
-    cout << oEnvironment["trust-chain"] << endl;
-    cout << oEnvironment["trust-path"]  << endl;
-    cout << *poPulex << endl;
-    cout << "HOST: " << oEnvironment["host"] << endl;
-    cout << "PORT: " << oEnvironment["port"] << endl;
+    cout << "Host.......: " << oEnvironment["host"] << endl;
+    cout << "Port.......: " << oEnvironment["port"] << endl;
+    cout << "Sender CRT.: " << sSenderCrt << endl;
+    cout << "Sender KEY.: " << sSenderKey << endl;
+    cout << "Password...: " << oEnvironment["password"]    << endl;
+    cout << "T-Chain....: " << oEnvironment["trust-chain"] << endl;
+    cout << "T-Path.....: " << oEnvironment["trust-path"]  << endl;
+    cout << endl;
     }
 
   // try to let all Pulexes jump to the server
-
-  ERR_load_crypto_strings(); // or: SSL_load_error_strings();
+  COpenSslError oOSE;
   try
     {
     CSocketClient oConnection( oEnvironment["host"],
@@ -160,8 +187,8 @@ int main( int argc, const char* argv[] )
                             ++it )
         {
         oConnection << **it ;
-//        cout << **it ;
-//        oConnection << "c:all" ;
+        cout << **it ;
+        oConnection << "c:all" ;
         }
       oConnection << ".\r";
 
@@ -177,13 +204,12 @@ int main( int argc, const char* argv[] )
       {
       cout << "Exception: " << e.Info() << "\n";
       }
-    if ( g_bVerbose ) cout << "Response from server:\n" << sServerReply << "\n";;
+    if ( g_bVerbose ) cout << "Response from server:\n" << sServerReply << "\n";
     }
   catch ( CSocketException& e )
     {
     cout << "Exception: " << e.Info() << "\n";
     }
-  ERR_free_strings();
 
   return 0;
   } // int main( int argc, char* argv[] )

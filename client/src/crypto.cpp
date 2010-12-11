@@ -30,6 +30,7 @@
 
 #include "crypto.h"
 #include "cryptoexception.h"
+#include "rsapadding.h"
 
 #include <iostream>
 
@@ -61,7 +62,6 @@ CCrypto::CCrypto( const string& rsInput )
     m_oData[ rsInput.length() ] = 0;
     }
   } // CCrypto::CCrypto( const string& rsInput )
-
 
 // Anything frees itself on the close
 CCrypto::~CCrypto()
@@ -182,12 +182,9 @@ void CCrypto::RsaKeyLoadFromCertificate( const string& rsFileCertificate )
                             + ::ERR_error_string(ERR_get_error(), 0) );
     }
 
-  m_oEvpPkey.Delete();
-  m_oEvpPkey = ::X509_get_pubkey( m_pX509 );
-
-  m_oRsa.Delete();
-  m_oRsa = ::EVP_PKEY_get1_RSA( m_oEvpPkey );
-  }
+  m_oEvpPkey = ::X509_get_pubkey  ( m_pX509 );
+  m_oRsa     = ::EVP_PKEY_get1_RSA( m_oEvpPkey );
+  } // void CCrypto::RsaKeyLoadFromCertificate( const string& rsFileCertificate )
 
 
 // RSA encrypt a buffer, return values will replace input values
@@ -202,21 +199,17 @@ bool CCrypto::EncryptRsaPublic( CUCBuffer& roBuffer )
   // RSA_public_encrypt().
   RandomSeed();
 
-  int            nRsaSize     = ::RSA_size( m_oRsa );
+  CRsaPadding oRsaPadding( RSA_PKCS1_OAEP_PADDING );
+  int nRsaSize = oRsaPadding.RsaEncSizeGet( m_oRsa );
+  int nSize    = roBuffer.size();
+  int nPadding = oRsaPadding.PaddingGet();
+  int nStep    = oRsaPadding.RsaPadSizeGet( m_oRsa );
+
   unsigned char* pucInput     = &roBuffer[ 0 ];
   unsigned char* pucEncrypted = new unsigned char[ nRsaSize ];
 
   CUCBuffer oOutput;
-
-  // flen must be
-  // less than RSA_size(rsa) - 11 for RSA_PKCS1_PADDING or RSA_SSLV23_PADDING,
-  // less than RSA_size(rsa) - 41 for RSA_PKCS1_OAEP_PADDING and
-  //   exactly RSA_size(rsa)      for RSA_NO_PADDING.
-  int nPadding = RSA_PKCS1_OAEP_PADDING;
-  int nStep    = nRsaSize-12;
-  int nSize    = roBuffer.size();
-
-  oOutput.reserve( (nSize/nStep +1) * nRsaSize );
+  oOutput.reserve( oRsaPadding.ResultSizeGet(nSize, nStep) );
 
   int nPos = 0;
   int nLen = nStep;
@@ -261,17 +254,17 @@ bool CCrypto::DecryptRsaPrivate( CUCBuffer& roBuffer )
     return false;
     }
 
-  int            nRsaSize     = ::RSA_size( m_oRsa );
+  // nPadding must be the same as in "EncryptRsaPublic"
+  CRsaPadding oRsaPadding( RSA_PKCS1_OAEP_PADDING );
+  int nRsaSize = oRsaPadding.RsaEncSizeGet( m_oRsa );
+  int nSize    = roBuffer.size();
+  int nPadding = oRsaPadding.PaddingGet();
+  int nStep    = nRsaSize;
+
   unsigned char* pucInput     = &roBuffer[ 0 ];
   unsigned char* pucDecrypted = new unsigned char[ nRsaSize ];
 
   CUCBuffer oOutput;
-
-  // nPadding must be the same as in "EncryptRsaPublic"
-  int nPadding = RSA_PKCS1_OAEP_PADDING;
-  int nStep    = nRsaSize;
-  int nSize    = roBuffer.size();
-
   oOutput.reserve( nSize );
 
   int nPos = 0;
@@ -351,7 +344,7 @@ string CCrypto::SymetricKeyRsaPublicEncrypt()
 
   string sResult = ConvertToBase64( &oBuffer[0], oBuffer.size() );
 
-  if ( g_bVerbose ) cout << "TransportKey64: " << endl << sResult << endl;
+//  if ( g_bVerbose ) cout << "TransportKey64: " << endl << sResult << endl;
 
   return sResult;
   } // string CCrypto::SymetricKeyRsaPublicEncrypt( CRsa& roRsa )
@@ -447,12 +440,13 @@ string CCrypto::EncryptToBase64( const unsigned char* pucData, size_t nSize )
 const CUCBuffer& CCrypto::ConvertFromBase64( const string& rsBase64 )
   {
   m_oData.clear();
-  m_oData.reserve( rsBase64.length()/2 );
+  m_oData.reserve( rsBase64.length() >> 1 );
   unsigned char uc;
 
   BIO* pBio64 = ::BIO_new ( ::BIO_f_base64() ); // may yield 0!
   BIO* pBio   = ::BIO_new_mem_buf( (void*)rsBase64.c_str(), -1 );
        pBio   = ::BIO_push( pBio64, pBio );
+
   while ( ::BIO_read(pBio, &uc, 1) > 0 )
     {
     m_oData.push_back( uc );
