@@ -27,6 +27,7 @@
  *                                                                         *
  ***************************************************************************/
 
+
 #include "domain.h"
 
 const std::string CDomain::s_sClassName = "DOMAIN";
