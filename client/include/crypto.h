@@ -79,6 +79,8 @@ class CCrypto
     std::string      BuildTransportPackage();
     const CUCBuffer& SolveTransportPackage( const std::string& rsBase64 );
 
+    static std::string FingerprintCrt( const std::string& rsPartnerAlias );
+
     std::string      EncryptToBase64  ();
     const CUCBuffer& DecryptFromBase64( const std::string& rsBase64 );
 

@@ -187,6 +187,58 @@ void CCrypto::RsaKeyLoadFromCertificate( const string& rsFileCertificate )
   } // void CCrypto::RsaKeyLoadFromCertificate( const string& rsFileCertificate )
 
 
+std::string CCrypto::FingerprintCrt( const std::string& rsPartnerAlias )
+  {
+  if ( !rsPartnerAlias.length() ) return string( 40, '0' );
+
+  // This is where we expect the certificate to live
+  string sFileName = "certificates/client/" + rsPartnerAlias + ".crt";
+
+  // Opens a file based readonly BIO to read from the certificate file
+  CBio oBio = ::BIO_new_file( sFileName.c_str(), "r" );
+  if ( !oBio.isValid() )
+    {
+    return "no-name-" + rsPartnerAlias;
+    throw CCryptoException( "Couldn't open X509 file for: " + rsPartnerAlias );
+    }
+
+  // Structured storage for a certificate
+  CX509 oX509 = ::X509_new();
+  // Reads a PEM certificate file, AUX is for PEM, without AUX DER is expected
+  // ptX509result is the same as (X509*)oX509 = not to be deleted!
+  X509* ptX509result = ::PEM_read_bio_X509_AUX( oBio, oX509, 0, 0 );
+
+  CUChar oDer;
+  // i2d_X509() encodes the structure pointed to by x into DER format. If out
+  // is not NULL is writes the DER encoded data to the buffer at *out, and
+  // increments it to point after the data just written. If the return value is
+  // negative an error occurred, otherwise it returns the length of the encoded
+  // data.
+  //
+  // For OpenSSL 0.9.7 and later if *out is NULL memory will be allocated for a
+  // buffer and the encoded data written to it. In this case *out is not
+  //  incremented and it points to the start of the data just written.
+  int nSize = i2d_X509( ptX509result, oDer );
+
+  CUChar oSha1 = (unsigned char*) malloc( SHA_DIGEST_LENGTH );
+  // Generates the SHA1 checksum from given DER certificate
+  if ( !SHA1( oDer, nSize, oSha1) )
+    {
+    throw CCryptoException( "Couldn't create fingerprint for: "
+                           + rsPartnerAlias );
+    }
+
+  // Building the ASCII-HEX form of the fingerprint
+  char pszHexSha1[ 41 ];
+  for ( int n = 0; n < 20; n++ )
+    {
+    sprintf( &pszHexSha1[ n << 1 ], "%02X", ((unsigned char*)oSha1)[ n ] );
+    }
+  if ( g_bVerbose ) cout << pszHexSha1 << " for " << rsPartnerAlias << endl; 
+  return pszHexSha1;
+  } // std::string CCrypto::FingerprintCrt( const std::string& rsPartnerAlias )
+
+
 // RSA encrypt a buffer, return values will replace input values
 bool CCrypto::EncryptRsaPublic( CUCBuffer& roBuffer )
   {
