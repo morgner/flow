@@ -183,13 +183,19 @@ int main( int argc, const char* argv[] )
     // iterate over all Pulexes in our Domain and let them jump
     try
       {
-      for ( CDomain::iterator it  = oDomain.begin();
-                              it != oDomain.end();
-                            ++it )
+      if ( oEnvironment.find("call") != oEnvironment.end() )
         {
-        oConnection << **it ;
-        cout << **it ;
-        oConnection << "c:all" ;
+        oConnection << "c:all";
+        }
+      else
+        {
+        for ( CDomain::iterator it  = oDomain.begin();
+                                it != oDomain.end();
+                              ++it )
+          {
+          oConnection << **it ;
+          if ( g_bVerbose ) cout << **it ;
+          }
         }
       oConnection << ".\r";
 

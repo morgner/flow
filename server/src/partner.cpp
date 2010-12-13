@@ -35,17 +35,20 @@
 #include <iostream>
 
 
-// thread funciton performing client communication
-// the used object is left free into the open space,
-// so at the end of the thread, the used object is
-// to destroy
-void* CPartner::thread(void *pSelf)
+using namespace std;
+
+// Thread function performing client communication the used object is left free
+// into the open space, so at the end of the thread, the used object is to
+// destroy
+// We trust callers to provide us with an instance of a CPartner class, there
+// is not check possible, given, that we use a reinterpret_cast on a void*
+void* CPartner::thread(void* pObject)
   {
-  CPartner* poPartner = reinterpret_cast<CPartner*>(pSelf);
+  CPartner* poPartner = reinterpret_cast<CPartner*>(pObject);
   poPartner->Action();
   delete poPartner;
   pthread_exit( NULL );
-  }
+  } // void* CPartner::thread(void* pObject)
 
 
 
@@ -60,23 +63,26 @@ CPartner::CPartner()
 
 CPartner::~CPartner()
   {
-  pthread_mutex_destroy(&m_tMutex);
+  if ( m_bRunning ) Stop();
+  pthread_mutex_destroy( &m_tMutex );
   delete m_poSocket;
   } // CPartner::~CPartner()
 
 
 // start the thread
-void CPartner::Communicate( CSocket* poSocket ) 
+void CPartner::Communicate( CSocketSSL* poSocket ) 
   {
-  m_poSocket = poSocket;
-  m_bRunning = true;
+  m_poSocket  = poSocket;
   int nResult = pthread_create(&m_tThread, 0, &CPartner::thread, this);
+  // If qwe can't create the controlling thead we'r lost! No one ever will find
+  // us we we must commit suicide. Otherwise, we will become a memory leak.
   if ( 0 != nResult )
     {
-    std::cout << "ERROR: thread not created, result: " << nResult << std::endl;
-    this->~CPartner();
-    }  
-  }
+    cout << "ERROR: thread not created, result: " << nResult << endl;
+//    this->~CPartner();
+    delete this;
+    } // if ( 0 != nResult )
+  } // void CPartner::Communicate( CSocket* poSocket ) 
 
 
 // stopp the thread
@@ -85,7 +91,7 @@ void CPartner::Stop()
   m_bRunning = false;
   m_bStopRequested = true;
   pthread_join( m_tThread, 0 );
-  }
+  } // void CPartner::Stop()
 
 
 extern CContainerMapByCLUID g_oContainerMapByCLUID;
@@ -93,8 +99,10 @@ extern long                 g_lLastRemoteId;
 
 void CPartner::Action()
   {
-  std::string sClientData;
-  std::string sInput;
+  m_bRunning  = true; // Now we're running
+
+  string sClientData;
+  string sInput;
   do
     {
     try
@@ -103,46 +111,55 @@ void CPartner::Action()
       }
     catch ( CSocketException& e)
       {
-      std::cout << "ERROR: " << e.Info() << std::endl;
+      cout << "ERROR: " << e.Info() << endl;
       if ( e.isFatal() ) break;
       }
     sClientData += sInput;
-    } while ( sInput.rfind("\r") == std::string::npos ); // m_bStopRequested
+    } while ( sInput.rfind("\r") == string::npos ); // m_bStopRequested
 
   if ( sClientData.find( "c:" ) == 0 )
+    {
+    cout << " * recall; container: " << g_oContainerMapByCLUID.size() << endl;
     Recall( sClientData, m_poSocket );
+    }
   else
+    {
+    cout << " * receive; container: ";
     BuildContainers( sClientData );
-
+	cout << g_oContainerMapByCLUID.size() << endl;
+    }
   *m_poSocket << ".\r";
-  }
+
+  Stop(); // That's all for now and here
+  } // void CPartner::Action()
 
 
 // c:recipient
 // o:all
 // t:from_time
 // q:from_id
-size_t CPartner::Recall( const std::string& rsClientData,
-                               CSocket*     poSocket )
+size_t CPartner::Recall( const string&  rsClientData,
+                               CSocket* poSocket )
   {
-  std::map<char, std::string> moQuery;
+  map<char, string> moQuery;
 
-  for (std::string::size_type p1=0, p2=0;
-       std::string::npos != ( p2 = rsClientData.find('\n', p1) );
+  for (string::size_type p1=0, p2=0;
+       string::npos != ( p2 = rsClientData.find('\n', p1) );
        p1 = p2+1)
     {
-    std::string s = rsClientData.substr(p1, p2-p1);
+    string s = rsClientData.substr(p1, p2-p1);
     if ( (s.length() > 2) && (s[1] == ':') )
       {
       moQuery[ s[0] ] = s.substr(2);
       }
-    } // for (std::string::size_type p1=0, p2=0; ...
+    } // for (string::size_type p1=0, p2=0; ...
 
   for ( CContainerMapByCLUID::iterator it  = g_oContainerMapByCLUID.begin(); 
                                        it != g_oContainerMapByCLUID.end(); 
                                      ++it )
     {
-    if ( it->second->isFor(moQuery['c']) )
+//    if ( it->second->isFor(moQuery['c']) )
+    if ( it->second->isFor(m_poSocket->PeerFingerprintGet()) )
       {
       *poSocket << it->second->RGUIDGet() << "\n";
       *poSocket << it->second->CLUIDGet() << "\n";
@@ -152,20 +169,20 @@ size_t CPartner::Recall( const std::string& rsClientData,
   }
 
 
-size_t CPartner::BuildContainers( const std::string& rsClientData )
+size_t CPartner::BuildContainers( const string& rsClientData )
   {
   /// a list to collect containers
-  typedef std::list<CContainer*> CContainerList;
+  typedef list<CContainer*> CContainerList;
 
   CContainerList oContainerList;  // temporary list to collect what we got
   CContainer*    poContainer = 0; // a potential container for if we get someting
   // splits the lines on their unixconform line ending seperator '\n'
-  for (std::string::size_type p1=0, p2=0;
-       std::string::npos != ( p2 = rsClientData.find('\n', p1) );
+  for (string::size_type p1=0, p2=0;
+       string::npos != ( p2 = rsClientData.find('\n', p1) );
        p1 = p2+1)
     {
-    std::string s = rsClientData.substr(p1, p2-p1);
-    if ( g_bVerbose ) std::cout << s << std::endl;
+    string s = rsClientData.substr(p1, p2-p1);
+    if ( g_bVerbose ) cout << s << endl;
     // the first two chars of a line is the line content descriptor
     if ( s.find("s:") == 0 )
       {
@@ -176,38 +193,38 @@ size_t CPartner::BuildContainers( const std::string& rsClientData )
       {
       *poContainer += s;
       } // if ( poContainer )
-    } // for ( std::string::size_type p1=0, p2=0; ...
+    } // for ( string::size_type p1=0, p2=0; ...
 
   pthread_mutex_lock( &m_tMutex );
   for ( CContainerList::iterator it=oContainerList.begin(); it != oContainerList.end(); ++it)
     {
-    std::string sKey = (*it)->CLUIDGet();
+    string sKey = (*it)->CLUIDGet();
     CContainerMapByCLUID::iterator itf = g_oContainerMapByCLUID.find( sKey );
     if ( itf != g_oContainerMapByCLUID.end() )
       {
       (*it)->ServerSideIdSet( itf->second->ServerSideIdGet() );
-      if ( g_bVerbose ) std::cout << "replacing: " << sKey << " by " << (*it)->RGUIDGet() << "\n";
+      if ( g_bVerbose ) cout << "replacing: " << sKey << " by " << (*it)->RGUIDGet() << "\n";
       delete itf->second;
       g_oContainerMapByCLUID.erase(itf);
       }
     else
       {
-      if ( g_bVerbose ) std::cout << "appending: " << sKey << " as ";
+      if ( g_bVerbose ) cout << "appending: " << sKey << " as ";
       (*it)->ServerSideIdSet( to_string(++g_lLastRemoteId) );
-      if ( g_bVerbose ) std::cout << (*it)->RGUIDGet() << std::endl;
+      if ( g_bVerbose ) cout << (*it)->RGUIDGet() << endl;
       }
     g_oContainerMapByCLUID[ sKey ] = *it;
 
     for ( CListString::iterator its=(*it)->begin(); its != (*it)->end(); ++its )
       {
-      if ( g_bVerbose ) std::cout << " *** " << *its << std::endl;
+      if ( g_bVerbose ) cout << " *** " << *its << endl;
       }
 
     pthread_mutex_unlock( &m_tMutex );
     }
 
-  if ( g_bVerbose ) std::cout << oContainerList.size() << " elements received ";
-  if ( g_bVerbose ) std::cout << g_oContainerMapByCLUID.size() << " elements total here." << std::endl;
+  if ( g_bVerbose ) cout << oContainerList.size() << " elements received ";
+  if ( g_bVerbose ) cout << g_oContainerMapByCLUID.size() << " elements total here." << endl;
   /* 
    for ( CContainerMapByCLUID::iterator it = g_oContainerMapByCLUID.begin(); 
    it != g_oContainerMapByCLUID.end(); 
@@ -218,4 +235,4 @@ size_t CPartner::BuildContainers( const std::string& rsClientData )
    }
    */
   return g_oContainerMapByCLUID.size();
-  } // size_t CPartner::BuildContainers( const std::string& rsClientData )
+  } // size_t CPartner::BuildContainers( const string& rsClientData )

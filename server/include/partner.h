@@ -28,7 +28,7 @@
  ***************************************************************************/
 
 
-#include "socket.h"
+#include "socketssl.h"
 
 #include <pthread.h>
 
@@ -42,13 +42,13 @@ class CPartner
     pthread_mutex_t m_tMutex;
     pthread_t       m_tThread;
 
-    CSocket*        m_poSocket;  
+    CSocketSSL*     m_poSocket;  
   
   public:
     CPartner();
    ~CPartner();
   
-    void Communicate( CSocket* poSocket );
+    void Communicate( CSocketSSL* poSocket );
     void Stop();
 
   protected:

@@ -58,6 +58,7 @@ class CSocketSSL : public CSocket
     std::string m_sFileCaChainTrust; // the CA chain for the server
     std::string m_sPathCaTrust;      // not used yet
     std::string m_sPeerCN;           // the common name out of the peers certificate
+    std::string m_sPeerFingerprint;  // the fingerprint of peers certificate
 
     SSL_CTX*    m_ptSslCtx;          // the SSL Context
     SSL*        m_ptSsl;             // the SSL socket
@@ -76,11 +77,13 @@ class CSocketSSL : public CSocket
                          const std::string& rsPathCaTrust );
     virtual ~CSocketSSL();
 
-    virtual CSocket* Accept  ()                       const;
-    virtual void     Connect ();
-    virtual void     Close   ();
-    virtual size_t   Send    ( const std::string& s ) const;
-    virtual size_t   Receive (       std::string& s );
+    virtual CSocketSSL* Accept  ()                       const;
+    virtual void        Connect ();
+    virtual void        Close   ();
+    virtual size_t      Send    ( const std::string& s ) const;
+    virtual size_t      Receive (       std::string& s );
+
+    const std::string& PeerFingerprintGet() const;
 
   public:
     const CSocketSSL& operator << ( const std::string& s ) const;
