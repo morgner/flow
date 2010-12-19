@@ -74,6 +74,8 @@ class COpenSslError
         } // if ( !s_bLoaded )
       } // COpenSslError()
 
+    COpenSslError( const COpenSslError& src ) {}
+
     virtual ~COpenSslError()
       {
       if ( s_bLoaded )
@@ -91,21 +93,30 @@ int main( int argc, const char* argv[] )
   {
   CEnvironment oEnvironment( argc, argv );
 
-  /// these are the command line options
-  oEnvironment.OptionAppend( "help",        no_argument,       0, 'H', "Show this help text",                           "" );
-  oEnvironment.OptionAppend( "version",     no_argument,       0, 'V', "Show version information",                      "" );
-  oEnvironment.OptionAppend( "verbose",     no_argument,       0, 'v', "Act verbose",                                   "" );
-  oEnvironment.OptionAppend( "host",        required_argument, 0, 'h', "The host to conncet to",                        DEFAULT_HOST );
-  oEnvironment.OptionAppend( "port",        required_argument, 0, 'p', "The port to connect to",                        DEFAULT_PORT );
-  oEnvironment.OptionAppend( "sender",      required_argument, 0, 's', "Sender name or alias",                          "$LOGNAME" );
-  oEnvironment.OptionAppend( "password",    required_argument, 0, 'w', "Password for senders key",                      PASSWORD );
-  oEnvironment.OptionAppend( "recipient",   required_argument, 0, 'r', "Recipients name or alias",                      "recipient" );
-  oEnvironment.OptionAppend( "message",     required_argument, 0, 'm', "The message",                                   "Hi there, I'm from far away" );
-  oEnvironment.OptionAppend( "cluid",       required_argument, 0, 'i', "Client side local ID (numeric) of the message", "1" );
-  oEnvironment.OptionAppend( "cert-dir",    required_argument, 0, 'd', "Directory for trusted and client certificates", CRT_PATH );
-  oEnvironment.OptionAppend( "trust-chain", required_argument, 0, 'a', "Trusted CA chain",                              CA_CHAIN );
-  oEnvironment.OptionAppend( "trust-path",  required_argument, 0, 't', "Path to trusted certificates",                  CA_PATH );
-  oEnvironment.OptionAppend( "call",        optional_argument, 0, 'c', "Call message(s) from the server",               "" );
+  /// These are the command line options
+  oEnvironment.OptionAppend( "help",        no_argument,       0, 'H', "Show this help text",                                "" );
+  oEnvironment.OptionAppend( "version",     no_argument,       0, 'V', "Show version information",                           "" );
+  oEnvironment.OptionAppend( "verbose",     no_argument,       0, 'v', "Act verbose",                                        "" );
+  // Contact
+  oEnvironment.OptionAppend( "host",        required_argument, 0, 'h', "The host to conncet to",                             DEFAULT_HOST );
+  oEnvironment.OptionAppend( "port",        required_argument, 0, 'p', "The port to connect to",                             DEFAULT_PORT );
+  // Client Ident
+  oEnvironment.OptionAppend( "sender",      required_argument, 0, 's', "Sender name or alias",                               "$LOGNAME" );
+  oEnvironment.OptionAppend( "password",    required_argument, 0, 'w', "Password for senders key",                           PASSWORD );
+  oEnvironment.OptionAppend( "recipient",   required_argument, 0, 'r', "Recipients name or alias",                           "recipient" );
+  // Message
+  oEnvironment.OptionAppend( "message",     required_argument, 0, 'm', "The message",                                        "Hi there, I'm from far away" );
+  // Container info
+  oEnvironment.OptionAppend( "cluid",       required_argument, 0, 'i', "Client side local ID (numeric) of the message",      "1" );
+  oEnvironment.OptionAppend( "cert-dir",    required_argument, 0, 'd', "Directory for trusted and client certificates",      CRT_PATH );
+  oEnvironment.OptionAppend( "trust-chain", required_argument, 0, 'a', "Trusted CA chain",                                   CA_CHAIN );
+  oEnvironment.OptionAppend( "trust-path",  required_argument, 0, 't', "Path to trusted certificates",                       CA_PATH );
+  // Calling control
+  oEnvironment.OptionAppend( "call",        optional_argument, 0, 'c', "Call message(s) from the server",                    "" );
+  oEnvironment.OptionAppend( "start-time",  required_argument, 0, 'b', "- beginning with time as `date +%Y-%m-%d-%H:%M:%S`", "" );
+  oEnvironment.OptionAppend( "start-glid",  required_argument, 0, 'g', "- beginning with ServerID 'n'",                      "" );
+  oEnvironment.OptionAppend( "next",        no_argument,       0, 'n', "- the next message",                                 "" );
+  oEnvironment.OptionAppend( "rest",        no_argument,       0, 'e', "- all new messages (start-time or start-glid)",      "" );
 
   // we need to read the command line parameters
   oEnvironment.CommandlineRead();

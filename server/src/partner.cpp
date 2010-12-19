@@ -134,8 +134,8 @@ void CPartner::Action()
   } // void CPartner::Action()
 
 
-// c:recipient
-// o:all
+// c:all / c:<num>
+// a:new / a:old
 // t:from_time
 // q:from_id
 size_t CPartner::Recall( const string&  rsClientData,
@@ -158,7 +158,6 @@ size_t CPartner::Recall( const string&  rsClientData,
                                        it != g_oContainerMapByCLUID.end(); 
                                      ++it )
     {
-//    if ( it->second->isFor(moQuery['c']) )
     if ( it->second->isFor(m_poSocket->PeerFingerprintGet()) )
       {
       *poSocket << it->second->RGUIDGet() << "\n";
@@ -196,22 +195,24 @@ size_t CPartner::BuildContainers( const string& rsClientData )
     } // for ( string::size_type p1=0, p2=0; ...
 
   pthread_mutex_lock( &m_tMutex );
-  for ( CContainerList::iterator it=oContainerList.begin(); it != oContainerList.end(); ++it)
+  for ( CContainerList::iterator it  = oContainerList.begin();
+                                 it != oContainerList.end();
+                               ++it)
     {
     string sKey = (*it)->CLUIDGet();
     CContainerMapByCLUID::iterator itf = g_oContainerMapByCLUID.find( sKey );
-    if ( itf != g_oContainerMapByCLUID.end() )
+    if ( itf == g_oContainerMapByCLUID.end() )
+      {
+      if ( g_bVerbose ) cout << "appending: " << sKey << " as ";
+      (*it)->ServerSideIdSet( to_string(++g_lLastRemoteId) );
+      if ( g_bVerbose ) cout << (*it)->RGUIDGet() << endl;
+      }
+    else
       {
       (*it)->ServerSideIdSet( itf->second->ServerSideIdGet() );
       if ( g_bVerbose ) cout << "replacing: " << sKey << " by " << (*it)->RGUIDGet() << "\n";
       delete itf->second;
       g_oContainerMapByCLUID.erase(itf);
-      }
-    else
-      {
-      if ( g_bVerbose ) cout << "appending: " << sKey << " as ";
-      (*it)->ServerSideIdSet( to_string(++g_lLastRemoteId) );
-      if ( g_bVerbose ) cout << (*it)->RGUIDGet() << endl;
       }
     g_oContainerMapByCLUID[ sKey ] = *it;
 
