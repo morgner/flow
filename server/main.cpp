@@ -89,7 +89,7 @@ int main ( int argc, const char* argv[] )
   /// we need to read the command line parameters
   oEnvironment.CommandlineRead();
   /// for convienice we create a local shortcut to the environment value of 'isVerbose()'
-  bool g_bVerbose = oEnvironment.find("verbose") != oEnvironment.end();
+  g_bVerbose = oEnvironment.find("verbose") != oEnvironment.end();
 
   ERR_load_crypto_strings(); // or: SSL_load_error_strings();
   try // server bind ...

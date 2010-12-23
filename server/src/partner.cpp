@@ -34,7 +34,6 @@
 
 #include <iostream>
 
-
 using namespace std;
 
 // Thread function performing client communication the used object is left free
@@ -79,7 +78,6 @@ void CPartner::Communicate( CSocketSSL* poSocket )
   if ( 0 != nResult )
     {
     cout << "ERROR: thread not created, result: " << nResult << endl;
-//    this->~CPartner();
     delete this;
     } // if ( 0 != nResult )
   } // void CPartner::Communicate( CSocket* poSocket ) 
@@ -115,18 +113,18 @@ void CPartner::Action()
       if ( e.isFatal() ) break;
       }
     sClientData += sInput;
-    } while ( sInput.rfind("\r") == string::npos ); // m_bStopRequested
+    } while ( !m_bStopRequested && sClientData.rfind(".\r") == string::npos );
 
   if ( sClientData.find( "c:" ) == 0 )
     {
-    cout << " * recall; container: " << g_oContainerMapByCLUID.size() << endl;
+    if (g_bVerbose) cout << " * recall; container: "
+                         << g_oContainerMapByCLUID.size() << endl;
     Recall( sClientData, m_poSocket );
     }
-  else
+  if ( sClientData.find( "s:" ) == 0 )
     {
-    cout << " * receive; container: ";
+    if (g_bVerbose) cout << " * receive; container: ";
     BuildContainers( sClientData );
-	cout << g_oContainerMapByCLUID.size() << endl;
     }
   *m_poSocket << ".\r";
 
@@ -170,6 +168,8 @@ size_t CPartner::Recall( const string&  rsClientData,
 
 size_t CPartner::BuildContainers( const string& rsClientData )
   {
+//  g_bVerbose = true;
+
   /// a list to collect containers
   typedef list<CContainer*> CContainerList;
 
@@ -203,26 +203,31 @@ size_t CPartner::BuildContainers( const string& rsClientData )
     CContainerMapByCLUID::iterator itf = g_oContainerMapByCLUID.find( sKey );
     if ( itf == g_oContainerMapByCLUID.end() )
       {
-      if ( g_bVerbose ) cout << "appending: " << sKey << " as ";
       (*it)->ServerSideIdSet( to_string(++g_lLastRemoteId) );
-      if ( g_bVerbose ) cout << (*it)->RGUIDGet() << endl;
+      *m_poSocket << (*it)->RGUIDGet() << "\n";
+      if ( g_bVerbose ) cout << "appending: " << sKey << " as "
+                             << (*it)->RGUIDGet() << endl;
       }
     else
       {
       (*it)->ServerSideIdSet( itf->second->ServerSideIdGet() );
       if ( g_bVerbose ) cout << "replacing: " << sKey << " by " << (*it)->RGUIDGet() << "\n";
       delete itf->second;
-      g_oContainerMapByCLUID.erase(itf);
+      itf->second = 0;
+      g_oContainerMapByCLUID.erase( itf );
       }
     g_oContainerMapByCLUID[ sKey ] = *it;
 
-    for ( CListString::iterator its=(*it)->begin(); its != (*it)->end(); ++its )
-      {
-      if ( g_bVerbose ) cout << " *** " << *its << endl;
-      }
-
     pthread_mutex_unlock( &m_tMutex );
-    }
+
+    if ( g_bVerbose )
+      {
+      for ( CListString::iterator its=(*it)->begin(); its != (*it)->end(); ++its )
+        {
+        cout << " *** " << *its << endl;
+        }
+      } // if ( g_bVerbose )
+    } // for ( CContainerList::iterator it  = oContainerList.begin(); ...
 
   if ( g_bVerbose ) cout << oContainerList.size() << " elements received ";
   if ( g_bVerbose ) cout << g_oContainerMapByCLUID.size() << " elements total here." << endl;

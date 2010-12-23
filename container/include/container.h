@@ -47,6 +47,10 @@ class CContainer : public CListString
     std::string m_sSender;
     CListString m_lsRecipients;
     std::string m_sClass;
+
+    static long s_nLastClientSideId;
+    static long s_nLastServerSideId;
+
     long        m_tClientSideId;   // time based client side id
     bool        m_bHasId;          // client side id already in given?
     long        m_nClientSideId;   // sequence base client side id
@@ -63,19 +67,19 @@ class CContainer : public CListString
     virtual size_t RecipientDel( const std::string& rsRecipient );
 
     virtual long ClientSideTmGet() const;
-    virtual long ClientSideTmSet( long nClientSideTm );
+    virtual long ClientSideTmSet( long nClientSideTm = 0 );
     virtual long ClientSideTmSet( const std::string& rsClientSideTm );
 
     virtual long ClientSideIdGet();
-    virtual long ClientSideIdSet( long rnClientSideId );
+    virtual long ClientSideIdSet( long nClientSideId = 0 );
     virtual long ClientSideIdSet( const std::string& rsClientSideId );
                   
-    virtual long ServerSideIdGet() const;
-    virtual long ServerSideIdSet( long rnServerSideId );
+    virtual long ServerSideIdGet();
+    virtual long ServerSideIdSet( long nServerSideId = 0 );
     virtual long ServerSideIdSet( const std::string& rsServerSideId );
                   
-    virtual std::string  RGUIDGet();
-    virtual std::string  CLUIDGet();
+    virtual std::string RGUIDGet();
+    virtual std::string CLUIDGet();
 
     virtual bool isFor( const std::string& rsRecipient );
 
@@ -90,6 +94,8 @@ class CContainer : public CListString
     static const char* scn_local_id_time;
     static const char* scn_remote_id;
     static const char* scn_content_text;
+
+    static const char* scn_block_delimiter;
 
   }; // class CContainer
 

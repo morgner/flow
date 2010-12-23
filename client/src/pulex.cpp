@@ -97,7 +97,8 @@ const string& CPulex::operator << ( const string& rsData )
 template<typename T>
   T& CPulex::Send( T& roStream )
     {
-    // information to manage the object if it's remote
+    // Information to manage the object if it's remote
+    // sender has to be first because it is indicated as start of a new object
     roStream << scn_sender << ":"
              << CCrypto::FingerprintCrt( SenderGet() ) << "\n";
     for ( CListString::iterator it  = m_lsRecipients.begin();

@@ -38,15 +38,17 @@
 
 using namespace std;
 
-const string CContainer::s_sClassName = "FLOW.CONTAINER";
+const string CContainer::s_sClassName        = "FLOW.CONTAINER";
+      long   CContainer::s_nLastClientSideId = 0;
+      long   CContainer::s_nLastServerSideId = 0;
 
 
 CContainer::CContainer()
-  : m_bHasId( false )
+  : m_tClientSideId( 0 ),
+    m_nClientSideId( 0 ),
+    m_nServerSideId( 0 )
   {
-  timeval time;
-  gettimeofday( &time, 0 );
-  m_tClientSideId = time.tv_sec;
+  ClientSideTmSet();
   } // CContainer::CContainer()
 
 CContainer::~CContainer()
@@ -98,60 +100,86 @@ long CContainer::ClientSideTmGet() const
 
 long CContainer::ClientSideTmSet( long nClientSideTm )
   {
-  return m_tClientSideId = nClientSideTm;
+  if ( nClientSideTm )
+    {
+    m_tClientSideId = nClientSideTm;
+    }
+  else
+    {
+    timeval time;
+    gettimeofday( &time, 0 );
+    m_tClientSideId = time.tv_sec;
+    }
+  return m_tClientSideId;
   } // long CContainer::ClientSideTmSet( long nClientSideTm )
 
 
 long CContainer::ClientSideTmSet( const string& rsClientSideTm )
   {
-  return m_tClientSideId = atol( rsClientSideTm.c_str() );
+  return ClientSideTmSet( atol( rsClientSideTm.c_str()) );
   } // long CContainer::ClientSideTmSet( const string& rsClientSideTm )
 
 
 // The unique client ID for a Container object
 long CContainer::ClientSideIdGet()
   {
-  static int nClientSideId = 0;
-  if ( m_bHasId )
-    {
-    return m_nClientSideId;
-    }
-  else
-    {
-    m_bHasId = true;
-    return m_nClientSideId = ++nClientSideId;
-    }
+  return ( m_nClientSideId ) ? m_nClientSideId : ClientSideIdSet();
   } // long CContainer::ClientSideIdGet()
 
 
 long CContainer::ClientSideIdSet( long nClientSideId )
   {
-  m_bHasId = true;
-  return m_nClientSideId = nClientSideId;
+  if ( nClientSideId )
+    {
+    m_nClientSideId = nClientSideId;
+    if ( nClientSideId > s_nLastClientSideId )
+      {
+      s_nLastClientSideId = nClientSideId;
+      } 
+    }
+  else
+    {
+    m_nClientSideId = ++s_nLastClientSideId;
+    }
+
+  return m_nClientSideId;
   } // long CContainer::ClientSideIdSet( long nClientSideId )
 
 
 long CContainer::ClientSideIdSet( const string& rsClientSideId )
   {
-  return m_nClientSideId = atol( rsClientSideId.c_str() );
+  return ClientSideIdSet( atol( rsClientSideId.c_str()) );
   } // long CContainer::ClientSideIdSet( const string& rsClientSideId )
 
 
-long CContainer::ServerSideIdGet() const
+long CContainer::ServerSideIdGet()
   {
-  return m_nServerSideId;
+  return ( m_nServerSideId ) ? m_nServerSideId : ServerSideIdSet();
   } // long CContainer::ServerSideIdGet() const
 
 
-long CContainer::ServerSideIdSet( long rnServerSideId )
+long CContainer::ServerSideIdSet( long nServerSideId )
   {
-  return m_nServerSideId = rnServerSideId;
-  } // long CContainer::ServerSideIdSet( long rnServerSideId )
+  if ( nServerSideId )
+    {
+    m_nServerSideId = nServerSideId;
+    if ( nServerSideId > s_nLastServerSideId )
+      {
+      s_nLastServerSideId = nServerSideId;
+      } 
+    }
+  else
+    {
+    m_nServerSideId = ++s_nLastServerSideId;
+    }
+
+  return m_nClientSideId;
+  } // long CContainer::ServerSideIdSet( long nServerSideId )
 
 
 long CContainer::ServerSideIdSet( const string& rsServerSideId )
   {
-  return m_nServerSideId = atol( rsServerSideId.c_str() );
+  return ServerSideIdSet( atol( rsServerSideId.c_str()) );
   } // long CContainer::ServerSideIdSet( const string& rsServerSideId )
 
 
@@ -179,8 +207,8 @@ string CContainer::RGUIDGet()
 string CContainer::CLUIDGet()
   {
   ostringstream sout;
-  sout << "CLUID"         << ":"
-       << m_sSender       << ":"
+  sout << "CLUID"           << ":"
+       << m_sSender         << ":"
        << ClientSideIdGet();
   return sout.str();
   } // string CContainer::CLUIDGet()
@@ -197,27 +225,35 @@ bool CContainer::isFor( const string& rsRecipient )
 
 
 // indicators to be used to transport the pulex
-const char* CContainer::scn_sender         = "s";
-const char* CContainer::scn_recipient      = "e";
-const char* CContainer::scn_local_id       = "l";
-const char* CContainer::scn_local_id_time  = "t";
-const char* CContainer::scn_remote_id      = "r";
-const char* CContainer::scn_content_text   = "x";
+const char* CContainer::scn_sender        = "s";
+const char* CContainer::scn_recipient     = "e";
+const char* CContainer::scn_local_id      = "l";
+const char* CContainer::scn_local_id_time = "t";
+const char* CContainer::scn_remote_id     = "r";
+const char* CContainer::scn_content_text  = "x";
+// client/src/crypto.cpp:const string CCrypto::s_sDelimiter = "===\n";
+const char* CContainer::scn_block_delimiter = "===\n";
 
-// e.g. "c:PULEX", "x:please read", "x:the manual"
+// e.g. "s:<FP>", "r:<FP>", "x:please read", "x:the manual"
 const string& CContainer::operator += ( const string& rsElement )
   {
   if ( rsElement[1] == ':' )
     switch ( rsElement[0] )
       {
-      case 's': m_sSender               = rsElement.substr(2);   break;
-      case 'e': m_lsRecipients.push_back( rsElement.substr(2) ); break;
-      case 'l': m_nClientSideId         = atol( rsElement.substr(2).c_str() ); break;
-      case 't': m_tClientSideId         = atol( rsElement.substr(2).c_str() ); break;
-      case 'r': m_nServerSideId         = atol( rsElement.substr(2).c_str() ); break;
+      case 's': SenderSet      ( rsElement.substr(2)         ); break;
+      case 'e': RecipientAdd   ( rsElement.substr(2)         ); break;
+      case 'l': ClientSideIdSet( rsElement.substr(2).c_str() ); break;
+      case 't': ClientSideTmSet( rsElement.substr(2).c_str() ); break;
+      case 'r': ServerSideIdSet( rsElement.substr(2).c_str() ); break;
 
-      case 'x': push_back( rsElement.substr(2) );
+      case 'x': push_back( rsElement.substr(2) ); break;
+
+      default : push_back( rsElement );
       }
+  else
+    {
+    push_back( rsElement );
+    }
 
   return rsElement;
   } // const string& CContainer::operator += ( const string& rsElement )

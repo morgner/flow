@@ -117,7 +117,7 @@ system/include/environment.h:171: warning: returning reference to temporary
 Which is not correct, clang thinks otherwise, which is more wise. I'm not sure
 if I should exclude such wrong messages and how. The best should be to add a
 compiler switch to turn off such nonsense at this point. In other situations
-this warning may be correct. So it may be unwise to should this message down
+this warning may be correct. So it may be unwise to shut this message down
 with a global compiler switch.
 
 But is GCC realy worth feeding?
