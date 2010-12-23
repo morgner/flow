@@ -52,7 +52,6 @@ class CContainer : public CListString
     static long s_nLastServerSideId;
 
     long        m_tClientSideId;   // time based client side id
-    bool        m_bHasId;          // client side id already in given?
     long        m_nClientSideId;   // sequence base client side id
     long        m_nServerSideId;   // server side id
 

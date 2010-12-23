@@ -218,8 +218,6 @@ size_t CPartner::BuildContainers( const string& rsClientData )
       }
     g_oContainerMapByCLUID[ sKey ] = *it;
 
-    pthread_mutex_unlock( &m_tMutex );
-
     if ( g_bVerbose )
       {
       for ( CListString::iterator its=(*it)->begin(); its != (*it)->end(); ++its )
@@ -228,6 +226,8 @@ size_t CPartner::BuildContainers( const string& rsClientData )
         }
       } // if ( g_bVerbose )
     } // for ( CContainerList::iterator it  = oContainerList.begin(); ...
+
+  pthread_mutex_unlock( &m_tMutex );
 
   if ( g_bVerbose ) cout << oContainerList.size() << " elements received ";
   if ( g_bVerbose ) cout << g_oContainerMapByCLUID.size() << " elements total here." << endl;
