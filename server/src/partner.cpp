@@ -112,6 +112,7 @@ void CPartner::Action()
       cout << "ERROR: " << e.Info() << endl;
       if ( e.isFatal() ) break;
       }
+    if ( g_bVerbose ) cout << sInput;
     sClientData += sInput;
     } while ( !m_bStopRequested && sClientData.rfind(".\r") == string::npos );
 
@@ -156,10 +157,23 @@ size_t CPartner::Recall( const string&  rsClientData,
                                        it != g_oContainerMapByCLUID.end(); 
                                      ++it )
     {
-    if ( it->second->isFor(m_poSocket->PeerFingerprintGet()) )
+    CContainer* poc = it->second;
+    if ( poc->isFor(m_poSocket->PeerFingerprintGet()) )
       {
-      *poSocket << it->second->RGUIDGet() << "\n";
-      *poSocket << it->second->CLUIDGet() << "\n";
+      *poSocket << poc->RGUIDGet() << "\n";
+      *poSocket << poc->CLUIDGet() << "\n";
+
+      *poSocket << CContainer::scn_sender        << ":" << poc->SenderGet() << "\n";
+      *poSocket << CContainer::scn_local_id      << ":" << poc->ClientSideIdGet() << "\n";
+      *poSocket << CContainer::scn_local_id_time << ":" << poc->ClientSideTmGet() << "\n";
+      *poSocket << CContainer::scn_remote_id     << ":" << poc->ServerSideIdGet() << "\n";
+
+      for ( CContainer::iterator itc  = poc->begin();
+                                 itc != poc->end();
+                               ++itc )
+        {
+        *poSocket << *itc << "\n";
+        }
       }
     }
   return 0;
@@ -203,21 +217,22 @@ size_t CPartner::BuildContainers( const string& rsClientData )
     CContainerMapByCLUID::iterator itf = g_oContainerMapByCLUID.find( sKey );
     if ( itf == g_oContainerMapByCLUID.end() )
       {
-      (*it)->ServerSideIdSet( to_string(++g_lLastRemoteId) );
-      *m_poSocket << (*it)->RGUIDGet() << "\n";
+      (*it)->ServerSideIdSet();
       if ( g_bVerbose ) cout << "appending: " << sKey << " as "
                              << (*it)->RGUIDGet() << endl;
+      *m_poSocket << (*it)->RGUIDGet() << "\n";
       }
     else
       {
       (*it)->ServerSideIdSet( itf->second->ServerSideIdGet() );
-      if ( g_bVerbose ) cout << "replacing: " << sKey << " by " << (*it)->RGUIDGet() << "\n";
+      if ( g_bVerbose ) cout << "replacing: " << sKey << " by "
+                             << (*it)->RGUIDGet() << "\n";
       delete itf->second;
       itf->second = 0;
       g_oContainerMapByCLUID.erase( itf );
       }
     g_oContainerMapByCLUID[ sKey ] = *it;
-
+/*
     if ( g_bVerbose )
       {
       for ( CListString::iterator its=(*it)->begin(); its != (*it)->end(); ++its )
@@ -225,8 +240,8 @@ size_t CPartner::BuildContainers( const string& rsClientData )
         cout << " *** " << *its << endl;
         }
       } // if ( g_bVerbose )
+ */
     } // for ( CContainerList::iterator it  = oContainerList.begin(); ...
-
   pthread_mutex_unlock( &m_tMutex );
 
   if ( g_bVerbose ) cout << oContainerList.size() << " elements received ";

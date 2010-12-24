@@ -141,14 +141,13 @@ long CContainer::ClientSideIdSet( long nClientSideId )
     {
     m_nClientSideId = ++s_nLastClientSideId;
     }
-
   return m_nClientSideId;
   } // long CContainer::ClientSideIdSet( long nClientSideId )
 
 
 long CContainer::ClientSideIdSet( const string& rsClientSideId )
   {
-  return ClientSideIdSet( atol( rsClientSideId.c_str()) );
+  return ClientSideIdSet( atol(rsClientSideId.c_str()) );
   } // long CContainer::ClientSideIdSet( const string& rsClientSideId )
 
 
@@ -160,20 +159,22 @@ long CContainer::ServerSideIdGet()
 
 long CContainer::ServerSideIdSet( long nServerSideId )
   {
-  if ( nServerSideId )
+  if ( !m_nServerSideId )
     {
-    m_nServerSideId = nServerSideId;
-    if ( nServerSideId > s_nLastServerSideId )
+    if ( nServerSideId )
       {
-      s_nLastServerSideId = nServerSideId;
-      } 
-    }
-  else
-    {
-    m_nServerSideId = ++s_nLastServerSideId;
-    }
-
-  return m_nClientSideId;
+      m_nServerSideId = nServerSideId;
+      if ( nServerSideId > s_nLastServerSideId )
+        {
+        s_nLastServerSideId = nServerSideId;
+        } 
+      }
+    else // if ( nServerSideId )
+      {
+      m_nServerSideId = ++s_nLastServerSideId;
+      }
+    } // if ( !m_nServerSideId )
+  return m_nServerSideId;
   } // long CContainer::ServerSideIdSet( long nServerSideId )
 
 
@@ -240,11 +241,11 @@ const string& CContainer::operator += ( const string& rsElement )
   if ( rsElement[1] == ':' )
     switch ( rsElement[0] )
       {
-      case 's': SenderSet      ( rsElement.substr(2)         ); break;
-      case 'e': RecipientAdd   ( rsElement.substr(2)         ); break;
-      case 'l': ClientSideIdSet( rsElement.substr(2).c_str() ); break;
-      case 't': ClientSideTmSet( rsElement.substr(2).c_str() ); break;
-      case 'r': ServerSideIdSet( rsElement.substr(2).c_str() ); break;
+      case 's': SenderSet      ( rsElement.substr(2) ); break;
+      case 'e': RecipientAdd   ( rsElement.substr(2) ); break;
+      case 'l': ClientSideIdSet( rsElement.substr(2) ); break;
+      case 't': ClientSideTmSet( rsElement.substr(2) ); break;
+      case 'r': ServerSideIdSet( rsElement.substr(2) ); break;
 
       case 'x': push_back( rsElement.substr(2) ); break;
 

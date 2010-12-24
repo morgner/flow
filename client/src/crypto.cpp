@@ -422,7 +422,7 @@ string CCrypto::ConvertToBase64( const unsigned char* pucData, size_t nSize )
   BUF_MEM* ptBuffer;
   ::BIO_get_mem_ptr( pBio, &ptBuffer );
 
-  string sResult( ptBuffer->length+1, 0 );
+  string sResult( ptBuffer->length, 0 );
   memcpy( &sResult[0], ptBuffer->data, ptBuffer->length );
 
   ::BIO_free_all( pBio ); // frees ptBuffer too
@@ -479,7 +479,7 @@ string CCrypto::EncryptToBase64( const unsigned char* pucData, size_t nSize )
   BUF_MEM* ptBuffer;
   ::BIO_get_mem_ptr( pBio, &ptBuffer );
 
-  string sResult( ptBuffer->length+1, 0 );
+  string sResult( ptBuffer->length, 0 );
   memcpy( &sResult[0], ptBuffer->data, ptBuffer->length );
 
   ::BIO_free_all( pBio );
