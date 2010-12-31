@@ -178,8 +178,9 @@ int main( int argc, const char* argv[] )
     cout << endl;
     }
 
-  // try to let all Pulexes jump to the server
+  // Load the descriptive error messages from the OpenSSL library
   COpenSslError oOSE;
+  // try to let all Pulexes jump to the server
   try
     {
     CSocketClient oConnection( oEnvironment["host"],
@@ -189,17 +190,18 @@ int main( int argc, const char* argv[] )
                                oEnvironment["password"],
                                oEnvironment["trust-chain"],
                                oEnvironment["trust-path"] );
-
+    // This ist where the servers reply is going to
     string sServerReply;
-    // iterate over all Pulexes in our Domain and let them jump
     try
       {
       if ( oEnvironment.find("call") != oEnvironment.end() )
         {
+        // call them all (the server knows which ones)
         oConnection << "c:all";
         }
       else
         {
+        // iterate over all Pulexes in our Domain and let them jump
         for ( CDomain::iterator it  = oDomain.begin();
                                 it != oDomain.end();
                               ++it )
@@ -210,8 +212,9 @@ int main( int argc, const char* argv[] )
         }
       oConnection << ".\r";
 
-      // collect the answer from the server (regarding ALL jumped Pulexes)
+      // for the parts the reply is parted into
       string sInput;
+      // collect the answer from the server (regarding ALL jumped Pulexes)
       do
         {
         oConnection >> sInput;
