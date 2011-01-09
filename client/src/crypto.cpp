@@ -45,7 +45,7 @@
 
 using namespace std;
 
-const string CCrypto::s_sDelimiter = "===\n";
+const string CCrypto::s_sDelimiter = "===== block =====\n";
 
 
 // The content has to be initialized on contruction time

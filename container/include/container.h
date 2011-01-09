@@ -94,7 +94,5 @@ class CContainer : public CListString
     static const char* scn_remote_id;
     static const char* scn_content_text;
 
-    static const char* scn_block_delimiter;
-
   }; // class CContainer
 

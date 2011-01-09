@@ -232,8 +232,6 @@ const char* CContainer::scn_local_id      = "l";
 const char* CContainer::scn_local_id_time = "t";
 const char* CContainer::scn_remote_id     = "r";
 const char* CContainer::scn_content_text  = "x";
-// client/src/crypto.cpp:const string CCrypto::s_sDelimiter = "===\n";
-const char* CContainer::scn_block_delimiter = "===\n";
 
 // e.g. "s:<FP>", "r:<FP>", "x:please read", "x:the manual"
 const string& CContainer::operator += ( const string& rsElement )
