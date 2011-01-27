@@ -1,9 +1,9 @@
-Simple test certificate
+Simple test certificates
 
 Don't use them in real life!
 
 
-Root CA: CA/CA.crt
+Root CA...............: CA/CA.crt
 Intermediate Client CA: CA/imc.crt
 Intermediate Server CA: CA/ims.crt
 
@@ -12,40 +12,85 @@ Server Certificate: server/localhost.crt
 
 
 
-'flow' uses certificates by their names. So if a users name
-(name it alias) is 'username', his/here certificate has to be
-named 'username.crt' and it has to be issued for a
-"Common Name (CN)=username" by the intermediate client CA 'CA/imc.crt'
-
-'flowclient' will use certificates this way
-'flowserver' will check certificatse this way
-
-'flowclient' will not check the CN of the server certificate nor
-will it force a check of the chain. The client trusts 'trusted
-server certificates' which means certificates set to be trustet
-for the flowclient by the user.
-
-Further 'flowclient' trusts user certificates the same way.
+'flow' uses certificates by their names. So if a users name (name it alias) is
+'username', his/here certificate should be named 'username.crt' in order to use
+it easyly.
 
 
-The overhead of producing and managing openly trusted certificates
-is proofen too demanding to do even business, let alone fun
-communication. It is too expensive, too complicated and is a
-risc in itself because you will not get an anonymous certificate
-with our personal alias from any official provider without linking
-these to your real identity. Which means official certificates
-may undermine your security interests. Imagine you'r political
-religiouse ideas do not match those of your environment ...
+'flowclient' will use certificates through the 'sender' and 'recipient'
+parameter by their filenames.
 
-Nevertheless, if clients are strict, the mechanism of 'flow'
-provides the same or more security than professional certificates.
-Given the fact that you will communicate over an open network,
-it naturally provides the same risc regarding the identity of
-your partner. But in difference to officially issued certificates
-you know it!
+  > flowclient -s rudolph -r sybille
+
+will use the file 'client/rudolph.crt' for the sender and 'client/sybille.crt'
+for the recipient. Naturally it expects 'client/rudolph.crt' to have a private
+key under the hood.
+
+From the clients view sender and recipients are being identified by the name of
+their certificate files. If all of your friends are using 'Private Club' as
+common name (CN) in their certificate you will be able to tell them apart by
+the name of their certificates on YOUR computer(s).
+
+'flowclient' will not check the CN of the server certificate nor will it force
+a check of server certificate chains. The client trusts 'trusted server
+certificates' which means certificates set to be trustet for the flowclient by
+you. There is no reason to check if the server certificte matches his own name
+for a simple reason. The trust chain would only be trustworthy if your system
+trusts the root certificate of the chain. But if you have to set this state
+anyway. it is much more secure to set it per certificate per server. You are in
+full control by the use of the parameters --trust-chain or --trust-path !
+
+'flowclient' trusts user certificates the same way. Their is no further
+senseful check possible, so why try to do one?
 
 
-You need the certificates in this package to play with the
-examples and have an easy go if you wish to contribute. These
-certificate do not provide any security at all, given that
-their private components are accessible for everyone.
+'flowserver' does not trust anyone and also does not care at all. 'flowclient'
+forces the server to do TLS. To find out which messages are to deliver to whom
+it compairs the fingerprints of the certificates involved. But don't be
+blinded! Evil implementations of 'flowserver' may check whatever they want to
+find out something. Thats why you should not use any real identification inside
+your certificates. For example, don't use your true name as CN.
+
+THe file names of involved certificate files are not delivered, so it's no
+problem if you're Rudolph and your communication partner is truely 'Sybille' to
+name your certificate to use with Sybille 'rudolph-to-sybille.crt'. Then a call
+to your friend may look like this:
+
+  > flowclient -s rudolph-to-sybille -r sybille -m "Thuesday at ...?"
+
+The 'flowserver' will see something like this:
+
+sender    (Private Club):FB0FB87C6F783B35F5F21B69F79F4DCC4EDF1963
+recipient (Private Club):BA95B648CE28F80842CECDC6A4BA8826B6B9FE32
+
+mTDKQCmLdrYynkwlrtVXvpo1ktpsEvJboNP/N4M4wqaLTpw3ZaRuD0L1vhI=
+
+"Private Club" would be the CN in your certificates.
+
+Remember: You can't hide public certificate informations if they are already in
+a certificate. So leave them out! No real name, nor locations, no relations,...
+
+
+
+A remark to official trusted certificates
+
+The overhead of producing and managing openly trusted certificates is proofen
+too demanding to do even business, let alone fun communication. It is
+too expensive, too complicated and a risc in itself because you will not get
+an anonymous certificate with our personal alias from any official provider
+without linking it to your real identity. Which means official certificates
+may undermine your security interests. Imagine you'r political or religious
+ideas differ those of your environment ...
+
+Nevertheless, if clients are strict, the mechanism of 'flow' provides the same
+or more security as professional certificates. Given the fact that you will
+communicate over an open network, it naturally provides the same risc regarding
+the identity of your partners.
+
+
+Important hint
+
+You my use the certificates in this package to play with the examples and have
+an easy go if you wish to contribute. These certificate do not provide any
+security at all, given that their private components are accessible for
+everyone.
