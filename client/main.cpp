@@ -113,6 +113,7 @@ int main( int argc, const char* argv[] )
   oEnvironment.OptionAppend( "trust-path",  required_argument, 0, 't', "Path to trusted certificates",                       CA_PATH );
   // Calling control
   oEnvironment.OptionAppend( "call",        optional_argument, 0, 'c', "Call message(s) from the server",                    "" );
+  oEnvironment.OptionAppend( "list",        no_argument,       0, 'l', "- list all (your) messages on the server",           "" );
   oEnvironment.OptionAppend( "start-time",  required_argument, 0, 'b', "- beginning with time as `date +%Y-%m-%d-%H:%M:%S`", "" );
   oEnvironment.OptionAppend( "start-glid",  required_argument, 0, 'g', "- beginning with ServerID 'n'",                      "" );
   oEnvironment.OptionAppend( "next",        no_argument,       0, 'n', "- the next message",                                 "" );
