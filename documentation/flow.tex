@@ -1,6 +1,7 @@
 %&program=pdflatex
 
-\documentclass[twoside,a4paper,english,ngerman,german,12pt,authoryear,openright]{book}
+%\documentclass[twoside,a4paper,english,ngerman,german,12pt,authoryear,openright]{book}
+\documentclass[twoside,a4paper,english,12pt,authoryear,openright]{book}
 \usepackage{geometry} % see geometry.pdf on how to lay out the page. There's lots.
 \geometry{a4paper} % or letter or a5paper or ... etc
 % \geometry{landscape} % rotated page geometry
@@ -85,32 +86,33 @@
 
 \section{What \flow is}
 
-\flow is a client server application system which may move your data secure over insecure networks using untrusted service providers. The level of security you get out of \flow is up to you! Meaning you have nearly unlimited control over your data while moving them. At least, if you're the recipient too, which is not as crazy as you might believe. \flow will also support you in establishing privacy whiule communicating with trustworthy partners.
+\flow is a client server application system which may move your data securely. It is not necessary, but you might use insecure networks and also untrusted service providers. The level of security you get out of \flow is up to you! Meaning you have nearly unlimited control over your data whilst they are on their ways. At least, if you're the recipient too, which is not as crazy as it sounds. \flow will also support you in establishing privacy whilst communicating with trustworthy partners.
 
 YOUR data is data you own, which is data you send and data you receive. Receiving data may imply third entities. Other people for example, or data gathering devices.
 
-As far as you're in control of all the security credential at both end of a transportation chain, you are in control of your data. Other people, friends for example, will undermine your control over your data but only in limited ways. So we need to discuss communication security soon.
+As far as you're in control of all the security credential at both end of a transportation chain, you are in control of your data. Other people, friends for example, will undermine your control over your data but only in limited ways. I need to discuss communication security soon to explain.
 
 \subsection{What \flow does}
 
-\flow secures your communication with dedicated partners as far as possible and does not make nonsense down the road. This way it maximizes the privacy you can get while communicating with remote partners and reenforces you to become your own master of your privacy.
+\flow secures your communication with dedicated partners as far as possible and does not make nonsense down the road. This way it maximizes the privacy you get while communicating with remote partners and reenforces you to become your own master of your privacy.
 
 \subsection{Why \flow is developed}
 
 \flow is developed for some different reasons
 
 \begin{itemize}
-  \item {A young man and a women I know didn't believe I'm able to program in C++. I needed to put this to test.}
-  \item {There are no useful communiction applications ensuring your privacy.}
-  \item {I was in need of some tools dealing with OpenSSL, which is in no way easy.}
+  \item {A young man and a women I know didn't believe I'm able to program in C++. I need to put this to test.}
+  \item {There are no useful communication applications ensuring your privacy.}
+  \item {I was in need of some tools dealing with OpenSSL.}
   \item {I couldn't believe that OpenSSL is as complicated as it is. Now I'm a believer.}
 \end{itemize}
 
 \subsection{What \flow is good for}
 
-\flow solves the problem you enter if you need to communicate and wish to communication to be protected.
+\flow solves the problem you enter if you need to communicate and wish to communication to be protected. You may establish (nearly) completely separated channels of communication for different communication entities - which may mean people, friends, devices, ... you name it, \flow claims it.
 
-\section{Some unusual security basics}
+
+\section{Some security basics}
 
 \subsection{Two simple definitions}
 
@@ -118,16 +120,16 @@ Assuming that data you send to others (autonomous entities, not controlled by yo
 
 \begin{description}
   \item{YOUR data:} Means data over which you have full control and which will not change their ownership.
-  \item{THEIR data:} Means data you share and therefore need to be given some control in other hands.
+  \item{THEIR data:} Means data you share and therefore need to be given some control into others hands.
 \end{description}
 
 \subsection{Trustworthyness}
 
-Nearly no one knows about Software Certificates. Good willing people, business man, manager and lot of other people tried to send the message about Software Certificates (for our purpose simple 'Certificates') to the world, but the world was not listening. This is because the matter is much too complicated.
+Nearly no one knows about Software Certificates. Good willing people, business man, manager and lot of other people tried to send the message about Software Certificates (for our purpose simply 'Certificates') to the world, but the world was not listening. This is because the matter is much too complicated.
 
 Because of this, I will not try to do the next boring attempt to explain. If you'r not familiar with the matter and - as usual - not interested at all, forget the whole chapter about security. You don't need to care about it. Other ones care for you. \textit{The last one is a joke!}
 
-A key question in all matters of security is: Who is trustworthy?
+One key question in all matters of security is: Who is trustworthy?
 
 The answer seems to be simple but it is not. You may take a most restrictive point of view and state, that the only person you are will to trust is you. But given the point of our discussion, an open network and (per definition) not trustworthy service providers building this network, your believe has to be wrong.
 
@@ -135,31 +137,88 @@ You'r only trustworthy against yourself if you understand the basics of data sec
 
 \subsection{To trust or not to trust}
 
-Should you trust yourself? Why? What is it you have or know or believe, that should make you trust yourself? Watch yourself for a while. Do you use cellphones in public? Did you ever wrote an SMS while using public transport? Did you talk about business matter in public? No? Ok, you may be trustworthy against yourself. Yes? You may think about information flow!
+Should you trust yourself? Why? What is it you have or know or believe, that should make you trust yourself? Watch yourself for a while. Do you use cellphones in public? Did you ever wrote an SMS while using public transport? Did you talk about business matter or partnership issues in public? No? Ok, you may be trustworthy against yourself. Yes? You may think about information leakage for a while.
+
+Should you trust others? I don't believe so and you shouldn't too. This is because of two reasons.
+
+\begin{itemize}
+  \item {You don't know if your communication partner knows about security.}
+  \item {You don't know if your communication partner put his/her (maybe) knowledge into action.}
+  \item {You don't know if your communication partner changes his/her mind after some time.}
+\end{itemize}
+
+As you can see, each time you think about it, there are more reasons not to trust than you believed at the beginning!
+
+A typical scenario is the erotic photo you sent to your friend. If your relationship breaks, your friend may decide to - accidentally - let the picture slip into to open. It might give you a kick to think about the question WHY this can happen.
+
+The normal answer would be: \textit{You were careless}. Another one may be: \textit{This people was not trustworthy.} But both are not the real answer. The really real answer is:
+
+"Because you gave the control over your data out of your hands."
+
+Some may love this, but hopefully you get a better feeling if I paint a picture of what \textit{giving control over your private data away} means:
+
+\textit{You're blindfolded. Your friend leads you for at least an hour through a foreign landscape. The last twenty minutes the way appears to go through a dense wood. After this, he/she strips off your cloths, ties you up, wide spread between some trees removing your blindfold. In a distance you here car doors closing.}
+
+Some people may find this situation comfortable. Most of us would stop the performance at a certain point. But why?
+
+"Because we don't trust our friends enough with our privacy."
+
+And if we do, possibly we shouldn't. At least with undeniable insides of your privacy.
+
+Compared with entrusting private data to others, this pictures is indeed harmless! If we try to transfer this situation into the world of information, we do not only speak about pictures, private ideas and privacy, we also speak about identity. One of the simpler form of identity theft is thieving credit card information. But even this may lead your way directly to jail. For example after some one used your private credit card information to buy illegal products. Such events may lead to some simple collateral damage like some weeks in jail and some month amongst layers. But this all is really a joke compared with what is possible if someone really steals your identity.
+
+Even if these thoughts lead a bit too far out you should keep them in mind. There are objective information, als pictures, and subjective ones, as tests. Luckily for all of us, as technology progresses through time, more and more of such information become deniable.
+
+But in some cases, you simply wish some information not to leak out before a certain time period. This is the moment when \flow comes handy.
+
 
 \subsection{Identity in open networks}
 
 Who are you?
 
-Sorry, I'm not interested, but believe me, someone is. A lot of people wish to know who you are. Sales man are the least frightening ones. You may believe that thiefs and other criminals are not interested on your identity because you don't know any, but you're wrong. Internet criminals are interested on everyone whom they are able to uncover. You leave traces and lots of individuals, organisations and governments are investing in tracing people, uncovering them and get as much social and other kind of information as possible.
+Sorry, I'm not interested, but believe me, someone is. A lot of people wish to know your better, wish to know exactly who you are. Sales man are the least frightening ones. You may believe that thiefs and other criminals are not interested in your identity because you don't know any, but you're wrong. Internet criminals are interested in everyone whom they are able to uncover. You leave traces and lots of individuals, organisations and governments are investing in tracing people, uncovering them and get as much social and other kind of information as possible.
 
 The use of such information is countless. It would fill some books for its own.
 
-But sometimes you run into greater problems. You need to prove your identity against a communication partner but hide it from everyone else. An some times not only this, some times you only wish you communication partner know that you are the right person but not really who you are.
+But sometimes you run into greater problems. You need to prove your identity against a communication partner but hide it from everyone else. An some times not only this, some times you wish only your communication partner knows that you are the right person but not really who you are.
 
-This may be an extreme case, but implementing secure, reliable private communication needs to put the possible requirements to the limit. If you've lesser requirements, dealing with them will become easier than doing it all and may result in some protection you would not get if the limit is only what you currently imagine.
+This may be an extreme case, but implementing secure, reliable private communication needs to put the possible requirements to the limit. If you've lesser requirements, dealing with them will become easier than dealing with the worst case and may result in some protection you would not get if the limit is only what you currently imagine.
+
+For the wise: IP address issues are in no case a discussion point in this document. \flow is completely ignorant and transparent against IP address fiddling.
+
 
 \subsection{How to trust}
 
-If we assume, trusting each other is recognizing each other as what one promised to be for the other one, it is on no way easy. One of the easier solutions is, using an well know communication channel to exchange the necessary enhanced authentication credentials.
+If we assume trusting each other is recognizing each other for what one promised to be for the other one, it is on no way easy. One of the easier solutions is using an well know communication channel to exchange the necessary enhanced authentication credentials.
 
-For example, you are emailing with a partner for a while, so you may send him your Certificate the same way, by email. This looks simple and indeed it is. But the receiver cant be certain that this Certificate belongs to you indeed. Maybe, someone else interfered. Thats why you may exchange other prove using other ways of communication.
+For example, you are emailing with a partner for a while, so you may send him your Certificate the same way; by email. This looks simple and indeed it is. But the receiver cant be certain that this Certificate belongs to you indeed. Maybe, someone else interfered. Thats why you may exchange other prove using other ways of communication.
 
-For example, you may print your Certificate and send it by snail mail or hand it over directly. There are different methods. But do not trust any 'web of trust'! In a so called 'web of trust' everyone believes every other one to be careful. A big mistake if you try to establish private communication. 
+For example, you may print your Certificate and send it by snail mail or hand it over directly. There are different methods. But do not trust any 'web of trust'! In a so called 'web of trust' everyone believes every other one to be careful. A big mistake if you try to establish private communication.
 
-You may trust a web of trust to be reliable if you need to communicate with partners with your and their identity openly known. But if you wish to be anonymous for the public but also sure to know with whom you're communicating with, you fail to fulfill two basic rules for a 'web of trust'. At first, your Certificate does not confirm you by its public content. And second, letting others know who you're for later prove, you discover your identity against others and so (eventually) discover it to others who wish to know who you are.
+For example: Calling a certificate from a public repository may give a listener (log file reader, ...) a hint you might be in need of private communication with the person/entity/unit the certificate is signed to.
 
-The best way to ensure others don't know who you are is to ensure, others don't know who you are.
+You may trust a web of trust to be reliable if you need to communicate with partners with your and their identity openly known. This should be the case if you do public business with them. But if you wish to be anonymous for the public but also sure to know with whom you're communicating with, you fail to fulfill two basic rules for a 'web of trust'.
+
+At first, your Certificate does not confirm you by its public content. And second, letting others know who you're for later prove, you discover your identity against others and so (eventually) discover it to others who wish to know who you are but shouldn't reach this conclusion.
+
+The best way to ensure others don't know who you are is to ensure, others don't know who you are!
+
+\subsection{Watch your ways!}
+
+Last, but surely not least, you have to watch your way, or speaking clearly, the traces you leave behind. If you deal with a set of real people in the real world (we call this 'Set R')  and a set of virtual people in the virtual world (we call this 'Set V') then you might be in for an enhanced 'Set Mathematics'.
+
+Possibly you don't think about it, but if you leave your certificates in relation to other certificates on some untrusted servers, watchers may - at the beginning - don't know who is communicating with whom, these watchers are able to spin a web of communication connections simply by watching which certificate becomes associated to which others.
+
+Given the assumption that communication behaviour in Set R becomes reflected in Set V, an onlooker may conclude who is who in your web of virtual entities. Using \flow, you may break the mathematical set by a simple measure. Use different certificates to communicate with the same partner.
+
+You should have a fluid set of certificates to communicate with your Set V and you should not use the same certificate to communicate with different partners. You even may not use the same communication server to communicate with different partners - if possible. Break the set in as many parts as possible!
+
+To confuse the observer, you even should relay random posts from others for others. Which distorts the truth about observed communication patterns if IP addresses are part of the observation. Also it might be helpfull if you send out messages of no true content to members of Set X, from whom you possibly don't know anyone.
+
+For an uninvited observer, an untrusted service provider this would create a buzzing where observers will be filled up with useless traffic, false connections and misleading traces.
+
+Even if an observer becomes part of the conversation, as long as you don't send personal data with your useless buzzing messages, he will not gain useful information out of such measures.
+
 
 \subsection{Why should you care?}
 
@@ -167,15 +226,19 @@ You don't know what will happen.
 
 Friends become foes. So, possibly you wish to deny that you're the communication partner after a former friend went against you.
 
-Communication partners may be accused to be involved in some criminal act you don't wish to become associated to.
+Communication partners may be accused to be involved in some criminal act you don't wish to become associated with.
 
-You don't want to spread you social net through the internet.
+You don't want to spread you social net - Set R - throughout the internet.
 
 You may have some of millions of other reason to care and if you have none, do it anyway. As time comes you will find out why this was a good decision.
 
 \subsection{Where to go from here}
 
-We need to have a communication system that enables you to become anonymous but at the same time able to prove who you are and further to not connect your communication with one partner with the communication to another partner. Which means you need to appear as someone other in each communication thread.
+May be someone is kind enough to add a file splitter to the system so you become able to spread a file through the net in parts.
+
+May be there will come a time when your request to your messages is answered be a server only if you come from a certain set of system names, device classes or IP addresses.
+
+And may be it's useful to pull the plug on your messages. Giving the command to delete your messages from the servers you used. This will not help against fraudulent servers but possibly against successful R-world or V-world attacks against trustworthy servers.
 
 \chapter{The project}
 
@@ -200,7 +263,7 @@ But how to provide the communication server with no information of who you are a
 Well, this is not only easy, but eases the rest of the boring transportation requirements too. This is, because you neither have to tell the server who your are nor who the receiver might be. A simple two step trick ensures this:
 
 \begin{enumerate}
-\item{You will be (anonymously) identified by the Certificate from your TLS connection.}
+\item{You will be (anonymously) identified by your Certificate used in your TLS connection.}
 \item{You address your message by using the identification code of the Certificate of your partner.}
 \end{enumerate}
 
@@ -211,7 +274,7 @@ FROM:FB0FB87C6F783B35F5F21B69F79F4DCC4EDF1963
 TO..:BA95B648CE28F80842CECDC6A4BA8826B6B9FE32
 \end{lstlisting}
 
-Its easy to believe that such addressing makes things obscure for an uninvited observer.
+Such addressing makes things obscure for an uninvited observer. At least it clearly is not easy to follow conversations if connections made using non personalized addressing like this. One may follow IP addresses but this is of limited use if users are careful.
 
 \subsection{Data protection}
 
