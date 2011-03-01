@@ -19,11 +19,6 @@
   59 Temple Place, Suite 330,
   Boston, MA  02111-1307  USA
 
-  In addition, as a special exception, the 'flow' project gives permission to
-  link the code of its release of 'flow' with the OpenSSL project's "OpenSSL"
-  library (or with modified versions of it that use the same license as the
-  "OpenSSL" library), and distribute the linked executables.
-
   You must obey the GNU General Public License in all respects for all of the
   code used other than "OpenSSL". If you  modify this file, you may  extend
   this exception to your version of the file, but you are not obligated to do
