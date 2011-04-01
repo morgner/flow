@@ -468,26 +468,251 @@ class CCrypto
 
 
 
+\chapter{Quickstart API description}
+
+\section{No library, no programming dependencies}
+
+There is no library, the complete API consists of communication and data formatting specification. At first you have to establish an encrypted connection to the server, secondly you have to send or call your message(s).
+
+There is no preferred programming language, no specific encryption library and no specific 'inner formatting' of the data. All you need is
+
+\begin{enumerate}
+\item{An encrypted TCP/IP session}
+\item{A client and a server to support the protocol}
+\item{Clients who match each others requirements}
+\end{enumerate}
+
+As described before, you may use any \flow server you and your communication partner(s) may reach. But also you are able to deliver whatever you need to as long as your packages fit the transport and container specification.
+
+\section{Transport Layer}
+
+A \flow server is expected to for the client to use TLS. Client are expected to only communicate with servers using TLS.
+
+For his own protection server are allowed to restrict access be rules as
+
+\begin{enumerate}
+\item{Allow all clients with client certificate - least requirements}
+\item{Allow dedicated client certificates}
+\item{Allow client certificates from specific CA(s)}
+\item{others as TLS enables them}
+\end{enumerate}
 
 
+\section{Addressing}
+
+Now switch on your 'abstract thinking mode'!. What is a \flow Partner?
+
+A \flow partner is a technical entity. It is the combination of a client certificate and a client software. The certificate has to have the attributes
+
+\begin{enumerate}
+\item{Client authentication}
+\item{Encrypt/Decrypt messages}
+\item{Sign messages}
+\end{enumerate}
+
+or none at all. (which is the better variant). Thats all! It is best if the certificate does not contain any personal truthfull or otherwise retraceable information. So you may be "Marc Zuckerberg" for the rest of the world, living in "Kairo", "Kenia".
+
+A certificate represents a \flow partner. If you use a seperate certificate with each of your communication partners, lets say eight of them, you have an eight fold personality. You represent eight \flow partners.
 
 
+\section{Data Transport}
+
+\subsection{Data transport packaging}
+
+Currently the data transport uses a simple sequential text transmission. A server builds message containers at his liking for storing messages in a way that enables him to answer queries from the client to list or deliver messages.
+
+A multi message sequence is build like this:
+
+\begin{lstlisting}
+a:<recipient> # first message
+<other bytes>
+a:<recipient> # second message
+<other bytes>
+.             # end of sequence sign terminated by \r
+\end{lstlisting}
+
+The line delimiter will always be \texttt{0x0A}. In the case of message reception \texttt{recipient} will be replaced with \texttt{sender}.
 
 
+\subsection{Data to send}
+
+A complete message from a client to a server, called \texttt{[client-message]}, is constructed by the following components.
+
+\begin{lstlisting}
+a:<recipient>
+x:<message data>
+\end{lstlisting}
+
+The answer to such message, to send back from the server to the client, is the server unique message id. A \flow server has to generate unique message ids for the transport context. Content and structure of such ID is not specified, but it has to fulfil three requirements:
+
+\begin{enumerate}
+\item{It has to be unique for the client}
+\item{It has to be transported in ASCII format}
+\item{Its transport form must not exceed 512 ASCII characters}
+\end{enumerate}
+
+Said this, it is perfectly in order to use simple enumeration for each client and send the ID as hexadecimal string.
 
 
+\subsection{Data to receive}
+
+A complete message from a server to a client, called \texttt{[recall-message]}, is constructed by the following components.
+
+\begin{lstlisting}
+a:<sender>
+m:<message-id>
+n:<next-message-id>
+x:<multiline data>
+\end{lstlisting}
+
+\texttt{[next-message-id]} is valid for the context of the recall request. If the client uses a filter, this filter is applied to the answer too. For example, if the client only calls the messages from a certain \texttt{sender}, then \texttt{[next-message-id]} is the ID of the next message from this sender.
+
+\begin{enumerate}
+\item{If no next message exists, the parameter is left out.}
+\item{If more than one message is delivered but not all in the context, \texttt{[next-message-id]} is only delivered in and for the last package.}
+\end{enumerate}
 
 
+\begin{table}[htdp]
+\begin{center}
+\begin{tabular}{ | l | l | l |  }
+
+\hline
+Command & client => server & server => client  \\
+\hline
+
+add message  & \texttt{ a:<recipient>}  & \texttt{ m:<message-id>}  \\
+& \texttt{ x:<body>}  &  \\
+\hline
+
+change message  & \texttt{ c:change}  &  \\
+& \texttt{ m:<message-id>}  &  \\
+& \texttt{[r:<recipient>]}  &  \\
+& \texttt{[x:<body>]}  &  \\
+\hline
+
+remove message  & \texttt{ a:<recipient>}  &  \\
+& \texttt{ m:<message id>} &\\
+\hline
+
+list mine  & \texttt{ c:mine}  & \texttt{ m:<message-id>}  \\
+&& \texttt{[m:<message-id>]}  \\
+&& \texttt{[m:<message-id>]}  \\
+\hline
+
+list senders  & \texttt{ c:senders}  & \texttt{ s:<sender-id>}  \\
+&& \texttt{[s:<sender-id>]}  \\
+&& \texttt{[s:<sender-id>]}  \\
+\hline
+
+list messages  & \texttt{ c:messages}  & \texttt{ m:<message-id>} \\
+& \texttt{[s:sender-id]}  & \texttt{[m:<message-id>]} \\
+&& \texttt{[m:<message-id>]} \\
+\hline
+
+call message  & \texttt{ c:get}  &  \texttt{ s:<sender-id>}  \\
+& \texttt{[s:<sender-id>]} & \texttt{ m:<message-id>}  \\
+& \texttt{ m:<message-id>} & \texttt{ x:<body> | none}  \\
+& \texttt{[m:<message-id>]} & \texttt{[s:<sender-id>]} \\
+&& \texttt{[m:<messageid>]} \\
+&& \texttt{[x:<body> | none]} \\
+&& \texttt{ n:<message id> | none} \\
+\hline
+
+call next message  & \texttt{c:next}  & \texttt{ s:<sender-id>}  \\
+& \texttt{r:<message id>}  & \texttt{ m:<message id>} \\
+&& \texttt{ x:<body>} \\
+&& \texttt{ n:<message-id> | none} \\
+\hline
 
 
+\end{tabular}
+\end{center}
+\caption{\flow Client Commands}
+\label{default}
+\end{table} %
 
+The recipient line may appear multiple times for multiple recipients. But if so, all of them has to follow one to each other without any other element between. Because the recipient element starts a new message if following any other element as another recipient element. It may not be advisable to create multi recipient messages but should be possible anyway.
 
+The server registers the sender ID (the fingerprint of the used TLS certificate) to the soup. This makes for an unique server ID which may be constructed like this:
 
+\texttt{sender:recipient:receive-time:context-sequence-id}
 
+this may look like this:
 
+\begin{lstlisting}
+SENDER:RECEIP:RECEIVE-TIME  :SID
+0A12DE:B2E807:20110325103527:3
+\end{lstlisting}
 
+----------- END OF TEXT -----------
 
+----------- END OF TEXT -----------
 
+Mainly the order of elements is irrelevant. But "s:" starts a new container. To close the data stream, how may contain multiple containers, the client has to send a line containing a single ".".
+
+Messages from a server to a client is constructed like this:
+
+\begin{lstlisting}
+s:<sender>
+e:<recipient>
+i:<client local id>
+t:<client local id time>
+r:<server local id>
+x:<multiline data>
+.
+\end{lstlisting}
+
+where the "r:" line represents the local unique identifier of the message on the server side. The client asks the server using a recall block:
+
+\begin{lstlisting}
+c:<recipient>
+.
+\end{lstlisting}
+
+List block for messages
+
+\begin{lstlisting}
+c:messages
+.
+\end{lstlisting}
+
+List block for senders
+
+\begin{lstlisting}
+c:senders
+.
+\end{lstlisting}
+
+Last read block
+
+\begin{lstlisting}
+c:next
+l:<server local id of the last received message>
+.
+\end{lstlisting}
+
+Receive a specific block
+
+\begin{lstlisting}
+c:<server local id>
+.
+\end{lstlisting}
+
+Receive all messages
+
+\begin{lstlisting}
+c:all
+.
+\end{lstlisting}
+
+Receive all messages starting with the next after a a specified one
+
+\begin{lstlisting}
+c:all
+l:<server local id of the last received message>
+.
+\end{lstlisting}
 
 
 \backmatter 
