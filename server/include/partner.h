@@ -1,6 +1,6 @@
 /***************************************************************************
- partner.h - description
- -----------------------
+ partner.h 
+
  begin                 : Fri Nov 05 2010
  copyright             : Copyright (C) 2010 by Manfred Morgner
  email                 : manfred@morgner.com
@@ -27,6 +27,19 @@
  *                                                                         *
  ***************************************************************************/
 
+/***************************************************************************
+ partner.h - description
+ -----------------------
+ A CPartner object represents an COMMUNICATION PARTNER. Such communication
+ partner is an abstract entity. Its identity is given by the client
+ certificate it used to connect to the server. Don't be fooled by this
+ certificate! A real person is not limited by one certificate. But CPartner
+ only ever identifies the partner, not the real person.
+
+ The mission of a CPartner instance is to generate CContainer objects
+ containing all information to serve as a recognizable, enumerable, sortable
+ message from a sender to a receiver.
+ ***************************************************************************/
 
 #include "socketssl.h"
 
@@ -42,12 +55,13 @@ class CPartner
     pthread_mutex_t m_tMutex;
     pthread_t       m_tThread;
 
-    CSocketSSL*     m_poSocket;  
-  
+    CSocketSSL*     m_poSocket;
+    std::string     m_sIdentity;
+
   public:
     CPartner();
    ~CPartner();
-  
+
     void Communicate( CSocketSSL* poSocket );
     void Stop();
 
