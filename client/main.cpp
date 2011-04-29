@@ -159,7 +159,7 @@ int main( int argc, const char* argv[] )
 
   // putting together defaults and command line input for the Pulex
   poPulex->SenderSet      ( oEnvironment["sender"] );
-  poPulex->RecipientAdd   ( oEnvironment["recipient"] );
+  poPulex->RecipientSet   ( oEnvironment["recipient"] );
   poPulex->ClientSideIdSet( oEnvironment["cluid"] );
 
   *poPulex << oEnvironment["message"];

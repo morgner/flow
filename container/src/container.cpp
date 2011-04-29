@@ -70,26 +70,16 @@ const string& CContainer::SenderGet() const
   } // const string& CContainer::SenderGet() const
 
 
-// add the recipient to the recipient list
-size_t CContainer::RecipientAdd( const string& rsRecipient )
+const string& CContainer::RecipientSet( const string& rsRecipient )
   {
-  for ( CListString::iterator it  = m_lsRecipients.begin();
-                              it != m_lsRecipients.end();
-                            ++it )
-    {
-    if ( *it == rsRecipient ) return m_lsRecipients.size();
-    }
-  m_lsRecipients.push_back( rsRecipient );
-  return m_lsRecipients.size();
-  } // size_t CContainer::RecipientAdd( const string& rsRecipient )
+  return m_sRecipient = rsRecipient;
+  } // const string& CContainer::RecipientSet( const string& rsRecipient )
 
 
-// remove all recipient entries for the given alias
-size_t CContainer::RecipientDel( const string& rsRecipient )
+const string& CContainer::RecipientGet()
   {
-  m_lsRecipients.remove( rsRecipient );
-  return m_lsRecipients.size();
-  } // size_t CContainer::RecipientDel( const string& rsRecipient )
+  return m_sRecipient;
+  } // const string& CContainer::RecipientGet()
 
 
 long CContainer::ClientSideTmGet() const
@@ -217,11 +207,7 @@ string CContainer::CLUIDGet()
 
 bool CContainer::isFor( const string& rsRecipient )
   {
-  for ( CListString::iterator it = m_lsRecipients.begin(); it != m_lsRecipients.end(); ++it)
-    {
-    if ( *it == rsRecipient ) return true;
-    }
-  return false;
+  return m_sRecipient == rsRecipient;
   } // bool CContainer::isFor( const string& rsRecipient )
 
 
@@ -240,7 +226,7 @@ const string& CContainer::operator += ( const string& rsElement )
     switch ( rsElement[0] )
       {
       case 's': SenderSet      ( rsElement.substr(2) ); break;
-      case 'e': RecipientAdd   ( rsElement.substr(2) ); break;
+      case 'e': RecipientSet   ( rsElement.substr(2) ); break;
       case 'l': ClientSideIdSet( rsElement.substr(2) ); break;
       case 't': ClientSideTmSet( rsElement.substr(2) ); break;
       case 'r': ServerSideIdSet( rsElement.substr(2) ); break;

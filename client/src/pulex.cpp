@@ -101,16 +101,11 @@ template<typename T>
     // sender has to be first because it is indicated as start of a new object
     roStream << scn_sender << ":"
              << CCrypto::FingerprintCrt( SenderGet() ) << "\n";
-    for ( CListString::iterator it  = m_lsRecipients.begin();
-                                it != m_lsRecipients.end();
-                              ++it )
+    if ( m_sRecipient.length() )
       {
-      if ( it->length() )
-        {
-        roStream << scn_recipient << ":"
-                 << CCrypto::FingerprintCrt( *it ) << "\n";
-        } // if ( it->length() )
-      } // for ( CListString::iterator it  = m_lsRecipients.begin();
+      roStream << scn_recipient << ":"
+               << CCrypto::FingerprintCrt( m_sRecipient ) << "\n";
+      } // if ( it->length() )
     roStream << scn_local_id      << ":" << ClientSideIdGet() << "\n";
     roStream << scn_local_id_time << ":" << ClientSideTmGet() << "\n";
     roStream << scn_remote_id     << ":" << ServerSideIdGet() << "\n";
@@ -133,7 +128,7 @@ template<typename T>
       } // for ( CPulex::iterator it  = begin();
 
     CCrypto oCrypto( sosBuffer.str() );
-    oCrypto.RsaKeyLoadFromCertificate( "certificates/client/" + *m_lsRecipients.begin() + ".crt" );
+    oCrypto.RsaKeyLoadFromCertificate( "certificates/client/" + m_sRecipient + ".crt" );
     roStream << oCrypto.BuildTransportPackage();
 
     roStream << "===== end of message =====" << "\n";

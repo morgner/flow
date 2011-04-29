@@ -45,7 +45,7 @@ class CContainer : public CListString
 
   protected:
     std::string m_sSender;
-    CListString m_lsRecipients;
+    std::string m_sRecipient;
     std::string m_sClass;
 
     static long s_nLastClientSideId;
@@ -62,8 +62,8 @@ class CContainer : public CListString
     virtual const std::string& SenderGet() const;
     virtual const std::string& SenderSet( const std::string& rsSender );
 
-    virtual size_t RecipientAdd( const std::string& rsRecipient );
-    virtual size_t RecipientDel( const std::string& rsRecipient );
+    virtual const std::string& RecipientSet( const std::string& rsRecipient );
+    virtual const std::string& RecipientGet();
 
     virtual long ClientSideTmGet() const;
     virtual long ClientSideTmSet( long nClientSideTm = 0 );
