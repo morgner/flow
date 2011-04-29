@@ -569,7 +569,7 @@ x:<multiline data>
 
 \begin{enumerate}
 \item{If no next message exists, the parameter is left out.}
-\item{If more than one message is delivered but not all in the context, \texttt{[next-message-id]} is only delivered in and for the last package.}
+\item{If more than one message is delivered but not all for the current context, \texttt{[next-message-id]} is only delivered in and for the last package.}
 \end{enumerate}
 
 
@@ -636,16 +636,35 @@ The recipient line may appear multiple times for multiple recipients. But if so,
 
 The server registers the sender ID (the fingerprint of the used TLS certificate) to the soup. This makes for an unique server ID which may be constructed like this:
 
-\texttt{sender:recipient:receive-time:context-sequence-id}
+\texttt{server-id:sender:recipient:receive-time:context-sequence-id}
 
 this may look like this:
 
 \begin{lstlisting}
-SENDER:RECIPI:RECEIVE-TIME  :SID
-0A12DE:B2E807:20110325103527:3
+SENDER   :RECIPIENT:RECEIVE-TIME  :SID
+0A12D4C9E:B8F02E807:20110325103527:3
 \end{lstlisting}
 
+Fingerprints of keys are longer, the representation above is only for descriptive use!
+
+As a suggestion the client may store the message-ids preceded  by their servers identification so it becomes easy to remember on which server which message resides: 
+
+\begin{lstlisting}
+SERVER-ID:SENDER   :RECIPIENT:RECEIVE-TIME  :SID
+C48E35A72:0A12D4C9E:B8F02E807:20110325103527:3
+\end{lstlisting}
+
+It is an important principle of the system that clients are aware and able to deal with an unlimited amount of servers.
+
+But the client is free to do what he wants! There is only one definition and this is the communication protocol. Clients and servers are free to handle their business as they want as long as this enables them to correctly follow the communication protocol while fulfilling their mission.
+
+Further clients should store their sent messages locally, remotely or not at all. Storing them is a complete new chapter and has to be handled with care.
+
+
+
 ----------- END OF TEXT -----------
+
+Do not believe anything from here on!
 
 ----------- END OF TEXT -----------
 
