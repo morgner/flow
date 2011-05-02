@@ -31,27 +31,36 @@
 #ifndef _SOCKET_SERVER_H
 #define _SOCKET_SERVER_H
 
-#include "socketssl.h"
+
+#include <string>
+
+#include "socket.h"
 
 
-class CSocketServer : public CSocketSSL
+class CSocketServer : public CSocket
   {
-  private:
-    typedef CSocketSSL inhertited;
+  protected:
+    typedef CSocket inherited;
+
+  protected:
+    std::string m_sHost;
+    std::string m_sPort;
+         bool   m_bVerbose;
 
   protected:
              CSocketServer();
   public:
              CSocketServer( const std::string& rsHost,
                             const std::string& rsPort,
-                            const std::string& rsFileCertificate,
-                            const std::string& rsFileKey,
-                            const std::string& rsPassword,
-                            const std::string& rsFileCaChainTrust,
-                            const std::string& rsPathCaTrust = "",
-                                       bool     bVerbose     = false);
+                                       bool    bVerbose = false);
     virtual ~CSocketServer();
+
+    virtual void     Create();
+    virtual void     Bind( int nPort );
+    virtual void     Listen();
+
+    virtual CSocket* Accept();
+
 };
 
 #endif // _SOCKET_SERVER_H
-

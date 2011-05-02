@@ -84,22 +84,20 @@ class CSocket
       };
 
   protected:
-    static const int INVALID_SOCKET;
-    static const int CLIENT_BACKLOG;
-    static const int RECEIVE_BUFFER_SIZE;
+    static const int       INVALID_SOCKET;
+    static const int       CLIENT_BACKLOG;
+    static const int       RECEIVE_BUFFER_SIZE;
 
-    static bool s_bVerbose;
+                 bool      m_bVerbose;
 
-    int       m_nSock;
-    CBuffer   m_ovBuffer;
-    CAddrInet m_tAddr;
+                 int       m_nSock;
+                 CBuffer   m_ovBuffer;
+                 CAddrInet m_tAddr;
 
-             CSocket( const CSocket& src  );
+             CSocket( const CSocket& src );
   public:
              CSocket( const int nSock = INVALID_SOCKET );
     virtual ~CSocket();
-
-            bool     VerboseSet( bool bVerbose );
 
     virtual void     Create ();
     virtual void     Bind   ( const int         nPort );

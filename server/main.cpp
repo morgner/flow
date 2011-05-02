@@ -91,17 +91,11 @@ int main ( int argc, const char* argv[] )
   /// for convienice we create a local shortcut to the environment value of 'isVerbose()'
   g_bVerbose = oEnvironment.find("verbose") != oEnvironment.end();
 
-  ERR_load_crypto_strings(); // or: SSL_load_error_strings();
   try // server bind ...
     {
-    CSocketServer server( oEnvironment["host"],
-                          oEnvironment["port"],
-                          oEnvironment["cert"],
-                          oEnvironment["key"],
-                          oEnvironment["password"],
-                          oEnvironment["trust-chain"],
-                          oEnvironment["trust-path"],
-                          g_bVerbose );
+    CSocketServer oServer( oEnvironment["host"],
+                           oEnvironment["port"],
+                           g_bVerbose );
 
     if ( g_bVerbose ) std::cout << "Waiting for clients..." << std::endl;
     while ( true )
@@ -110,7 +104,7 @@ int main ( int argc, const char* argv[] )
       try
         {
         /// don't panic! this threaded object terminates itself after doing its mission
-        (new CPartner())->Communicate( server.Accept() );
+        (new CPartner())->Communicate( oServer.Accept() );
         } // try  -  wait for a client
       catch ( CSocketException& e )
         {
@@ -121,8 +115,7 @@ int main ( int argc, const char* argv[] )
   catch ( CSocketException& e )
     {
     std::cout << "Exception: " << e.Info() << "\nExiting.\n";
-    } // catch  -  server bind ...
-  ERR_free_strings();
+    } // catch  -  oServer bind ...
 
   return 0;
   } // main

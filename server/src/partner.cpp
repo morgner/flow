@@ -69,7 +69,7 @@ CPartner::~CPartner()
 
 
 // start the thread
-void CPartner::Communicate( CSocketSSL* poSocket ) 
+void CPartner::Communicate( CSocket* poSocket ) 
   {
   m_poSocket  = poSocket;
   int nResult = pthread_create(&m_tThread, 0, &CPartner::thread, this);
@@ -158,7 +158,7 @@ size_t CPartner::Recall( const string&  rsClientData,
                                      ++it )
     {
     CContainer* poc = it->second;
-    if ( poc->isFor(m_poSocket->PeerFingerprintGet()) )
+//    if ( poc->isFor(m_poSocket->PeerFingerprintGet()) )
       {
       *poSocket << poc->RGUIDGet() << "\n";
       *poSocket << poc->CLUIDGet() << "\n";

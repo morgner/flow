@@ -29,13 +29,8 @@
 
 
 #include "pulex.h"
-#include "crypto.h"
 
-#include "ssltemplates.h"
 #include "socketexception.h"
-
-#include <openssl/ssl.h>
-#include <openssl/x509.h>
 
 
 using namespace std;
@@ -100,11 +95,13 @@ template<typename T>
     // Information to manage the object if it's remote
     // sender has to be first because it is indicated as start of a new object
     roStream << scn_sender << ":"
-             << CCrypto::FingerprintCrt( SenderGet() ) << "\n";
+//        << CCrypto::FingerprintCrt( SenderGet() ) << "\n";
+        << SenderGet() << "\n";
     if ( m_sRecipient.length() )
       {
       roStream << scn_recipient << ":"
-               << CCrypto::FingerprintCrt( m_sRecipient ) << "\n";
+//          << CCrypto::FingerprintCrt( m_sRecipient ) << "\n";
+          << m_sRecipient << "\n";
       } // if ( it->length() )
     roStream << scn_local_id      << ":" << ClientSideIdGet() << "\n";
     roStream << scn_local_id_time << ":" << ClientSideTmGet() << "\n";
@@ -127,10 +124,11 @@ template<typename T>
         sosBuffer << scn_content_text << ":" << "\n";
       } // for ( CPulex::iterator it  = begin();
 
+/*
     CCrypto oCrypto( sosBuffer.str() );
     oCrypto.RsaKeyLoadFromCertificate( "certificates/client/" + m_sRecipient + ".crt" );
     roStream << oCrypto.BuildTransportPackage();
-
+*/
     roStream << "===== end of message =====" << "\n";
     return roStream;
     } // template<typename T> T& CPulex::Send( T& roStream )

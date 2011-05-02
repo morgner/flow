@@ -34,23 +34,20 @@
 
 CSocketClient::CSocketClient( const std::string& rsHost,
                               const std::string& rsPort,
-                              const std::string& rsFileCertificate,
-                              const std::string& rsFileKey,
-                              const std::string& rsPassword,
-                              const std::string& rsFileCaChainTrust,
-                              const std::string& rsPathCaTrust )
-  : CSocketSSL( rsHost,
-                rsPort,
-                rsFileCertificate,
-                rsFileKey,
-                rsPassword,
-                rsFileCaChainTrust,
-                rsPathCaTrust )
+                                         bool    bVerbose )
   {
   Create();
   Connect();
   }
 
 CSocketClient::~CSocketClient()
+  {
+  }
+
+void CSocketClient::Create()
+  {
+  }
+
+void CSocketClient::Connect()
   {
   }

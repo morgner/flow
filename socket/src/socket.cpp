@@ -45,8 +45,6 @@ const int  CSocket::INVALID_SOCKET      = -1;
 const int  CSocket::CLIENT_BACKLOG      =  5;
 const int  CSocket::RECEIVE_BUFFER_SIZE =  512;
 
-bool CSocket::s_bVerbose = false;
-
 
 CSocket::CSocket( const int nSock )
   : m_nSock( nSock )
@@ -92,12 +90,6 @@ CSocket::~CSocket()
     m_nSock = INVALID_SOCKET;
     }
   } // CSocket::~CSocket()
-
-
-bool CSocket::VerboseSet( bool bVerbose )
-  {
-  return s_bVerbose = bVerbose;
-  } // bool CSocket::VerboseSet( bool bVerbose )
 
 
 void CSocket::Create()

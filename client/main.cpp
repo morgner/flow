@@ -59,35 +59,6 @@ bool g_bVerbose = false;
 
 using namespace std;
 
-// A class to load and unload ERR texts from OpenSSL
-class COpenSslError
-  {
-  protected:
-    static bool s_bLoaded;
-  public:
-    COpenSslError()
-      {
-      if ( !s_bLoaded )
-        {
-        ERR_load_crypto_strings(); // or: SSL_load_error_strings();
-        s_bLoaded = true;
-        } // if ( !s_bLoaded )
-      } // COpenSslError()
-
-    COpenSslError( const COpenSslError& src ) {}
-
-    virtual ~COpenSslError()
-      {
-      if ( s_bLoaded )
-        {
-        ERR_free_strings();
-        s_bLoaded = false;
-        } // if ( !s_bLoaded )
-      }
-  }; // class COpenSslError
-
-bool COpenSslError::s_bLoaded = false;
-
 
 int main( int argc, const char* argv[] )
   {
@@ -179,18 +150,11 @@ int main( int argc, const char* argv[] )
     cout << endl;
     }
 
-  // Load the descriptive error messages from the OpenSSL library
-  COpenSslError oOSE;
   // try to let all Pulexes jump to the server
   try
     {
     CSocketClient oConnection( oEnvironment["host"],
-                               oEnvironment["port"],
-                               sSenderCrt,
-                               sSenderKey,
-                               oEnvironment["password"],
-                               oEnvironment["trust-chain"],
-                               oEnvironment["trust-path"] );
+                               oEnvironment["port"] );
     // This ist where the servers reply is going to
     string sServerReply;
     try

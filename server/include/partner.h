@@ -41,7 +41,7 @@
  message from a sender to a receiver.
  ***************************************************************************/
 
-#include "socketssl.h"
+#include "socket.h"
 
 #include <pthread.h>
 
@@ -55,14 +55,14 @@ class CPartner
     pthread_mutex_t m_tMutex;
     pthread_t       m_tThread;
 
-    CSocketSSL*     m_poSocket;
+    CSocket*        m_poSocket;
     std::string     m_sIdentity;
 
   public:
     CPartner();
    ~CPartner();
 
-    void Communicate( CSocketSSL* poSocket );
+    void Communicate( CSocket* poSocket );
     void Stop();
 
   protected:

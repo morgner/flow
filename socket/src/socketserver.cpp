@@ -37,21 +37,11 @@ CSocketServer::CSocketServer()
 
 CSocketServer::CSocketServer( const std::string& rsHost,
                               const std::string& rsPort,
-                              const std::string& rsFileCertificate,
-                              const std::string& rsFileKey,
-                              const std::string& rsPassword,
-                              const std::string& rsFileCaChainTrust,
-                              const std::string& rsPathCaTrust,
                                          bool     bVerbose )
-  : CSocketSSL( rsHost,
-                rsPort,
-                rsFileCertificate,
-                rsFileKey,
-                rsPassword,
-                rsFileCaChainTrust,
-                rsPathCaTrust )
+  : m_sHost(rsHost),
+    m_sPort(rsPort),
+    m_bVerbose(bVerbose)
   {
-  VerboseSet( bVerbose );
   Create();
   Bind( atoi( rsPort.c_str() ) );
   Listen();
@@ -60,3 +50,21 @@ CSocketServer::CSocketServer( const std::string& rsHost,
 CSocketServer::~CSocketServer()
   {
   } // 	CSocketServer::~CSocketServer()
+
+void CSocketServer::Create()
+  {
+  } // CSocketServer::Create()
+
+void CSocketServer::Bind( int nPort )
+  {
+  } // CSocketServer::Bind()
+
+void CSocketServer::Listen()
+  {
+  } // CSocketServer::Listen()
+
+CSocket* CSocketServer::Accept()
+  {
+  return 0;
+  } // CSocketServer::Accept()
+

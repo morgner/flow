@@ -1,8 +1,8 @@
 
 CC = clang
 
-SERVER_LIBS = -lflowsocket -lflowcontainer -lc -lstdc++ -lpthread -lssl -lcrypto
-CLIENT_LIBS = -lflowsocket -lflowcontainer -lc -lstdc++           -lssl -lcrypto
+SERVER_LIBS = -lflowsocket -lflowcontainer -lc -lstdc++ -lpthread
+CLIENT_LIBS = -lflowsocket -lflowcontainer -lc -lstdc++          
 
 SOCKET_PATH = socket
 SERVER_PATH = server
@@ -20,7 +20,7 @@ CFLAGS = -c -mtune=native -Wall -pedantic
 
 LDFLAGS  = -L.
 
-SOCKET_SRC=$(SOCKET_PATH)/src/socket.cpp $(SOCKET_PATH)/src/socketssl.cpp $(SOCKET_PATH)/src/ssltemplates.cpp $(SOCKET_PATH)/src/socketclient.cpp $(SOCKET_PATH)/src/socketserver.cpp $(SOCKET_PATH)/src/socketexception.cpp
+SOCKET_SRC=$(SOCKET_PATH)/src/socket.cpp $(SOCKET_PATH)/src/socketclient.cpp $(SOCKET_PATH)/src/socketserver.cpp $(SOCKET_PATH)/src/socketexception.cpp
 SOCKET_OBJ=$(SOCKET_SRC:.cpp=.o)
 SOCKET=libflowsocket.a
 
@@ -32,7 +32,7 @@ SERVER_SRC=$(SERVER_PATH)/src/partner.cpp $(SERVER_PATH)/main.cpp
 SERVER_OBJ=$(SERVER_SRC:.cpp=.o)
 SERVER=flowserver
 
-CLIENT_SRC=$(CLIENT_PATH)/src/pulex.cpp $(CLIENT_PATH)/src/domain.cpp $(CLIENT_PATH)/src/rsapadding.cpp $(CLIENT_PATH)/src/crypto.cpp $(CLIENT_PATH)/src/cryptoexception.cpp $(CLIENT_PATH)/main.cpp
+CLIENT_SRC=$(CLIENT_PATH)/src/pulex.cpp $(CLIENT_PATH)/src/domain.cpp $(CLIENT_PATH)/src/cryptoexception.cpp $(CLIENT_PATH)/main.cpp
 CLIENT_OBJ=$(CLIENT_SRC:.cpp=.o)
 CLIENT=flowclient
 
