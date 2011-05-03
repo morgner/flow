@@ -88,19 +88,20 @@ class CSocket
     static const int       CLIENT_BACKLOG;
     static const int       RECEIVE_BUFFER_SIZE;
 
-                 bool      m_bVerbose;
-
                  int       m_nSock;
                  CBuffer   m_ovBuffer;
                  CAddrInet m_tAddr;
 
+                 bool      m_bVerbose;
+
              CSocket( const CSocket& src );
   public:
-             CSocket( const int nSock = INVALID_SOCKET );
+             CSocket( const int  nSock    = INVALID_SOCKET,
+                      const bool bVerbose = false );
     virtual ~CSocket();
 
     virtual void     Create ();
-    virtual void     Bind   ( const int         nPort );
+    virtual void     Bind   ( const int          nPort );
     virtual void     Listen ()                            const;
     virtual CSocket* Accept ()                            const;
     virtual void     Connect( const std::string& rsHost,
@@ -112,7 +113,7 @@ class CSocket
 
   public:
     const CSocket& operator << ( const std::string& s ) const;
-    const CSocket& operator << (       long         n ) const;
+    const CSocket& operator << ( const long         n ) const;
     const CSocket& operator >> (       std::string& s );
 
     bool isValid() const;
@@ -120,4 +121,3 @@ class CSocket
   }; // class CSocket
 
 #endif // _SOCKET_H
-

@@ -31,17 +31,13 @@
 #include "socketserver.h"
 
 
-CSocketServer::CSocketServer()
-  {
-  }
-
 CSocketServer::CSocketServer( const std::string& rsHost,
                               const std::string& rsPort,
                                          bool     bVerbose )
   : m_sHost(rsHost),
-    m_sPort(rsPort),
-    m_bVerbose(bVerbose)
+    m_sPort(rsPort)
   {
+  m_bVerbose = bVerbose;
   Create();
   Bind( atoi( rsPort.c_str() ) );
   Listen();
@@ -50,21 +46,3 @@ CSocketServer::CSocketServer( const std::string& rsHost,
 CSocketServer::~CSocketServer()
   {
   } // 	CSocketServer::~CSocketServer()
-
-void CSocketServer::Create()
-  {
-  } // CSocketServer::Create()
-
-void CSocketServer::Bind( int nPort )
-  {
-  } // CSocketServer::Bind()
-
-void CSocketServer::Listen()
-  {
-  } // CSocketServer::Listen()
-
-CSocket* CSocketServer::Accept()
-  {
-  return 0;
-  } // CSocketServer::Accept()
-

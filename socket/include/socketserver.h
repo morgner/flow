@@ -45,21 +45,14 @@ class CSocketServer : public CSocket
   protected:
     std::string m_sHost;
     std::string m_sPort;
-         bool   m_bVerbose;
 
   protected:
-             CSocketServer();
+             CSocketServer() {}
   public:
              CSocketServer( const std::string& rsHost,
                             const std::string& rsPort,
-                                       bool    bVerbose = false);
+                            const      bool     bVerbose = false);
     virtual ~CSocketServer();
-
-    virtual void     Create();
-    virtual void     Bind( int nPort );
-    virtual void     Listen();
-
-    virtual CSocket* Accept();
 
 };
 

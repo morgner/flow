@@ -45,14 +45,9 @@ class CSocketClient : public CSocket
   public:  
              CSocketClient( const std::string& rsHost,
                             const std::string& rsPort,
-                                       bool    bVerbose = false);
+                            const      bool     bVerbose = false);
     virtual ~CSocketClient();
-
-    virtual void Create();
-    virtual void Connect();
-
 
   }; // class CSocketClient
 
 #endif // _SOCKET_CLIENT_H
-

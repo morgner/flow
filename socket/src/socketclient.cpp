@@ -34,20 +34,12 @@
 
 CSocketClient::CSocketClient( const std::string& rsHost,
                               const std::string& rsPort,
-                                         bool    bVerbose )
+                              const      bool     bVerbose )
   {
   Create();
-  Connect();
+  Connect( rsHost, rsPort );
   }
 
 CSocketClient::~CSocketClient()
-  {
-  }
-
-void CSocketClient::Create()
-  {
-  }
-
-void CSocketClient::Connect()
   {
   }

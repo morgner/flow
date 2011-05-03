@@ -46,8 +46,10 @@ const int  CSocket::CLIENT_BACKLOG      =  5;
 const int  CSocket::RECEIVE_BUFFER_SIZE =  512;
 
 
-CSocket::CSocket( const int nSock )
-  : m_nSock( nSock )
+CSocket::CSocket( const int  nSock,
+                  const bool bVerbose )
+  : m_nSock( nSock ),
+    m_bVerbose( bVerbose )
   {
   } // CSocket::CSocket( const int nSock )
 
@@ -174,10 +176,8 @@ CSocket* CSocket::Accept() const
 void CSocket::Close( )
   {
   if ( !isValid() ) return;
-  
-  int nResult = ::close( m_nSock );
 
-  if ( nResult == -1 )
+  if ( ::close( m_nSock ) == -1 )
     {
     throw CSocketException( "Could not 'close' in CSocket::Close()." );
     }
@@ -193,7 +193,7 @@ const CSocket& CSocket::operator << ( const std::string& s ) const
   }
 
 
-const CSocket& CSocket::operator << ( long n ) const
+const CSocket& CSocket::operator << ( const long n ) const
   {
   Send( to_string(n) );
   return *this;
@@ -255,12 +255,12 @@ size_t CSocket::Receive( std::string& s )
   } // const std::string& CSocket::Receive( std::string& s ) const
 
 
-// Connect to the TCP/IP given server on the given port
+// Connect to the given server on the given port
 // if successful, the connection is represented by an socket
-void CSocket::Connect(const std::string& rsHost,
-                      const std::string& rsPort )
+void CSocket::Connect( const std::string& rsHost,
+                       const std::string& rsPort )
   {
-  if ( isValid() ) Close();
+  Close();
 
   addrinfo  hints;
   addrinfo* servinfo;
@@ -272,10 +272,10 @@ void CSocket::Connect(const std::string& rsHost,
   int nResult = ::getaddrinfo( rsHost.c_str(),
                                rsPort.c_str(),
                                &hints,
-                               &servinfo);
+                               &servinfo );
   if ( nResult != 0 )
     {
-    // if ( g_bVerbose ) std::cerr << "getaddrinfo: " << gai_strerror(rv) << std::endl;
+    if ( m_bVerbose ) std::cerr << "getaddrinfo: " << gai_strerror( nResult ) << std::endl;
     throw CSocketException( "Could not find out host IP in CSocket::Connect()." );
     }
 
@@ -286,23 +286,23 @@ void CSocket::Connect(const std::string& rsHost,
                              p->ai_socktype,
                              p->ai_protocol)) == INVALID_SOCKET )
       {
-      // std::cout << "socket fail" << std::endl;
+      if ( m_bVerbose ) std::cout << "socket fail" << std::endl;
       continue;
       }
-    // std::cout << "socket ok" << std::endl;
+    if ( m_bVerbose ) std::cout << "socket ok" << std::endl;
 
     if ( ::connect(m_nSock,
                    p->ai_addr,
                    p->ai_addrlen) == -1 )
       {
       // We are to close and invalidate a low level socket
-      // So we must not call any derived Close() methode
-      ::close(m_nSock);
+      // so we must not call any derived Close() methode
+      ::close( m_nSock );
       m_nSock = INVALID_SOCKET;
-      // std::cout << "connect fail" << std::endl;
+      if ( m_bVerbose ) std::cout << "connect fail" << std::endl;
       continue;
       }
-    // std::cout << "connect ok" << std::endl;
+    if ( m_bVerbose ) std::cout << "connect ok" << std::endl;
 
     break; // if we get here, we must have connected successfully
     }
