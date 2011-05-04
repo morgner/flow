@@ -32,9 +32,9 @@
 #define _SOCKET_SERVER_H
 
 
-#include <string>
-
 #include "socket.h"
+
+#include <string>
 
 
 class CSocketServer : public CSocket

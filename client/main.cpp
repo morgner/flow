@@ -48,11 +48,9 @@
 
 // #include <stdlib.h> // for atol(), exit()
 // #include <stdio.h>  // for EOF
-#include <fcntl.h>  // for fnctl()
+#include <fcntl.h>  // for fnctl() for 'piped input'
 
 #include "environment.h"
-
-#include <openssl/err.h>
 
 
 bool g_bVerbose = false;

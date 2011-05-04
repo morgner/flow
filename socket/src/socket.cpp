@@ -1,5 +1,5 @@
 /***************************************************************************
- socket.cpp  description
+ socket.cpp
  -----------------------
  begin                 : Fri Oct 29 2010
  copyright             : Copyright (C) 2010 by Manfred Morgner
@@ -46,12 +46,12 @@ const int  CSocket::CLIENT_BACKLOG      =  5;
 const int  CSocket::RECEIVE_BUFFER_SIZE =  512;
 
 
-CSocket::CSocket( const int  nSock,
+CSocket::CSocket( const int  nSocket,
                   const bool bVerbose )
-  : m_nSock( nSock ),
+  : m_nSocket( nSocket ),
     m_bVerbose( bVerbose )
   {
-  } // CSocket::CSocket( const int nSock )
+  } // CSocket::CSocket( const int nSocket )
 
 CSocket::CSocket( const CSocket& src )
   {
@@ -60,11 +60,11 @@ CSocket::CSocket( const CSocket& src )
     throw CSocketException( "Source Socket is invalid, so new socket can't be better" );
     }
 
-  socklen_t addr_length = m_tAddr.SizeGet();
-  m_nSock      = ::accept( src.m_nSock,
-                           src.m_tAddr,
-                           &addr_length );
-  if ( m_nSock <= 0 )
+  socklen_t addr_length = m_otAddr.SizeGet();
+  m_nSocket      = ::accept( src.m_nSocket,
+                             src.m_otAddr,
+                             &addr_length );
+  if ( m_nSocket <= 0 )
     {
     throw CSocketException( "Could not 'accept', new socket is invalid" );
     }
@@ -72,7 +72,7 @@ CSocket::CSocket( const CSocket& src )
   timeval timeout;
   timeout.tv_sec  = 0;
   timeout.tv_usec = 1000; // looks like this value is ignored
-  int nResult = ::setsockopt( m_nSock,
+  int nResult = ::setsockopt( m_nSocket,
                               SOL_SOCKET,
                               SO_RCVTIMEO,
                               (const char*)&timeout,
@@ -88,15 +88,15 @@ CSocket::~CSocket()
   {
   if ( isValid() )
     {
-    ::close(m_nSock);
-    m_nSock = INVALID_SOCKET;
+    ::close(m_nSocket);
+    m_nSocket = INVALID_SOCKET;
     }
   } // CSocket::~CSocket()
 
 
 void CSocket::Create()
   {
-  m_nSock = ::socket(AF_INET,
+  m_nSocket = ::socket(AF_INET,
                      SOCK_STREAM,
                      0);
   if ( !isValid() )
@@ -106,7 +106,7 @@ void CSocket::Create()
     }
 
   int on = 1;
-  int nResult = ::setsockopt( m_nSock,
+  int nResult = ::setsockopt( m_nSocket,
                               SOL_SOCKET,
                               SO_REUSEADDR,
                               (void*)&on,
@@ -117,7 +117,7 @@ void CSocket::Create()
     }
 /*
   int off = 0;
-  nResult = ::setsockopt( m_nSock,
+  nResult = ::setsockopt( m_nSocket,
                           IPPROTO_TCP,
                           TCP_NODELAY,
                           (void*) &off,
@@ -137,13 +137,13 @@ void CSocket::Bind ( const int nPort )
     throw CSocketException( "Socket is invalid in CSocket::Bind()." );
     }
   
-  m_tAddr.sin_family      = AF_INET;
-  m_tAddr.sin_addr.s_addr = INADDR_ANY; // inet_addr("127.0.0.1"); // INADDR_ANY;
-  m_tAddr.sin_port        = htons ( nPort );
+  m_otAddr.sin_family      = AF_INET;
+  m_otAddr.sin_addr.s_addr = INADDR_ANY; // inet_addr("127.0.0.1"); // INADDR_ANY;
+  m_otAddr.sin_port        = htons ( nPort );
   
-  int result = ::bind( m_nSock,
-                       m_tAddr,
-                       m_tAddr.SizeGet() );
+  int result = ::bind( m_nSocket,
+                       m_otAddr,
+                       m_otAddr.SizeGet() );
   if ( result == -1 )
     {
     throw CSocketException( "Could not bind to port in CSocket::Bind." );
@@ -158,7 +158,7 @@ void CSocket::Listen() const
     throw CSocketException( "Socket is invalid in CSocket::Listen()." );
     }
 
-  int result = ::listen( m_nSock,
+  int result = ::listen( m_nSocket,
                          CLIENT_BACKLOG );
   if ( result == -1 )
     {
@@ -177,12 +177,12 @@ void CSocket::Close( )
   {
   if ( !isValid() ) return;
 
-  if ( ::close( m_nSock ) == -1 )
+  if ( ::close( m_nSocket ) == -1 )
     {
     throw CSocketException( "Could not 'close' in CSocket::Close()." );
     }
 
-  m_nSock = INVALID_SOCKET;
+  m_nSocket = INVALID_SOCKET;
   } // void CSocket::Close( )
 
 
@@ -214,7 +214,7 @@ size_t CSocket::Send(const std::string& s) const
     throw CSocketException( "Socket is invalid in CSocket::Send()." );
     }
 
-  int status = ::send( m_nSock,
+  int status = ::send( m_nSocket,
                        s.c_str(),
                        s.length(),
                        0 );
@@ -236,7 +236,7 @@ size_t CSocket::Receive( std::string& s )
     }
   s.clear();
 
-  ssize_t nResult = ::recv( m_nSock,
+  ssize_t nResult = ::recv( m_nSocket,
                             m_ovBuffer,
                             m_ovBuffer.capacity() -1,
                             0 );
@@ -282,7 +282,7 @@ void CSocket::Connect( const std::string& rsHost,
   // loop through all the results and connect to the first we can
   for( addrinfo* p = servinfo; p != NULL; p = p->ai_next)
     {
-    if ( (m_nSock = ::socket(p->ai_family,
+    if ( (m_nSocket = ::socket(p->ai_family,
                              p->ai_socktype,
                              p->ai_protocol)) == INVALID_SOCKET )
       {
@@ -291,14 +291,14 @@ void CSocket::Connect( const std::string& rsHost,
       }
     if ( m_bVerbose ) std::cout << "socket ok" << std::endl;
 
-    if ( ::connect(m_nSock,
+    if ( ::connect(m_nSocket,
                    p->ai_addr,
                    p->ai_addrlen) == -1 )
       {
       // We are to close and invalidate a low level socket
       // so we must not call any derived Close() methode
-      ::close( m_nSock );
-      m_nSock = INVALID_SOCKET;
+      ::close( m_nSocket );
+      m_nSocket = INVALID_SOCKET;
       if ( m_bVerbose ) std::cout << "connect fail" << std::endl;
       continue;
       }
@@ -319,5 +319,5 @@ void CSocket::Connect( const std::string& rsHost,
 
 bool CSocket::isValid() const
   {
-  return m_nSock != INVALID_SOCKET;
+  return m_nSocket != INVALID_SOCKET;
   }  // bool CSocket::isValid() const

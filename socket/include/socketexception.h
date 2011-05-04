@@ -27,6 +27,7 @@
  *                                                                         *
  ***************************************************************************/
 
+
 #ifndef _SOCKET_EXCEPTION_H
 #define _SOCKET_EXCEPTION_H
 

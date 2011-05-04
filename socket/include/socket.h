@@ -1,5 +1,5 @@
 /***************************************************************************
- socket.h  - description
+ socket.h
  -----------------------
  begin                 : Fri Oct 29 2010
  copyright             : Copyright (C) 2010 by Manfred Morgner
@@ -33,8 +33,8 @@
 
 #include <string>
 #include <vector>
-#include <arpa/inet.h>
 
+#include <arpa/inet.h>
 #include <memory.h>
 
 
@@ -71,42 +71,47 @@ class CSocket
           }
         int SizeGet() const
           {
-          int r = sizeof(struct sockaddr_in);
-          return r;
+          return sizeof(struct sockaddr_in);
           }
-      }; // class CSocketAddrInet
+      }; // class CAddrInet
 
     class CBuffer : public std::vector<char>
       {
       public:
-        CBuffer() { resize( RECEIVE_BUFFER_SIZE ); }
-        operator char*() { return &front(); }
-      };
+        CBuffer()
+          {
+          resize( RECEIVE_BUFFER_SIZE );
+          }
+        operator char*()
+          {
+          return &front();
+          }
+      }; // class CBuffer
 
   protected:
     static const int       INVALID_SOCKET;
     static const int       CLIENT_BACKLOG;
     static const int       RECEIVE_BUFFER_SIZE;
 
-                 int       m_nSock;
+                 int       m_nSocket;
+                 CAddrInet m_otAddr;
                  CBuffer   m_ovBuffer;
-                 CAddrInet m_tAddr;
 
                  bool      m_bVerbose;
 
              CSocket( const CSocket& src );
   public:
-             CSocket( const int  nSock    = INVALID_SOCKET,
+             CSocket( const int  nSocket  = INVALID_SOCKET,
                       const bool bVerbose = false );
     virtual ~CSocket();
 
-    virtual void     Create ();
-    virtual void     Bind   ( const int          nPort );
-    virtual void     Listen ()                            const;
-    virtual CSocket* Accept ()                            const;
-    virtual void     Connect( const std::string& rsHost,
-                              const std::string& rsPort );
-    virtual void     Close  ();
+    virtual void     Create  ();
+    virtual void     Bind    ( const int           nPort );
+    virtual void     Listen  ()                            const;
+    virtual CSocket* Accept  ()                            const;
+    virtual void     Connect ( const std::string& rsHost,
+                               const std::string& rsPort );
+    virtual void     Close   ();
 
     virtual size_t   Send    ( const std::string& s )     const;
     virtual size_t   Receive (       std::string& s );
