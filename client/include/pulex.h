@@ -1,5 +1,5 @@
 /***************************************************************************
- pulex.h  -  description
+ pulex.h
  -----------------------
  begin                 : Fri Oct 29 2010
  copyright             : Copyright (C) 2010 by Manfred Morgner
@@ -38,33 +38,45 @@
 #include <iostream>
 
 
-extern bool g_bVerbose;
+/*****************************************************************************
 
-// The Pulex class represents a neutral object containing client data to become
-// moved to other clients using a server able to move Container objects. To be
-// able to do so, a Container is able to move data wiht minimum amount of
-// knowledge of what these data are. This works similar to a packet moved by a
-// post office. The sender ist known, the receiver ist known but the content is
-// not.
-// Regarding a Pulex, the sender ist mainly unknown, the receiver will become
-// partially known if and when he calls is Container. The server will give the
-// packet to every receiver who successfuly claims to be the receiver of it.
-// To make things with a Pulex not as easy as with a Container, a Pulex sends
-// the identity of its sender and its receiver in the form of a 40 character
-// ascii representation of the fingerprint of their certificates.
+ CPulex is a class knowing how to deal with messages to let them jump from one
+ client to another one using appropriate servers. Meaning, a CPulex instande
+ knows how to deal with flow-servers to push and pull messages.
+
+ It may be important to understand that one pulex is intended to be sent to
+ one receiver only. Thus not directly creating networks of receivers and also
+ for later use if messages are encrypted.
+ ----------
+ Without TLS the pulex needs to send the plain sender identification with the
+ message so the server.
+
+ With TLS in place, this is no more neccessary because the server already
+ knows all he needs to know from the TLS connection in use.
+ ----------
+ The flow messaging protocol is a plain ASCII protocol to prevent two effects:
+
+  * Someone kills the server or a client be invalid input
+  * Excessive us of computing ressources
+
+ *****************************************************************************/
 
 class CPulex : public CContainer
   {
   private:
-    // The parent class to be used as 'inherited::methode()' for abstract
-    // usage of inherited methods. Mimimizes logical redundancy
     typedef CContainer inherited;
 
     static const std::string s_sClassName;
 
+  protected:
+    std::string m_sMessageId;
+
   public:
              CPulex();
     virtual ~CPulex();
+
+    const std::string& MessageIdSet( const std::string& sMessageId );
+    const std::string& MessageIdGet();
 
     // May be this is not a good idea at all, but enables compact code, which
     // also may not be good idea. This operator appends data to the object as
@@ -75,7 +87,7 @@ class CPulex : public CContainer
     friend std::ostream& operator << ( std::ostream&, CPulex& );
     friend      CSocket& operator << (      CSocket&, CPulex& );
   protected:
-    // A template to be used by output pipe operators to send the puley off
+    // A template to be used by output pipe operators to send the pulex off
     template<typename T>
       T& Send( T& roStream );
 

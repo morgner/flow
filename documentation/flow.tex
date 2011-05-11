@@ -524,9 +524,9 @@ Currently the data transport uses a simple sequential text transmission. A serve
 A multi message sequence is build like this:
 
 \begin{lstlisting}
-a:<recipient> # first message
+r:<recipient> # first message
 <other bytes>
-a:<recipient> # second message
+r:<recipient> # second message
 <other bytes>
 .             # end of sequence sign terminated by \r
 \end{lstlisting}
@@ -539,7 +539,7 @@ The line delimiter will always be \texttt{0x0A}. In the case of message receptio
 A complete message from a client to a server, called \texttt{[client-message]}, is constructed by the following components.
 
 \begin{lstlisting}
-a:<recipient>
+r:<recipient>
 x:<message data>
 \end{lstlisting}
 
@@ -581,17 +581,16 @@ x:<multiline data>
 Command & client => server & server => client  \\
 \hline
 
-add message  & \texttt{ a:<recipient>}  & \texttt{ m:<message-id>}  \\
+add message  & \texttt{ r:<recipient>}  & \texttt{ m:<message-id>}  \\
 & \texttt{ x:<body>}  &  \\
 \hline
 
-change message  & \texttt{ c:change}  &  \\
-& \texttt{ m:<message-id>}  &  \\
+change message  & \texttt{ m:<message-id>}  &  \\
 & \texttt{[r:<recipient>]}  &  \\
 & \texttt{[x:<body>]}  &  \\
 \hline
 
-remove message  & \texttt{ a:<recipient>}  &  \\
+remove message  & \texttt{ r:<recipient>}  &  \\
 & \texttt{ m:<message id>} &\\
 \hline
 
@@ -674,10 +673,8 @@ Messages from a server to a client is constructed like this:
 
 \begin{lstlisting}
 s:<sender>
-e:<recipient>
-i:<client local id>
-t:<client local id time>
-r:<server local id>
+r:<recipient>
+m:<message id>
 x:<multiline data>
 .
 \end{lstlisting}

@@ -76,7 +76,7 @@ int main( int argc, const char* argv[] )
   // Message
   oEnvironment.OptionAppend( "message",     required_argument, 0, 'm', "The message",                                        "Hi there, I'm from far away" );
   // Container info
-  oEnvironment.OptionAppend( "cluid",       required_argument, 0, 'i', "Client side local ID (numeric) of the message",      "1" );
+  oEnvironment.OptionAppend( "cluid",       required_argument, 0, 'i', "Client side local ID (numeric) of the message",      "" );
   oEnvironment.OptionAppend( "cert-dir",    required_argument, 0, 'd', "Directory for trusted and client certificates",      CRT_PATH );
   oEnvironment.OptionAppend( "trust-chain", required_argument, 0, 'a', "Trusted CA chain",                                   CA_CHAIN );
   oEnvironment.OptionAppend( "trust-path",  required_argument, 0, 't', "Path to trusted certificates",                       CA_PATH );
@@ -127,9 +127,9 @@ int main( int argc, const char* argv[] )
   if ( g_bVerbose ) cout << "===pipe-end===" << endl << endl;
 
   // putting together defaults and command line input for the Pulex
-  poPulex->SenderSet      ( oEnvironment["sender"] );
-  poPulex->RecipientSet   ( oEnvironment["recipient"] );
-  poPulex->ClientSideIdSet( oEnvironment["cluid"] );
+  poPulex->SenderSet   ( oEnvironment["sender"] );
+  poPulex->RecipientSet( oEnvironment["recipient"] );
+  poPulex->MessageIdSet( oEnvironment["cluid"] );
 
   *poPulex << oEnvironment["message"];
 

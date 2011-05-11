@@ -29,10 +29,11 @@
 
 
 #include "partner.h"
-#include "container.h"
 #include "socketexception.h"
 
 #include <iostream>
+
+#include <sys/time.h> // gettimeofday()
 
 using namespace std;
 
@@ -68,6 +69,35 @@ CPartner::~CPartner()
   } // CPartner::~CPartner()
 
 
+extern CContainerMapByCLUID g_oContainerMapByCLUID;
+
+string CPartner::MakeMessageKey( CContainer* poContainer )
+  {
+  string sSender    = poContainer->SenderGet();
+  string sMessageId = poContainer->MessageIdGet();
+
+  if ( sMessageId.length() == 0 )
+    {
+    // generate a first simple version of Message-ID
+    if ( ! sMessageId.length() )
+      {
+      timeval time;
+      gettimeofday( &time, 0 );
+      sMessageId = sSender + to_string( time.tv_sec );
+
+      int nSuffix = 0;
+      for ( ; g_oContainerMapByCLUID.find( sMessageId + ':' + to_string(nSuffix) ) != g_oContainerMapByCLUID.end(); nSuffix++ )
+        {
+        if ( g_bVerbose ) cout << sMessageId;
+        }
+        sMessageId += ':' + to_string(nSuffix);
+      }
+    } // if ( sMessageId.length() == 0 )
+
+  return sSender + ':' + sMessageId;
+  } // string CPartner::MakeMessageKey( CContainer* poContainer )
+
+
 // start the thread
 void CPartner::Communicate( CSocket* poSocket ) 
   {
@@ -92,9 +122,6 @@ void CPartner::Stop()
   } // void CPartner::Stop()
 
 
-extern CContainerMapByCLUID g_oContainerMapByCLUID;
-extern long                 g_lLastRemoteId;
-
 void CPartner::Action()
   {
   m_bRunning  = true; // Now we're running
@@ -116,15 +143,17 @@ void CPartner::Action()
     sClientData += sInput;
     } while ( !m_bStopRequested && sClientData.rfind(".\r") == string::npos );
 
-  if ( sClientData.find( "c:" ) == 0 )
+  if ( (sClientData[1] == ':') &&
+       (sClientData[0] == CContainer::scn_command) )
     {
     if (g_bVerbose) cout << " * recall; container: "
                          << g_oContainerMapByCLUID.size() << endl;
     Recall( sClientData, m_poSocket );
     }
-  if ( sClientData.find( "s:" ) == 0 )
+  if ( (sClientData[1] == ':') &&
+       (sClientData[0] == CContainer::scn_sender) )
     {
-    if (g_bVerbose) cout << " * receive; container: ";
+    if (g_bVerbose) cout << " * received container " << endl;
     BuildContainers( sClientData );
     }
   *m_poSocket << ".\r";
@@ -133,10 +162,6 @@ void CPartner::Action()
   } // void CPartner::Action()
 
 
-// c:all / c:<num>
-// a:new / a:old
-// t:from_time
-// q:from_id
 size_t CPartner::Recall( const string&  rsClientData,
                                CSocket* poSocket )
   {
@@ -160,24 +185,19 @@ size_t CPartner::Recall( const string&  rsClientData,
     CContainer* poc = it->second;
 //    if ( poc->isFor(m_poSocket->PeerFingerprintGet()) )
       {
-      *poSocket << poc->RGUIDGet() << "\n";
-      *poSocket << poc->CLUIDGet() << "\n";
-
-      *poSocket << CContainer::scn_sender        << ":" << poc->SenderGet() << "\n";
-      *poSocket << CContainer::scn_local_id      << ":" << poc->ClientSideIdGet() << "\n";
-      *poSocket << CContainer::scn_local_id_time << ":" << poc->ClientSideTmGet() << "\n";
-      *poSocket << CContainer::scn_remote_id     << ":" << poc->ServerSideIdGet() << "\n";
+      *poSocket << string(1, CContainer::scn_sender)  << ":" << poc->SenderGet() << "\n";
+      *poSocket << it->first                          << "\n";
 
       for ( CContainer::iterator itc  = poc->begin();
                                  itc != poc->end();
                                ++itc )
         {
         *poSocket << *itc << "\n";
-        }
-      }
-    }
+        } // for ( CContainer::iterator itc  = poc->begin();
+      } // if ( poc->isFor(m_poSocket->PeerFingerprintGet()) )
+    } // for ( CContainerMapByCLUID::iterator it  = g_oContainerMapByCLUID.begin(); 
   return 0;
-  }
+  } // size_t CPartner::Recall( const string&  rsClientData, CSocket* poSocket )
 
 
 size_t CPartner::BuildContainers( const string& rsClientData )
@@ -196,9 +216,12 @@ size_t CPartner::BuildContainers( const string& rsClientData )
     {
     string s = rsClientData.substr(p1, p2-p1);
     if ( g_bVerbose ) cout << s << endl;
-    // the first two chars of a line is the line content descriptor
-    if ( s.find("s:") == 0 )
+    // is it a sender-id?
+
+    if ( (s[1] == ':') &&
+         (s[0] == CContainer::scn_sender) )
       {
+      // if so this means a new message is starting
       poContainer = new CContainer;
       oContainerList.push_back( poContainer );
       }
@@ -213,20 +236,16 @@ size_t CPartner::BuildContainers( const string& rsClientData )
                                  it != oContainerList.end();
                                ++it)
     {
-    string sKey = (*it)->CLUIDGet();
+    string sKey = MakeMessageKey(*it);
     CContainerMapByCLUID::iterator itf = g_oContainerMapByCLUID.find( sKey );
     if ( itf == g_oContainerMapByCLUID.end() )
       {
-      (*it)->ServerSideIdSet();
-      if ( g_bVerbose ) cout << "appending: " << sKey << " as "
-                             << (*it)->RGUIDGet() << endl;
-      *m_poSocket << (*it)->RGUIDGet() << "\n";
+      if ( g_bVerbose ) cout << "appending: " << sKey << endl;
+      *m_poSocket << sKey << "\n";
       }
     else
       {
-      (*it)->ServerSideIdSet( itf->second->ServerSideIdGet() );
-      if ( g_bVerbose ) cout << "replacing: " << sKey << " by "
-                             << (*it)->RGUIDGet() << "\n";
+      if ( g_bVerbose ) cout << "replacing: " << sKey << endl;
       delete itf->second;
       itf->second = 0;
       g_oContainerMapByCLUID.erase( itf );
@@ -251,8 +270,7 @@ size_t CPartner::BuildContainers( const string& rsClientData )
    it != g_oContainerMapByCLUID.end(); 
    ++it )
    {
-   *m_poSocket << it->second->RGUIDGet() << "\n";
-   *mPpoSocket << it->second->CLUIDGet() << "\n";
+   *m_poSocket << it->second->MessageId() << "\n";
    }
    */
   return g_oContainerMapByCLUID.size();

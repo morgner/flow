@@ -69,6 +69,17 @@ CPulex::~CPulex()
   }
 
 
+const std::string& CPulex::MessageIdSet( const std::string& sMessageId )
+  {
+  return m_sMessageId = sMessageId;
+  }
+
+const std::string& CPulex::MessageIdGet()
+  {
+  return m_sMessageId;
+  }
+
+
 
 // The class name for reconstruction
 const string& CPulex::ClassNameGet() const
@@ -94,34 +105,38 @@ template<typename T>
     {
     // Information to manage the object if it's remote
     // sender has to be first because it is indicated as start of a new object
-    roStream << scn_sender << ":"
+    roStream << string(1, scn_sender) << ":"
 //        << CCrypto::FingerprintCrt( SenderGet() ) << "\n";
-        << SenderGet() << "\n";
+             << SenderGet()           << "\n";
+
+    // messageid has to be second if present because means command "change" or "delete"
+    if ( m_sMessageId.length() )
+      {
+      roStream << string(1, scn_messageid) << ":"
+               << m_sMessageId             << "\n";
+      } // if ( it->length() )
+
     if ( m_sRecipient.length() )
       {
-      roStream << scn_recipient << ":"
+      roStream << string(1, scn_recipient) << ":"
 //          << CCrypto::FingerprintCrt( m_sRecipient ) << "\n";
-          << m_sRecipient << "\n";
+               << m_sRecipient             << "\n";
       } // if ( it->length() )
-    roStream << scn_local_id      << ":" << ClientSideIdGet() << "\n";
-    roStream << scn_local_id_time << ":" << ClientSideTmGet() << "\n";
-    roStream << scn_remote_id     << ":" << ServerSideIdGet() << "\n";
 
     roStream << "===== message goes here =====" << "\n";
 
     // This is not the final solution, data have to be able to flow into the
     // Cropto object to miminzie memory footage
     ostringstream sosBuffer;
-    sosBuffer << scn_content_text << ":" << ClassNameGet() << "\n";
     for ( CPulex::iterator it  = begin();
                            it != end();
                          ++it )
       {
       // with SSL the server breaks down if '*it' is empty but piped from the client
       if ( it->length() )
-        sosBuffer << scn_content_text << ":" << *it << "\n";
+        sosBuffer << scn_content << ":" << *it << "\n";
       else
-        sosBuffer << scn_content_text << ":" << "\n";
+        sosBuffer << scn_content << ":" << "\n";
       } // for ( CPulex::iterator it  = begin();
 
 /*

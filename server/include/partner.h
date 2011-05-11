@@ -41,7 +41,12 @@
  message from a sender to a receiver.
  ***************************************************************************/
 
+
+#ifndef _PARTNER_H
+#define _PARTNER_H
+
 #include "socket.h"
+#include "container.h"
 
 #include <pthread.h>
 
@@ -62,6 +67,10 @@ class CPartner
     CPartner();
    ~CPartner();
 
+  protected:
+    std::string MakeMessageKey( CContainer* poContainer );
+
+  public:
     void Communicate( CSocket* poSocket );
     void Stop();
 
@@ -75,3 +84,5 @@ class CPartner
     size_t BuildContainers( const std::string& rsClientData );
 
   }; // class CPartner
+
+#endif // _PARTNER_H

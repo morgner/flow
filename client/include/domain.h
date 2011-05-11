@@ -31,11 +31,6 @@
 #ifndef _DOMAIN_H
 #define _DOMAIN_H
 
-#if _MSC_VER > 1000
-#pragma once
-#pragma warning (disable:4786)
-#endif // _MSC_VER > 1000
-
 #include "pulex.h"
 
 #include <string>
