@@ -56,7 +56,7 @@
  ----------
  The flow messaging protocol is a plain ASCII protocol to prevent two effects:
 
-  * Someone kills the server or a client be invalid input
+  * Someone kills the server or a client by invalid input
   * Excessive us of computing ressources
 
  *****************************************************************************/
