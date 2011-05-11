@@ -1,0 +1,75 @@
+/***************************************************************************
+ PROTOCOL
+ -----------------------
+ begin                 : Wed May 04 2011
+ copyright             : Copyright (C) 2011 by Manfred Morgner
+ email                 : manfred@morgner.com
+ ***************************************************************************/
+
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *                                                                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place Suite 330,                                            *
+ *   Boston, MA  02111-1307, USA.                                          *
+ *                                                                         *
+ ***************************************************************************/
+
+
+==-- Protocol specification for flow
+
+Copyright (C) 2010 Manfred Morgner manfred@morgner.com
+
+
+<tabsize = 5 (or 4)>
+
+Command			client => server	server => client
+--------------------------------------------------------------
+add message		 a:<recipient>		 m:<message-id>
+				 x:<body>
+
+change message		 c:change
+				 m:<message-id>
+				[r:<recipient>]
+				[x:<body>]
+
+remove message		 a:<recipient>
+				 m:<message id>
+
+list mine			 c:mine			 m:<message-id>
+								[m:<message-id>]
+								[m:<message-id>]
+
+list senders		 c:senders		 s:<sender-id>
+								[s:<sender-id>]
+								[s:<sender-id>]
+
+list messages		 c:messages		 m:<message-id>
+				[s:sender-id]		[m:<message-id>]
+								[m:<message-id>]
+
+call message		 c:get			 s:<sender-id>
+				[s:<sender-id>]	 m:<message-id>
+				 m:<message-id>	 x:<body> | none
+				[m:<message-id>]	[s:<sender-id>]
+								[m:<messageid>]
+								[x:<body> | none]
+							 	 n:<message id> | none
+
+call next message	 c:next			 s:<sender-id>
+				 r:<message id>	 m:<message id>
+							 	 x:<body>
+							 	 n:<message-id> | none
+--------------------------------------------------------------
