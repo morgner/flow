@@ -37,8 +37,8 @@
 
 #define VERSION "0.1"
 
-#define DEFAULT_HOST "localhost"
-#define DEFAULT_PORT "30000"
+#define CLT_HOST "localhost"
+#define CLT_PORT "30000"
 
 #define CRT_PATH  "certificates/client/"
 #define CA_CHAIN  "certificates/server/server-CA-chain.pem"
@@ -67,8 +67,8 @@ int main( int argc, const char* argv[] )
   oEnvironment.OptionAppend( "version",     no_argument,       0, 'V', "Show version information",                           "" );
   oEnvironment.OptionAppend( "verbose",     optional_argument, 0, 'v', "Act verbose (0..2)",                                 "0" );
   // Contact
-  oEnvironment.OptionAppend( "host",        required_argument, 0, 'H', "The host to conncet to",                             DEFAULT_HOST );
-  oEnvironment.OptionAppend( "port",        required_argument, 0, 'P', "The port to connect to",                             DEFAULT_PORT );
+  oEnvironment.OptionAppend( "host",        required_argument, 0, 'H', "The host to conncet to",                             CLT_HOST );
+  oEnvironment.OptionAppend( "port",        required_argument, 0, 'P', "The port to connect to",                             CLT_PORT );
   // Client Ident
   oEnvironment.OptionAppend( "sender",      required_argument, 0, 's', "Sender name or alias",                               "$LOGNAME" );
   oEnvironment.OptionAppend( "password",    required_argument, 0, 'w', "Password for senders key",                           PASSWORD );
