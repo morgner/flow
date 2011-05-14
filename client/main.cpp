@@ -53,7 +53,7 @@
 #include "environment.h"
 
 
-bool g_bVerbose = false;
+short g_nVerbosity = 0;
 
 using namespace std;
 
@@ -63,12 +63,12 @@ int main( int argc, const char* argv[] )
   CEnvironment oEnvironment( argc, argv );
 
   /// These are the command line options
-  oEnvironment.OptionAppend( "help",        no_argument,       0, 'H', "Show this help text",                                "" );
+  oEnvironment.OptionAppend( "help",        no_argument,       0, 'h', "Show this help text",                                "" );
   oEnvironment.OptionAppend( "version",     no_argument,       0, 'V', "Show version information",                           "" );
-  oEnvironment.OptionAppend( "verbose",     no_argument,       0, 'v', "Act verbose",                                        "" );
+  oEnvironment.OptionAppend( "verbose",     optional_argument, 0, 'v', "Act verbose (0..2)",                                 "0" );
   // Contact
-  oEnvironment.OptionAppend( "host",        required_argument, 0, 'h', "The host to conncet to",                             DEFAULT_HOST );
-  oEnvironment.OptionAppend( "port",        required_argument, 0, 'p', "The port to connect to",                             DEFAULT_PORT );
+  oEnvironment.OptionAppend( "host",        required_argument, 0, 'H', "The host to conncet to",                             DEFAULT_HOST );
+  oEnvironment.OptionAppend( "port",        required_argument, 0, 'P', "The port to connect to",                             DEFAULT_PORT );
   // Client Ident
   oEnvironment.OptionAppend( "sender",      required_argument, 0, 's', "Sender name or alias",                               "$LOGNAME" );
   oEnvironment.OptionAppend( "password",    required_argument, 0, 'w', "Password for senders key",                           PASSWORD );
@@ -91,7 +91,8 @@ int main( int argc, const char* argv[] )
   // we need to read the command line parameters
   oEnvironment.CommandlineRead();
   // being verbose?
-  g_bVerbose = oEnvironment.find("verbose") != oEnvironment.end();
+  g_nVerbosity =  atoi( oEnvironment["verbose"].c_str() );
+  if ( g_nVerbosity ) cout << "Verbosity: " << g_nVerbosity << endl;
 
   // the real operation starts here
   CDomain oDomain;
@@ -109,7 +110,7 @@ int main( int argc, const char* argv[] )
   // --
   // -- this methode (?) of deblocking cin not reliable for pipe input
   // -- have to work on it !
-  if ( g_bVerbose ) cout << "===pipe-begin===" << endl;
+  if ( g_nVerbosity > 1 ) cout << "===pipe-begin===" << endl;
   int flags = ::fcntl(fileno(stdin), F_GETFL, 0);
   ::fcntl( ::fileno(stdin), F_SETFL, flags | O_NONBLOCK );
     string s;
@@ -118,13 +119,13 @@ int main( int argc, const char* argv[] )
 //    while ( getline(cin, s) )
     for ( getline( cin, s ); !cin.eof(); getline(cin, s) )
       {
-      if ( g_bVerbose ) cout << s << endl;
+      if ( g_nVerbosity > 1 ) cout << s << endl;
       *poPulex << s;
 //      if ( !cin.good() ) break;
       }
     ::fcntl( ::fileno(stdin), F_SETFL, flags );
   cin.clear();
-  if ( g_bVerbose ) cout << "===pipe-end===" << endl << endl;
+  if ( g_nVerbosity > 1 ) cout << "===pipe-end===" << endl << endl;
 
   // putting together defaults and command line input for the Pulex
   poPulex->SenderSet   ( oEnvironment["sender"] );
@@ -136,7 +137,7 @@ int main( int argc, const char* argv[] )
   string sSenderCrt = oEnvironment["cert-dir"] + poPulex->SenderGet() + ".crt";
   string sSenderKey = oEnvironment["cert-dir"] + poPulex->SenderGet() + ".key";
 
-  if ( g_bVerbose )
+  if ( g_nVerbosity > 1 )
     {
     cout << "Host.......: " << oEnvironment["host"] << endl;
     cout << "Port.......: " << oEnvironment["port"] << endl;
@@ -170,7 +171,7 @@ int main( int argc, const char* argv[] )
                               ++it )
           {
           oConnection << **it ;
-          if ( g_bVerbose ) cout << **it ;
+          if ( g_nVerbosity > 1 ) cout << **it ;
           }
         }
       oConnection << ".\r";
@@ -188,7 +189,7 @@ int main( int argc, const char* argv[] )
       {
       cout << "Exception: " << e.Info() << "\n";
       }
-    if ( g_bVerbose ) cout << "Response from server:\n" << sServerReply << "\n";
+    if ( g_nVerbosity ) cout << "Response from server:\n" << sServerReply << "\n";
     }
   catch ( CSocketException& e )
     {

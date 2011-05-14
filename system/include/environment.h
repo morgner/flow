@@ -123,7 +123,7 @@ class CEnvironment : public std::map<std::string, std::string>
           back() = rtOption;
           push_back( m_tNullOption );
 
-           m_vsHelp.push_back(rsHelp);
+          m_vsHelp.push_back(rsHelp);
           if ( (rsDefault.length() > 0) && (rsDefault[0] == '$') && (rsDefault.substr(1).c_str()) )
             {
             m_vsDefault.push_back( getenv(rsDefault.substr(1).c_str()) );
@@ -195,13 +195,13 @@ class CEnvironment : public std::map<std::string, std::string>
       std::string     m_sProgramName;
       int             m_nArgumentCount;
       char**          m_ppcArguments;
-      TOptionCallback m_fOptionCallback;
+      TOptionCallback m_fOptionsCallback;
 
     public:
       CEnvironment( int argc, const char** argv )
         : m_nArgumentCount ( argc ),
           m_ppcArguments   ( const_cast<char**>(argv) ),
-          m_fOptionCallback( 0 )
+          m_fOptionsCallback( 0 )
         {
         m_sProgramName = m_ppcArguments[0];
         m_sProgramName = m_sProgramName.substr( m_sProgramName.rfind('/')+1 );
@@ -225,7 +225,7 @@ class CEnvironment : public std::map<std::string, std::string>
 
     void OptionCallbackSet( TOptionCallback fOptionsCallback )
       {
-      m_fOptionCallback = fOptionsCallback;
+      m_fOptionsCallback = fOptionsCallback;
       } // void OptionCallbackSet( TOptionCallback fOptionsCallback )
 
     const std::string& ProgramNameGet()
@@ -268,11 +268,11 @@ class CEnvironment : public std::map<std::string, std::string>
   protected:
     void OptionSet( char c, const std::string& rsName, const std::string& rsData )
       {
-      if ( ! ( m_fOptionCallback != 0 && m_fOptionCallback(c, rsName, rsData, *this)) )
+      if ( ! ( m_fOptionsCallback != 0 && m_fOptionsCallback(c, rsName, rsData, *this)) )
         {
         switch ( c )
           {
-          case 'H':
+          case 'h':
             UsageExit(0);
           case 'V':
             exit(0);
@@ -284,6 +284,7 @@ class CEnvironment : public std::map<std::string, std::string>
               break;
               }
             // if not - advance to "default"
+
           default:
             if ( rsData.length() )
               {
@@ -291,7 +292,7 @@ class CEnvironment : public std::map<std::string, std::string>
               }
             break;
           } // switch ( c )
-        } // if ( ! ( m_fOptionCallback != 0 && m_fOptionCallback( …
+        } // if ( ! ( m_fOptionsCallback != 0 && m_fOptionsCallback( …
       } // void OptionSet( char c, const std::string& rsName, con...
 
   }; // class CEnvironment

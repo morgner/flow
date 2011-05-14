@@ -74,11 +74,11 @@ int main ( int argc, const char* argv[] )
   CEnvironment oEnvironment( argc, argv );
 
   /// these are the command line options
-  oEnvironment.OptionAppend( "help",        no_argument,       0, 'H', "Show this help text",          "" );
+  oEnvironment.OptionAppend( "help",        no_argument,       0, 'h', "Show this help text",          "" );
   oEnvironment.OptionAppend( "version",     no_argument,       0, 'V', "Show version information",     "" );
   oEnvironment.OptionAppend( "verbose",     no_argument,       0, 'v', "Act verbose",                  "" );
-  oEnvironment.OptionAppend( "host",        required_argument, 0, 'h', "The host to conncet to",       SRV_HOST );
-  oEnvironment.OptionAppend( "port",        required_argument, 0, 'p', "The port to connect to",       SRV_PORT );
+  oEnvironment.OptionAppend( "host",        required_argument, 0, 'H', "The host to listen on",        SRV_HOST );
+  oEnvironment.OptionAppend( "port",        required_argument, 0, 'P', "The port to listen on",        SRV_PORT );
   oEnvironment.OptionAppend( "cert",        required_argument, 0, 'c', "Server certificate",           CRT_FILE );
   oEnvironment.OptionAppend( "key",         required_argument, 0, 'k', "Server key",                   KEY_FILE );
   oEnvironment.OptionAppend( "password",    required_argument, 0, 'w', "Password for servers key",     PASSWORD );
