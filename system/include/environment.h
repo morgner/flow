@@ -152,7 +152,7 @@ class CEnvironment : public std::map<std::string, std::string>
         operator option* () { return &this->front(); }
         operator option& () { return  this->front(); }
 
-        const std::string ShortOptionsGet() { return m_sShortOpt; }
+        const std::string& ShortOptionsGet() { return m_sShortOpt; }
 
         bool hasShortOption( const int c )
           {
