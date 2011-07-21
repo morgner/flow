@@ -5,8 +5,7 @@
 #  Copyright (C) 2010 by Manfred Morgner
 #  manfred@morgner.com
 #
-#  This script creates a bunch of certifictes to work with for
-#  testing and/or developing (on) the 'flow' system
+#  This script creates a bunch of certifictes to work with for 'flow'
 #  ---
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -36,86 +35,96 @@
 #                   -cert client/username.crt -key client/username.key -CAfile client/client-CA-chain.pem -tls1 -verify 3
 
 
-RTCA="cert.flow-ca.info"
-ISCA="Intermediate-Server-CA"
-ICCA="Intermediate-Client-CA"
+CART="cert.flow.info"
+SVCA="flow-server-CA"
+CLCA="flow-client-CA"
 
-FLOWSERVER="localhost"
-FLOWSORGAN="'flow' Working Group"
-FLOWSCOUNT="CH"
+SERVERS="`hostname` localhost"
+SORGAN="'flow' Working Group (fwg)"
+SCNTRY="CH"
 
-USER1=${LOGNAME}
-USER2="recipient"
-
+CLIENTS="${LOGNAME} recipient"
+CORGAN="'flow' User Group (fug)"
+CCNTRY="CH"
 
 WORKDIR=`pwd`
-README=${WORKDIR}/CERTIFICATES
-rm -f ${README}
+SCRPTDIR=`dirname $0`
+HISTORY="${WORKDIR}/CERTIFICATES"
+rm -f ${HISTORY}
 
 mkdir -p CA
 mkdir -p client
 mkdir -p server
 
-DIR_CA=${WORKDIR}/CA
-DIR_CLIENT=${WORKDIR}/client
-DIR_SERVER=${WORKDIR}/server
+DIR_CA="${WORKDIR}/CA"
+DIR_SERVER="${WORKDIR}/server"
+DIR_CLIENT="${WORKDIR}/client"
 
-CLIENT_CA_CHAIN=${DIR_CLIENT}/client-CA-chain.pem
-SERVER_CA_CHAIN=${DIR_SERVER}/server-CA-chain.pem
+SERVER_CA_CHAIN="${DIR_SERVER}/server-ca-chain.pem"
+CLIENT_CA_CHAIN="${DIR_CLIENT}/client-ca-chain.pem"
 
 
 #
 # Root CA
 #
-echo "Creating Root CA"
+echo "Creating CA Root"
 
 cd ${DIR_CA}
 
-NAME=${RTCA}
-ORGANISATION="Great Privacy Commitee"
-COUNTRY="CH"
+NAME="${CART}"
+ORGANISATION="${SORGAN}"
+COUNTRY="${SCNTRY}"
 STATE="Bern"
-LOCATION="Stadt Bern"
+LOCATION="City of Bern"
 openssl req -new -utf8 -x509 -days 7302 \
             -newkey rsa:4096 -nodes \
             -subj "/CN=${NAME}/O=${ORGANISATION}/C=${COUNTRY}/ST=${STATE}/L=${LOCATION}" \
-            -keyout ${NAME}.key -out ${NAME}.crt
-echo "Root CA Certificate is: `pwd`/${NAME}.crt" | tee -a ${README}
+            -keyout "${DIR_CA}/${NAME}.key" -out "${DIR_CA}/${NAME}.crt"
+echo "CA Root Certificate is: ${DIR_CA}/${NAME}.crt" | tee -a ${HISTORY}
 
 #
-# Intermediate Server CA
+# Server CA
 #
-echo "Creating Intermediate Server CA"
+echo "Creating Server CA"
 
-NAME=${ISCA}
-CN="Intermediate Server CA"
-ORGANISATION="Great Privacy Server Management"
+NAME="${SVCA}"
+CN="Server CA"
+ORGANISATION="${SORGAN}"
 openssl req -new -utf8 -days 7301 \
             -newkey rsa:4096 -nodes \
             -subj "/CN=${CN}/O=${ORGANISATION}/C=${COUNTRY}/ST=${STATE}/L=${LOCATION}" \
-            -keyout ${NAME}.key -out ${NAME}.csr
-SER="100"
-CA=${RTCA}
-openssl x509 -req -days 7300 -extfile ${WORKDIR}/v3_ca.conf -extensions v3_ca -in ${NAME}.csr -CA ${CA}.crt -CAkey ${CA}.key -set_serial ${SER} -out ${NAME}.crt
-echo "Intermediate Server CA Certificate is: `pwd`/${NAME}.crt" | tee -a ${README}
+            -keyout "${DIR_CA}/${NAME}.key" -out "${DIR_CA}/${NAME}".csr
+SERIAL="100"
+CA=${CART}
+openssl x509 -req -days 7300 \
+             -extfile "${WORKDIR}/v3_ca.conf" -extensions v3_ca \
+             -in "${DIR_CA}/${NAME}".csr \
+             -CA "${DIR_CA}/${CA}.crt" -CAkey "${DIR_CA}/${CA}.key" -set_serial ${SERIAL} \
+             -out "${DIR_CA}/${NAME}.crt"
+echo "SERVER:${SERIAL}:CA Certificate is: ${DIR_CA}/${NAME}.crt" | tee -a ${HISTORY}
 
 
 #
-# Intermediate Client CA
+#  Client CA
 #
-echo "Creating Intermediate Client CA"
+echo "Creating Client CA"
 
-NAME=${ICCA}
-CN="Intermediate Client CA"
-ORGANISATION="Great Privacy Client Administration"
+NAME=${CLCA}
+CN="Client CA"
+ORGANISATION="${CORGAN}"
+COUNTRY="${CCNTRY}"
 openssl req -new -utf8 -days 7301 \
             -newkey rsa:4096 -nodes \
             -subj "/CN=${CN}/O=${ORGANISATION}/C=${COUNTRY}/ST=${STATE}/L=${LOCATION}" \
-            -keyout ${NAME}.key -out ${NAME}.csr
-SER="200"
-CA=${RTCA}
-openssl x509 -req -days 7300 -extfile ${WORKDIR}/v3_ca.conf -extensions v3_ca -in ${NAME}.csr -CA ${CA}.crt -CAkey ${CA}.key -set_serial ${SER} -out ${NAME}.crt
-echo "Intermediate Client CA Certificate is: `pwd`/${NAME}.crt" | tee -a ${README}
+            -keyout "${DIR_CA}/${NAME}.key" -out "${DIR_CA}/${NAME}.csr"
+SERIAL="200"
+CA=${CART}
+openssl x509 -req -days 7300 \
+             -extfile "${WORKDIR}/v3_ca.conf" -extensions v3_ca \
+             -in "${DIR_CA}/${NAME}.csr" \
+             -CA "${DIR_CA}/${CA}.crt" -CAkey "${DIR_CA}/${CA}.key" -set_serial ${SERIAL} \
+             -out "${DIR_CA}/${NAME}.crt"
+echo "CLIENT:${SERIAL}:Client CA Certificate is: ${DIR_CA}/${NAME}.crt" | tee -a ${HISTORY}
 
 
 #
@@ -124,75 +133,68 @@ echo "Intermediate Client CA Certificate is: `pwd`/${NAME}.crt" | tee -a ${READM
 echo "Compose CA Chains"
 
 rm -f ${SERVER_CA_CHAIN}
-for i in ${RTCA}.crt ${ISCA}.crt
+for i in ${CART}.crt ${SVCA}.crt
   do
-  openssl x509 -in $i -text >> ${SERVER_CA_CHAIN}
+  openssl x509 -in "${DIR_CA}/$i" -text >> "${SERVER_CA_CHAIN}"
   done
-echo "Server CA Chain is: ${SERVER_CA_CHAIN}" | tee -a ${README}
+echo "Server CA Chain is: ${SERVER_CA_CHAIN}" | tee -a ${HISTORY}
 
 rm -f ${CLIENT_CA_CHAIN}
-for i in ${RTCA}.crt ${ICCA}.crt
+for i in ${CART}.crt ${CLCA}.crt
   do
-  openssl x509 -in $i -text >> ${CLIENT_CA_CHAIN}
+  openssl x509 -in "${DIR_CA}/$i" -text >> "${CLIENT_CA_CHAIN}"
   done
-echo "Client CA Chain is: ${CLIENT_CA_CHAIN}" | tee -a ${README}
+echo "Client CA Chain is: ${CLIENT_CA_CHAIN}" | tee -a ${HISTORY}
 
 
 #
-# Server Certificate for ${FLOWSERVER}, ${FLOWSORGAN}, "CH", ser=101
+echo "Create Server Certificates for servers: ${SERVERS}"
 #
-echo "Create Server Certificate for ${FLOWSERVER}"
 
-cd ${DIR_SERVER}
+for C in `egrep "^SERVER:" CERTIFICATES | cut -d: -f2`; do SERIAL=${C}; done
+cd "${DIR_SERVER}"
+for NAME in ${SERVERS}
+  do
+  SERIAL=$((SERIAL+1))
 
-NAME=${FLOWSERVER}
-ORGANISATION="'flow' Working Group"
-COUNTRY="CH"
-openssl req -new -utf8 -days 7300 \
-            -newkey rsa:4096 -nodes \
-            -subj "/CN=${NAME}/O=${FLOWSORGAN}/C=${FLOWSCOUNT}" \
-            -keyout ${NAME}.key -out ${NAME}.csr
-SER="101"
-CA=${DIR_CA}/${ISCA}
-openssl x509 -req -days 7300 -in ${NAME}.csr -CA ${CA}.crt -CAkey ${CA}.key -set_serial ${SER} -out ${NAME}.crt
-echo "Server Certificate for ${NAME} is: `pwd`/${NAME}.crt" | tee -a ${README}
-openssl verify -CAfile ${SERVER_CA_CHAIN} ${NAME}.crt | tee -a ${README}
+  ORGANISATION="${SORGAN}"
+  COUNTRY="${SCNTRY}"
+# STATE="Bern"
+# LOCATION="City of Bern"
+  openssl req  -new -utf8 -days 7300 \
+               -newkey rsa:4096 -nodes \
+               -subj "/CN=${NAME}/O=${ORGANISATION}/C=${COUNTRY}/ST=${STATE}/L=${LOCATION}" \
+               -keyout "${NAME}.key" -out ${NAME}.csr
+  CA="${DIR_CA}/${SVCA}"
+  openssl x509 -req -days 7300 -in "${NAME}.csr" -CA "${CA}.crt" -CAkey "${CA}.key" -set_serial ${SERIAL} -out "${NAME}.crt"
+  echo "SERVER:${SERIAL}:Certificate for ${NAME} is: `pwd`/${NAME}.crt" | tee -a ${HISTORY}
+  openssl verify -CAfile ${SERVER_CA_CHAIN} ${NAME}.crt
+  done
+cd "${WORKDIR}"
 
 
 #
-# Client Certificate for ${USER1}, ser=201
+echo "Create Client Certificates for clients: ${CLIENTS}"
 #
-echo "Create User Certificare for ${USER1}"
 
+for C in `egrep "^CLIENT:" CERTIFICATES | cut -d: -f2`; do SERIAL=${C}; done
 cd ${DIR_CLIENT}
+for NAME in ${CLIENTS}
+  do
+  SERIAL=$((SERIAL+1))
 
-NAME=${USER1}
-openssl req -new -utf8 -days 7300 \
-            -newkey rsa:4096 -nodes \
-            -subj "/CN=${NAME}" \
-            -keyout ${NAME}.key -out ${NAME}.csr
-SER="201"
-CA=${DIR_CA}/${ICCA}
-openssl x509 -req -days 7300 -in ${NAME}.csr -CA ${CA}.crt -CAkey ${CA}.key -set_serial ${SER} -out ${NAME}.crt
-echo "User Certificate for ${NAME} is: `pwd`/${NAME}.crt" | tee -a ${README}
-openssl verify -CAfile ${CLIENT_CA_CHAIN} ${NAME}.crt | tee -a ${README}
-
-openssl rsa -pubout -in ${NAME}.key -out ${NAME}.pub
-
-#
-# Client Certificate for ${USER2}, ser=202
-#
-echo "Create User Certificare for ${USER2}"
-
-NAME=${USER2}
-openssl req -new -utf8 -days 7300 \
-            -newkey rsa:4096 -nodes \
-            -subj "/CN=${NAME}" \
-            -keyout ${NAME}.key -out ${NAME}.csr
-SER="202"
-CA=${DIR_CA}/${ICCA}
-openssl x509 -req -days 7300 -in ${NAME}.csr -CA ${CA}.crt -CAkey ${CA}.key -set_serial ${SER} -out ${NAME}.crt
-echo "User Certificate for ${NAME} is: `pwd`/${NAME}.crt" | tee -a ${README}
-openssl verify -CAfile ${CLIENT_CA_CHAIN} ${NAME}.crt | tee -a ${README}
-
-openssl rsa -pubout -in ${NAME}.key -out ${NAME}.pub
+  ORGANISATION="${CORGAN}"
+  COUNTRY="${CCNTRY}"
+# STATE="Bern"
+# LOCATION="City of Bern"
+  openssl req -new -utf8 -days 7300 \
+              -newkey rsa:4096 -nodes \
+              -subj "/CN=${NAME}/O=${ORGANISATION}/C=${COUNTRY}/ST=${STATE}/L=${LOCATION}" \
+              -keyout "${NAME}.key" -out "${NAME}.csr"
+  CA="${DIR_CA}/${CLCA}"
+  openssl x509 -req -days 7300 -in "${NAME}.csr" -CA "${CA}.crt" -CAkey "${CA}.key" -set_serial ${SERIAL} -out "${NAME}.crt"
+  echo "CLIENT:${SERIAL}:Certificate for ${NAME} is: `pwd`/${NAME}.crt" | tee -a ${HISTORY}
+  openssl rsa -pubout -in "${NAME}.key" -out "${NAME}.pub"
+  openssl verify -CAfile ${CLIENT_CA_CHAIN} ${NAME}.crt
+  done
+cd "${WORKDIR}"
