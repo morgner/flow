@@ -159,8 +159,9 @@ class CEnvironment : public std::map<std::string, std::string>
           return ShortOptionsGet().find( (char)c ) != std::string::npos;
           }
         
-        const std::string& LongOptionByShortOption( const int c )
+        std::string LongOptionByShortOption( const int c )
           {
+          const static std::string sUnknown = "unknown";
           for ( iterator it=begin(); it != end(); ++it )
             {
             if ( it->val == c )
@@ -168,7 +169,7 @@ class CEnvironment : public std::map<std::string, std::string>
               return it->name;
               }
             }
-          return "unknown";
+          return sUnknown;
           }
 
         void UsagePrint()
