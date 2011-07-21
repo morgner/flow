@@ -6,11 +6,11 @@ create-set-of-certificates-hierarchical.sh
 
 Create a complete tree of certificates:
 
- * CA
- * Intermediate Server CA
- * Intermediate Client CA
- * 1 Server Certificate
- * 2 Client Certificates
+ * CA Root
+ * Server CA
+ * Client CA
+ * 2 Server Certificates (localhost, `hostname`)
+ * 3 Client Certificates (username, recipient, ${LOGNAME})
 
 
 create-certificates-selfsigned.sh

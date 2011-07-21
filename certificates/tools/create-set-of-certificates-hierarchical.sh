@@ -43,7 +43,7 @@ SERVERS="`hostname` localhost"
 SORGAN="'flow' Working Group (fwg)"
 SCNTRY="CH"
 
-CLIENTS="${LOGNAME} recipient"
+CLIENTS="username recipient ${LOGNAME}"
 CORGAN="'flow' User Group (fug)"
 CCNTRY="CH"
 
