@@ -42,7 +42,6 @@
 #include "partner.h"
 #include "container.h"
 
-#include <openssl/err.h>
 
 #define SRV_HOST  "localhost"
 #define SRV_PORT  "30000"
