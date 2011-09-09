@@ -103,7 +103,7 @@ void CPartner::Communicate( CSocket* poSocket )
   {
   m_poSocket  = poSocket;
   int nResult = pthread_create(&m_tThread, 0, &CPartner::thread, this);
-  // If qwe can't create the controlling thead we'r lost! No one ever will find
+  // If we can't create the controlling thead we'r lost! No one ever will find
   // us we we must commit suicide. Otherwise, we will become a memory leak.
   if ( 0 != nResult )
     {

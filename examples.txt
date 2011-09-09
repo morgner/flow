@@ -1,124 +1,135 @@
 server start
 ~~~~~~~~~~~~
-$ ./flowserver 
+$ ./flowserver -v
 Waiting for clients...
 
+EXAMPLE A
 
+Requirements: bzip2, openssl (for base64), flow
 
-EXAMPLE 1
+bzip2 -c test.file | base64 | ./flowclient -m 'My message for you' -v2
 
-client command
-~~~~~~~~~~~~~~
-$ ./flowclient -v -u un -i 2 -m 'data must flow!' -h localhost
+== client output ==
+
+Verbosity: 2
 ===pipe-begin===
+QlpoOTFBWSZTWYfCogIAAOrdgAAQQAA4IABAK2ffoDABGAFAANAyZBQADQMmQJqoRE0MAhpyYxYwjGvEN+1vDjiHeHqGQ4ZznFD78w+/cNoeYYhvDnKugfkMN/MMwz0rCPyG0PcMa9wzDMOkNdYbXqHJQ0DjD9hvDEPrlKuH9DxiGaxD4h1hqGu2s1izDzDeH9D5h2h3vcM8Icaq+Q5ahwhzxDZDVqGaG0N80OcP8XckU4UJCHwqICA=
 ===pipe-end===
 
-u:un
-p:password
-c:PULEX
-l:2
-t:1289062127
-r:0
-===data-begin===
-x:data must flow!
-===data-end===
+Host.......: localhost
+Port.......: 30000
+Sender CRT.: certificates/client/manfred.crt
+Sender KEY.: certificates/client/manfred.key
+Password...: 
+T-Chain....: certificates/server/server-CA-chain.pem
+T-Path.....: certificates/trust/
 
- * HOST: localhost
- * PORT: 30000
+a:manfred
+r:recipient
+===== message runs =====
+QlpoOTFBWSZTWYfCogIAAOrdgAAQQAA4IABAK2ffoDABGAFAANAyZBQADQMmQJqoRE0MAhpyYxYwjGvEN+1vDjiHeHqGQ4ZznFD78w+/cNoeYYhvDnKugfkMN/MMwz0rCPyG0PcMa9wzDMOkNdYbXqHJQ0DjD9hvDEPrlKuH9DxiGaxD4h1hqGu2s1izDzDeH9D5h2h3vcM8Icaq+Q5ahwhzxDZDVqGaG0N80OcP8XckU4UJCHwqICA=
+
+===== message next =====
+My message for you
+===== message ends =====
 Response from server:
+manfred:manfred1315604171:0
 .
 
-server output
-~~~~~~~~~~~~~
-appending: CLUID:PULEX:un:2 as RGUID:PULEX:un:2:1289062127:101
- *** data must flow!
+== server output ==
+
+a:manfred
+r:recipient
+===== message runs =====
+QlpoOTFBWSZTWYfCogIAAOrdgAAQQAA4IABAK2ffoDABGAFAANAyZBQADQMmQJqoRE0MAhpyYxYwjGvEN+1vDjiHeHqGQ4ZznFD78w+/cNoeYYhvDnKugfkMN/MMwz0rCPyG0PcMa9wzDMOkNdYbXqHJQ0DjD9hvDEPrlKuH9DxiGaxD4h1hqGu2s1izDzDeH9D5h2h3vcM8Icaq+Q5ahwhzxDZDVqGaG0N80OcP8XckU4UJCHwqICA=
+
+===== message next =====
+My message for you
+===== message ends =====
+ * received container 
+a:manfred
+r:recipient
+===== message runs =====
+QlpoOTFBWSZTWYfCogIAAOrdgAAQQAA4IABAK2ffoDABGAFAANAyZBQADQMmQJqoRE0MAhpyYxYwjGvEN+1vDjiHeHqGQ4ZznFD78w+/cNoeYYhvDnKugfkMN/MMwz0rCPyG0PcMa9wzDMOkNdYbXqHJQ0DjD9hvDEPrlKuH9DxiGaxD4h1hqGu2s1izDzDeH9D5h2h3vcM8Icaq+Q5ahwhzxDZDVqGaG0N80OcP8XckU4UJCHwqICA=
+
+===== message next =====
+My message for you
+===== message ends =====
+appending: manfred:manfred1315604171:0
 1 elements received 1 elements total here.
 
 
+EXAMPLE B
 
-EXAMPLE 2
+Requirements: bzip2, uuencode, flow
 
-client command
-~~~~~~~~~~~~~~
-$ cat test.txt | ./flowclient -v
+bzip2 -c test.file | uuencode -m message | ./flowclient -v2 -m 'Hello there!'
+
+== client output ==
+
+Verbosity: 2
 ===pipe-begin===
-1 a simple line
-2 an another line
-3 even another line
-
-9 the last line
+begin-base64 644 message
+QlpoOTFBWSZTWYfCogIAAOrdgAAQQAA4IABAK2ffoDABGAFAANAyZBQADQMmQJqoRE0MAhpyYxYw
+jGvEN+1vDjiHeHqGQ4ZznFD78w+/cNoeYYhvDnKugfkMN/MMwz0rCPyG0PcMa9wzDMOkNdYbXqHJ
+Q0DjD9hvDEPrlKuH9DxiGaxD4h1hqGu2s1izDzDeH9D5h2h3vcM8Icaq+Q5ahwhzxDZDVqGaG0N8
+0OcP8XckU4UJCHwqICA=
+====
 ===pipe-end===
 
-u:username
-p:password
-c:PULEX
-l:1
-t:1289062499
-r:0
-===data-begin===
-x:1 a simple line
-x:2 an another line
-x:3 even another line
-x:
-x:9 the last line
-x:Hello Word, this is I, a lonley pulex
-===data-end===
+Host.......: localhost
+Port.......: 30000
+Sender CRT.: certificates/client/manfred.crt
+Sender KEY.: certificates/client/manfred.key
+Password...: 
+T-Chain....: certificates/server/server-CA-chain.pem
+T-Path.....: certificates/trust/
 
- * HOST: localhost
- * PORT: 30000
+a:manfred
+r:recipient
+===== message runs =====
+begin-base64 644 message
+QlpoOTFBWSZTWYfCogIAAOrdgAAQQAA4IABAK2ffoDABGAFAANAyZBQADQMmQJqoRE0MAhpyYxYw
+jGvEN+1vDjiHeHqGQ4ZznFD78w+/cNoeYYhvDnKugfkMN/MMwz0rCPyG0PcMa9wzDMOkNdYbXqHJ
+Q0DjD9hvDEPrlKuH9DxiGaxD4h1hqGu2s1izDzDeH9D5h2h3vcM8Icaq+Q5ahwhzxDZDVqGaG0N8
+0OcP8XckU4UJCHwqICA=
+====
+
+===== message next =====
+Hello there!
+===== message ends =====
 Response from server:
+manfred:manfred1315604280:0
 .
 
-server output
-~~~~~~~~~~~~~
-appending: CLUID:PULEX:username:1 as RGUID:PULEX:username:1:1289062499:101
- *** 1 a simple line
- *** 2 an another line
- *** 3 even another line
- *** 
- *** 9 the last line
- *** Hello Word, this is I, a lonley pulex
+== server output ==
+
+a:manfred
+r:recipient
+===== message runs =====
+begin-base64 644 message
+QlpoOTFBWSZTWYfCogIAAOrdgAAQQAA4IABAK2ffoDABGAFAANAyZBQADQMmQJqoRE0MAhpyYxYw
+jGvEN+1vDjiHeHqGQ4ZznFD78w+/cNoeYYhvDnKugfkMN/MMwz0rCPyG0PcMa9wzDMOkNdYbXqHJ
+Q0DjD9hvDEPrlKuH9DxiGaxD4h1hqGu2s1izDzDeH9D5h2h3vcM8Icaq+Q5ahwhzxDZDVqGaG0N8
+0OcP8XckU4UJCHwqICA=
+====
+
+===== message next =====
+Hello there!
+===== message ends =====
+ * received container 
+a:manfred
+r:recipient
+===== message runs =====
+begin-base64 644 message
+QlpoOTFBWSZTWYfCogIAAOrdgAAQQAA4IABAK2ffoDABGAFAANAyZBQADQMmQJqoRE0MAhpyYxYw
+jGvEN+1vDjiHeHqGQ4ZznFD78w+/cNoeYYhvDnKugfkMN/MMwz0rCPyG0PcMa9wzDMOkNdYbXqHJ
+Q0DjD9hvDEPrlKuH9DxiGaxD4h1hqGu2s1izDzDeH9D5h2h3vcM8Icaq+Q5ahwhzxDZDVqGaG0N8
+0OcP8XckU4UJCHwqICA=
+====
+
+===== message next =====
+Hello there!
+===== message ends =====
+appending: manfred:manfred1315604280:0
 1 elements received 1 elements total here.
-
-
-
-EXAMPLE 3
-
-client command
-~~~~~~~~~~~~~~
-cat examples.txt | uuencode -m example.txt | ./flowclient
-
-server output
-~~~~~~~~~~~~~
-appending: CLUID:PULEX:username:1 as RGUID:PULEX:username:1:1289065407:101
- *** begin-base64 644 example.txt
- *** c2VydmVyIHN0YXJ0Cn5+fn5+fn5+fn5+fgokIC4vZmxvd3NlcnZlciAKV2Fp
- *** dGluZyBmb3IgY2xpZW50cy4uLgoKCgpFWEFNUExFIDEKCmNsaWVudCBjb21t
- *** YW5kCn5+fn5+fn5+fn5+fn5+CiQgLi9mbG93Y2xpZW50IC12IC11IHVuIC1p
- *** IDIgLW0gJ2RhdGEgbXVzdCBmbG93IScgLWggbG9jYWxob3N0Cj09PXBpcGUt
- *** YmVnaW49PT0KPT09cGlwZS1lbmQ9PT0KCnU6dW4KcDpwYXNzd29yZApjOlBV
- *** TEVYCmw6Mgp0OjEyODkwNjIxMjcKcjowCj09PWRhdGEtYmVnaW49PT0KeDpk
- *** YXRhIG11c3QgZmxvdyEKPT09ZGF0YS1lbmQ9PT0KCiAqIEhPU1Q6IGxvY2Fs
- *** aG9zdAogKiBQT1JUOiAzMDAwMApSZXNwb25zZSBmcm9tIHNlcnZlcjoKLgoK
- *** c2VydmVyIG91dHB1dAp+fn5+fn5+fn5+fn5+CmFwcGVuZGluZzogQ0xVSUQ6
- *** UFVMRVg6dW46MiBhcyBSR1VJRDpQVUxFWDp1bjoyOjEyODkwNjIxMjc6MTAx
- *** CiAqKiogZGF0YSBtdXN0IGZsb3chCjEgZWxlbWVudHMgcmVjZWl2ZWQgMSBl
- *** bGVtZW50cyB0b3RhbCBoZXJlLgoKCgpFWEFNUExFIDIKCmNsaWVudCBjb21t
- *** YW5kCn5+fn5+fn5+fn5+fn5+Cj09PXBpcGUtYmVnaW49PT0KMSBhIHNpbXBs
- *** ZSBsaW5lCjIgYW4gYW5vdGhlciBsaW5lCjMgZXZlbiBhbm90aGVyIGxpbmUK
- *** CjkgdGhlIGxhc3QgbGluZQo9PT1waXBlLWVuZD09PQoKdTp1c2VybmFtZQpw
- *** OnBhc3N3b3JkCmM6UFVMRVgKbDoxCnQ6MTI4OTA2MjQ5OQpyOjAKPT09ZGF0
- *** YS1iZWdpbj09PQp4OjEgYSBzaW1wbGUgbGluZQp4OjIgYW4gYW5vdGhlciBs
- *** aW5lCng6MyBldmVuIGFub3RoZXIgbGluZQp4Ogp4OjkgdGhlIGxhc3QgbGlu
- *** ZQp4OkhlbGxvIFdvcmQsIHRoaXMgaXMgSSwgYSBsb25sZXkgcHVsZXgKPT09
- *** ZGF0YS1lbmQ9PT0KCiAqIEhPU1Q6IGxvY2FsaG9zdAogKiBQT1JUOiAzMDAw
- *** MApSZXNwb25zZSBmcm9tIHNlcnZlcjoKLgoKc2VydmVyIG91dHB1dAp+fn5+
- *** fn5+fn5+fn5+CmFwcGVuZGluZzogQ0xVSUQ6UFVMRVg6dXNlcm5hbWU6MSBh
- *** cyBSR1VJRDpQVUxFWDp1c2VybmFtZToxOjEyODkwNjI0OTk6MTAxCiAqKiog
- *** MSBhIHNpbXBsZSBsaW5lCiAqKiogMiBhbiBhbm90aGVyIGxpbmUKICoqKiAz
- *** IGV2ZW4gYW5vdGhlciBsaW5lCiAqKiogCiAqKiogOSB0aGUgbGFzdCBsaW5l
- *** CiAqKiogSGVsbG8gV29yZCwgdGhpcyBpcyBJLCBhIGxvbmxleSBwdWxleAox
- *** IGVsZW1lbnRzIHJlY2VpdmVkIDEgZWxlbWVudHMgdG90YWwgaGVyZS4KCg==
- *** ====
- *** Hello Word, this is I, a lonley pulex
-

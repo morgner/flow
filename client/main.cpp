@@ -74,7 +74,7 @@ int main( int argc, const char* argv[] )
   oEnvironment.OptionAppend( "password",    required_argument, 0, 'w', "Password for senders key",                           PASSWORD );
   oEnvironment.OptionAppend( "recipient",   required_argument, 0, 'r', "Recipients name or alias",                           "recipient" );
   // Message
-  oEnvironment.OptionAppend( "message",     required_argument, 0, 'm', "The message",                                        "Hi there, I'm from far away" );
+  oEnvironment.OptionAppend( "message",     required_argument, 0, 'm', "The message",                                        "" );
   // Container info
   oEnvironment.OptionAppend( "cluid",       required_argument, 0, 'i', "Client side local ID (numeric) of the message",      "" );
   oEnvironment.OptionAppend( "cert-dir",    required_argument, 0, 'd', "Directory for trusted and client certificates",      CRT_PATH );
@@ -100,6 +100,14 @@ int main( int argc, const char* argv[] )
   // our domain starts with only one Pulex
   oDomain += poPulex = new CPulex();
 
+  // We need to know if we had piped input later on because if we also have
+  // command line input, we need to insert a delimitter between both messages
+  // Encryption will encrypt the complete set including the delimiter to higher
+  // the complexity of decrypting the message by make the encrypted junk as
+  // large as possible. I believe, decrypting short sentences may be easier,
+  // so if one of the parts is short and the other long and both are encrypted
+  // with the same key, it may become too easy to decrypt the message
+  bool bHadPipeInput = false;
   // here we do a bit C to read stdin if any, oherwise ignore it silently
   // try to seek to the end of stdin,
   // nothings will move, we don't need to rewind(stdin) but ask ftell(stdin):
@@ -109,10 +117,12 @@ int main( int argc, const char* argv[] )
   // tell me if there are data in stdin
   if ( ftell(stdin) )
     {
+    bHadPipeInput = true;
+
     #define CBS 2047
     char* pcBuffer = new char[CBS+1];
     if ( g_nVerbosity > 1 ) cout << "===pipe-begin===" << endl;
-    do
+    while ( !feof(stdin) )
       {
       size_t nRead;
       // read CBS or the rest of from the in put device
@@ -126,7 +136,7 @@ int main( int argc, const char* argv[] )
       pcBuffer[nRead] = 0;
       if ( g_nVerbosity > 1 ) cout << pcBuffer;
       *poPulex << pcBuffer;
-      } while ( !feof(stdin) ); // while ( !feof(stdin) )
+      } // while ( !feof(stdin) )
     if ( g_nVerbosity > 1 ) cout << "===pipe-end===" << endl << endl;
     delete pcBuffer;
     #undef CBS
@@ -136,6 +146,11 @@ int main( int argc, const char* argv[] )
   poPulex->SenderSet   ( oEnvironment["sender"] );
   poPulex->RecipientSet( oEnvironment["recipient"] );
   poPulex->MessageIdSet( oEnvironment["cluid"] );
+
+  if ( bHadPipeInput && ( oEnvironment["message"].length() ) )
+    {
+    *poPulex << "\n===== message next =====\n";
+    }
 
   *poPulex << oEnvironment["message"];
 

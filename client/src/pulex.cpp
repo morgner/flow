@@ -35,8 +35,8 @@
 
 using namespace std;
 
-// Stream operators to send the pulex to an output stream The streams differ,
-// but the methode keeps the sam by using a template for 'Send(...)'
+// Stream operators to send the pulex to an output stream. The streams differ
+// but the methode keeps the same by using a template for 'Send(...)'
 
 // Send the pulex to a generic ostream
 ostream& operator << ( ostream& roStream, CPulex& roPulex )
@@ -52,18 +52,15 @@ CSocket& operator << ( CSocket& roStream, CPulex& roPulex )
 
 
 // Static const members of the pulex
-
 // The name of the class 'CPulex' in the transport stream for reconstruction
 const string CPulex::s_sClassName = "FLOW.PULEX";
 
 
-// A Pulx object has its time tag and its ID
-// This way it should be unique
+
 CPulex::CPulex()
   {
   }
 
-// No ressources allocated, nothings to free
 CPulex::~CPulex()
   {
   }
@@ -123,27 +120,15 @@ template<typename T>
                << m_sRecipient             << "\n";
       } // if ( it->length() )
 
-    roStream << "===== message goes here =====" << "\n";
+    roStream << "===== message runs =====\n";
 
-    // This is not the final solution, data have to be able to flow into the
-    // Cropto object to miminzie memory footage
-    ostringstream sosBuffer;
     for ( CPulex::iterator it  = begin();
                            it != end();
                          ++it )
       {
-      // with SSL the server breaks down if '*it' is empty but piped from the client
-      if ( it->length() )
-        sosBuffer << scn_content << ":" << *it << "\n";
-      else
-        sosBuffer << scn_content << ":" << "\n";
+      roStream /* << string(1, scn_content) << ":" */ << *it;
       } // for ( CPulex::iterator it  = begin();
 
-/*
-    CCrypto oCrypto( sosBuffer.str() );
-    oCrypto.RsaKeyLoadFromCertificate( "certificates/client/" + m_sRecipient + ".crt" );
-    roStream << oCrypto.BuildTransportPackage();
-*/
-    roStream << "===== end of message =====" << "\n";
+    roStream << "\n===== message ends =====\n";
     return roStream;
     } // template<typename T> T& CPulex::Send( T& roStream )
