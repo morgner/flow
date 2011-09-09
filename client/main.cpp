@@ -100,32 +100,37 @@ int main( int argc, const char* argv[] )
   // our domain starts with only one Pulex
   oDomain += poPulex = new CPulex();
 
-
-  // reading the (potentially given) piped input'directly' into the pulex object
-  // the operation is a bit tricky because of a little problem with cin we need
-  // to read unblocked for several reanson. one of the is the fact that we can't
-  // be certain, tha piped input is presented anyway possibly importand is the
-  // operation to set the file control flags back to the patter from before out
-  // manipulation to ensure normal behavior of  cin after the unblocked operation
-  // --
-  // -- this methode (?) of deblocking cin not reliable for pipe input
-  // -- have to work on it !
-  if ( g_nVerbosity > 1 ) cout << "===pipe-begin===" << endl;
-  int flags = ::fcntl(fileno(stdin), F_GETFL, 0);
-  ::fcntl( ::fileno(stdin), F_SETFL, flags | O_NONBLOCK );
-    string s;
-    cin.clear();
-//    for ( getline(cin, s); cin.good(); getline(cin, s) )
-//    while ( getline(cin, s) )
-    for ( getline( cin, s ); !cin.eof(); getline(cin, s) )
+  // here we do a bit C to read stdin if any, oherwise ignore it silently
+  // try to seek to the end of stdin,
+  // nothings will move, we don't need to rewind(stdin) but ask ftell(stdin):
+  //      0 = stdin is empty
+  //     -1 = there is anything in there
+  fseek (stdin, 0 , SEEK_END);
+  // tell me if there are data in stdin
+  if ( ftell(stdin) )
+    {
+    #define CBS 2047
+    char* pcBuffer = new char[CBS+1];
+    if ( g_nVerbosity > 1 ) cout << "===pipe-begin===" << endl;
+    do
       {
-      if ( g_nVerbosity > 1 ) cout << s << endl;
-      *poPulex << s;
-//      if ( !cin.good() ) break;
-      }
-    ::fcntl( ::fileno(stdin), F_SETFL, flags );
-  cin.clear();
-  if ( g_nVerbosity > 1 ) cout << "===pipe-end===" << endl << endl;
+      size_t nRead;
+      // read CBS or the rest of from the in put device
+      nRead = fread( pcBuffer, sizeof(char), CBS, stdin );
+
+      if ( ferror(stdin) )
+        {
+        break;
+        } // if ( ferror(stdin) )
+
+      pcBuffer[nRead] = 0;
+      if ( g_nVerbosity > 1 ) cout << pcBuffer;
+      *poPulex << pcBuffer;
+      } while ( !feof(stdin) ); // while ( !feof(stdin) )
+    if ( g_nVerbosity > 1 ) cout << "===pipe-end===" << endl << endl;
+    delete pcBuffer;
+    #undef CBS
+    } // if ( !feof(stdin) )
 
   // putting together defaults and command line input for the Pulex
   poPulex->SenderSet   ( oEnvironment["sender"] );
