@@ -42,9 +42,9 @@ but also using untrusted message exchange servers.
 the system will give you near realtime and asynchronous message exchange and
 message distribution capability
 
-because all 'flow' data are secure, they may be stored anywhere for unlimited
-time. so, if you lose your message history or dialog history, you should be able
-to recall all of them from the 'flow' server you used, given, the server stores
+because all 'flow' data is secure, it may be stored anywhere for unlimited
+time. so, if you lose your message or dialog history, you should be able
+to recall all of it from the 'flow' server you used, given, the server stores
 your messages
 
 messages are stored encrypted at any time anywhere as long as 'flow' stores
@@ -54,13 +54,13 @@ your systems security of course.
 because of the basic mechanisms of 'flow' it is not a good idea to bind it
 to other social networks or similar. 'flow' is for secure and trusted 
 message exchange, social networks are for fast and open message exchange.
-if you use 'flow', your are interested in privacy. I can not see any  reason
-to compromise your and your messaging partners privacy by open a hole in
+if you use 'flow', your are interested in privacy. I can not see any reason
+to compromise your and your messaging partners privacy by opening a hole in
 the system.
 
-you're in command about your messages. you dictate who will be able to
+you're in command of your messages. you dictate who will be able to
 read your messages and so ensure who is going to receive them.
-this way, even if the 'flow' server(s) you will use is not trustworthy,
+this way, even if the 'flow' servers you will use are not trustworthy,
 it is able to supress deliveries, but not to read your messages as long
 as you and your message recievers stay trustworthy (keep their secrets)
 
@@ -70,14 +70,14 @@ DATA MUST FLOW!
 'flow' will
 -----------
 enable you to exchange messages even through smartphones and tablet computers
-enalbe you to build protected groups to communicate with
+enable you to build protected groups to communicate with
 
 
 for security reason 'flow' may never
 ------------------------------------
 enable unsafe message exchange
 have an official MS Windows version
-become an official HTTP(S) interface
+get an official HTTP(S) interface
 become able to exchange data with other social networks
 
 
@@ -89,15 +89,15 @@ a system to exchange data with public social community systems
 
 current status
 --------------
- 1) Data are transported encrypted over an encrypted transport layer
+ 1) Data is transported encrypted over an encrypted transport layer
  2) Client and Server are not rock stable
- 3) the server is able to receive data from client and keeps them in his memory
+ 3) the server is able to receive data from client and keeps it in his memory
  4) the client is able to connect to a remote server and send a message to it
  5) TLS on all your ways
 
 next steps
 ----------
-the client should be able to request messages from the server and recontruct them
+the client should be able to request messages from the server and reconstruct them
 the client should remember some important command line information
 
 data compression ? (only if OpenSSL supports it inherently)
@@ -109,8 +109,8 @@ GCC believes:
 system/include/environment.h:168: warning: returning reference to temporary
 system/include/environment.h:171: warning: returning reference to temporary
 
-Which is not correct, clang thinks otherwise, which is more wise. I'm not sure
-if I should exclude such wrong messages and how. The best should be to add a
+Which is not correct, clang thinks otherwise, which is wiser. I'm not sure
+if I should exclude such wrong messages and how. The best way should be to add a
 compiler switch to turn off such nonsense at this point. In other situations
 this warning may be correct. So it may be unwise to shut this message down
 with a global compiler switch.
