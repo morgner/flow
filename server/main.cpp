@@ -27,22 +27,29 @@
  *                                                                         *
  ***************************************************************************/
 
-
+// STL 
 #include <string>
 #include <list>
 #include <map>
 
 #include <iostream>
 
+// SOCKET IO OBJECTS
 #include "socketserver.h"
 #include "socketexception.h"
 
-#include "environment.h"
-
+// DATA OBJECTS
 #include "partner.h"
 #include "container.h"
 
+// DEFINES
+// These have to be bevor including environment.h because it uses them
+#define VERSION   0.3
+#define APPLNAME  "'flow Server'"
 
+#include "environment.h"
+
+// Locale defines
 #define SRV_HOST  "localhost"
 #define SRV_PORT  "30000"
 #define KEY_FILE  "certificates/server/localhost.key"
@@ -52,9 +59,11 @@
 #define CA_PATH   "certificates/trust/"
 #define DH_FILE   "dh1024.pem"
 
+
+// We assume we are expected to be quiet
 bool g_bVerbose = false;
 
-long                 g_lLastRemoteId = 100;
+// Our message database
 CContainerMapByCLUID g_oContainerMapByCLUID;
 
 /*
@@ -67,6 +76,9 @@ CContainerMapByCLUID g_oContainerMapByCLUID;
  elements new|updates|all
  
  */
+
+
+using namespace std;
 
 int main ( int argc, const char* argv[] )
   {

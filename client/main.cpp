@@ -27,16 +27,25 @@
  *                                                                         *
  ***************************************************************************/
 
-
-#include "domain.h"
-#include "socketclient.h"
-#include "socketexception.h"
-
+// STL
 #include <map>
 #include <iostream>
 
-#define VERSION "0.1"
+// SOCKET IO OBJECTS
+#include "socketclient.h"
+#include "socketexception.h"
 
+// DATA OBJECTS
+#include "domain.h"
+
+// DEFINES
+// These have to be bevor including environment.h because it uses them
+#define VERSION  0.3
+#define APPLNAME "flow Client"
+
+#include "environment.h"
+
+// Locale defines
 #define CLT_HOST "localhost"
 #define CLT_PORT "30000"
 
@@ -46,17 +55,11 @@
 #define PASSWORD  ""
 
 
-// #include <stdlib.h> // for atol(), exit()
-// #include <stdio.h>  // for EOF
-#include <fcntl.h>  // for fnctl() for 'piped input'
-
-#include "environment.h"
-
-
+// We assume we are expected to be quiet
 short g_nVerbosity = 0;
 
-using namespace std;
 
+using namespace std;
 
 int main( int argc, const char* argv[] )
   {

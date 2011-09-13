@@ -69,6 +69,7 @@ oEnvironment.OptionCallbackSet( OptionCallback );
 #include <getopt.h>
 #include <stdlib.h>
 
+
 class CEnvironment : public std::map<std::string, std::string>
   {
   public:
@@ -276,6 +277,15 @@ class CEnvironment : public std::map<std::string, std::string>
           case 'h':
             UsageExit(0);
           case 'V':
+#ifdef VERSION
+#ifdef APPLNAME
+            std::cout << m_sProgramName << ": " << APPLNAME << " Version " << VERSION << std::endl;
+#else // APPLNAME
+            std::cout << m_sProgramName << " Version " << VERSION << std::endl;
+#endif // APPLNAME
+#else // VERSION
+            std::cout << m_sProgramName << std::endl;
+#endif // VERSION
             exit(0);
 
           case 'v':
