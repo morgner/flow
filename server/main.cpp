@@ -108,7 +108,7 @@ int main ( int argc, const char* argv[] )
                            oEnvironment["port"],
                            g_bVerbose );
 
-    if ( g_bVerbose ) std::cout << "Waiting for clients..." << std::endl;
+    if ( g_bVerbose ) cout << "Waiting for clients..." << endl;
     while ( true )
       {
       /// wait for a client
@@ -119,13 +119,13 @@ int main ( int argc, const char* argv[] )
         } // try  -  wait for a client
       catch ( CSocketException& e )
         {
-        std::cout << "Exception: " << e.Info() << "\nExiting.\n";
+        cout << "Exception: " << e.Info() << "\nExiting.\n";
         } // catch  -  accept
       } // while ( true )
     } // try  -  server bind ...
   catch ( CSocketException& e )
     {
-    std::cout << "Exception: " << e.Info() << "\nExiting.\n";
+    cout << "Exception: " << e.Info() << "\nExiting.\n";
     } // catch  -  oServer bind ...
 
   return 0;
