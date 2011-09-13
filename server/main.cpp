@@ -108,7 +108,7 @@ int main ( int argc, const char* argv[] )
                            oEnvironment["port"],
                            g_bVerbose );
 
-    if ( g_bVerbose ) cout << "Waiting for clients..." << endl;
+    if ( g_bVerbose ) cout << "Waiting for clients on " << oEnvironment["host"] << ":" << oEnvironment["port"] << " ..." << endl;
     while ( true )
       {
       /// wait for a client
