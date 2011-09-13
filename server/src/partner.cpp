@@ -34,6 +34,7 @@
 #include <iostream>
 
 #include <sys/time.h> // gettimeofday()
+#include <errno.h>    // EAGAIN, ...
 
 using namespace std;
 
@@ -44,9 +45,14 @@ using namespace std;
 // is no check possible, given, that we use a reinterpret_cast on a void*
 void* CPartner::thread(void* pObject)
   {
+  // Threads receive void pointers, we know (assume) this pointer points to an
+  // instance of CPartner.
   CPartner* poPartner = reinterpret_cast<CPartner*>(pObject);
+  // We are context free, so there is only one action: "receive and react"
   poPartner->Action();
+  // That's all for the object
   delete poPartner;
+  // And off we flow
   pthread_exit( NULL );
   } // void* CPartner::thread(void* pObject)
 
@@ -57,20 +63,38 @@ CPartner::CPartner()
     m_bRunning(false),
     m_poSocket(0)
   {
+  // Possibly, we need some coordination for database access. Multithreading
+  // is a threadening kind of programming, so we have to be very carefull.
+  // The best way to do multithreading is: Not to do it.
   pthread_mutex_init( &m_tMutex, 0 );
   }
 
 
+// We erase everything we know of. Keep in mind, we are multithreaded!
 CPartner::~CPartner()
   {
-  if ( m_bRunning ) Stop();
+  if ( m_bRunning )
+    {
+    cout << "ERROR: ~CPartner() called while 'running' flag is 'on'" << endl;
+    // This is not a point where Stop() can be a valid call. We expect to be
+    // called by the terminating theard.
+    // Calling Stop() here leads to recursion.
+    // Stop();
+    }
+
+  // The mutex is no longer of use
   pthread_mutex_destroy( &m_tMutex );
+
+  // We end the communication with client unconditioned
   delete m_poSocket;
   } // CPartner::~CPartner()
 
 
+// This is the database of messages, defined elsewhere
 extern CContainerMapByCLUID g_oContainerMapByCLUID;
 
+// If we received a message, the message needs a unique key to refere to based
+// on the content of the filled data container
 string CPartner::MakeMessageKey( CContainer* poContainer )
   {
   string sSender    = poContainer->SenderGet();
@@ -98,7 +122,12 @@ string CPartner::MakeMessageKey( CContainer* poContainer )
   } // string CPartner::MakeMessageKey( CContainer* poContainer )
 
 
-// start the thread
+// Start the thread
+// We have to give the server, who called us into life, free. To do so, we
+// start a thread to deal with us. This thread is given control about us. So we
+// are able to return immediately to the call who is waitung to generate a new
+// object of our kind to receiv the next call.
+// So THIS is the action the server calls to start us up flying.
 void CPartner::Communicate( CSocket* poSocket ) 
   {
   m_poSocket  = poSocket;
@@ -107,13 +136,28 @@ void CPartner::Communicate( CSocket* poSocket )
   // us we we must commit suicide. Otherwise, we will become a memory leak.
   if ( 0 != nResult )
     {
-    cout << "ERROR: thread not created, result: " << nResult << endl;
+    cout << "ERROR: In Communicate(), thread not created, result: " << nResult;
+    switch ( nResult )
+      {
+      case EAGAIN:
+        cout << " (ressources not sufficient)";
+        break;
+      case EINVAL:
+        cout << " (invalid thread parameters)";
+        break;
+      case EPERM:
+        cout << " (unsufficient permissions)";
+        break;
+      }
+    cout << endl;
+
+    // No one knows us anymore, so we have to erase us ourself
     delete this;
     } // if ( 0 != nResult )
   } // void CPartner::Communicate( CSocket* poSocket ) 
 
 
-// stopp the thread
+// Stopp the thread
 void CPartner::Stop()
   {
   m_bRunning = false;
@@ -122,6 +166,11 @@ void CPartner::Stop()
   } // void CPartner::Stop()
 
 
+// What we do is:
+//  * Receive client data
+//  * do what's to be requested if the request is valid
+//  * answer properly if possible (or not if not)
+//  * end the call
 void CPartner::Action()
   {
   m_bRunning  = true; // Now we're running
@@ -162,6 +211,7 @@ void CPartner::Action()
   } // void CPartner::Action()
 
 
+// We recall messages stored in the database
 size_t CPartner::Recall( const string&  rsClientData,
                                CSocket* poSocket )
   {
@@ -200,10 +250,11 @@ size_t CPartner::Recall( const string&  rsClientData,
   } // size_t CPartner::Recall( const string&  rsClientData, CSocket* poSocket )
 
 
+// Seems we were given a new message (or more) so we try to pack them into
+// containers, seal them and keep them warm and healthy until some one calls to
+// erase them or another reason makes them die
 size_t CPartner::BuildContainers( const string& rsClientData )
   {
-//  g_bVerbose = true;
-
   /// a list to collect containers
   typedef list<CContainer*> CContainerList;
 
