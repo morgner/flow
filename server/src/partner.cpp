@@ -41,7 +41,7 @@ using namespace std;
 // into the open space, so at the end of the thread, the used object is to
 // destroy
 // We trust callers to provide us with an instance of a CPartner class, there
-// is not check possible, given, that we use a reinterpret_cast on a void*
+// is no check possible, given, that we use a reinterpret_cast on a void*
 void* CPartner::thread(void* pObject)
   {
   CPartner* poPartner = reinterpret_cast<CPartner*>(pObject);
