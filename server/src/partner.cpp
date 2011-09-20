@@ -97,28 +97,28 @@ extern CContainerMapByCLUID g_oContainerMapByCLUID;
 // on the content of the filled data container
 string CPartner::MakeMessageKey( CContainer* poContainer )
   {
-  string sSender    = poContainer->SenderGet();
   string sMessageId = poContainer->MessageIdGet();
 
   if ( sMessageId.length() == 0 )
     {
     // generate a first simple version of Message-ID
-    if ( ! sMessageId.length() )
-      {
-      timeval time;
-      gettimeofday( &time, 0 );
-      sMessageId = sSender + to_string( time.tv_sec );
+    timeval time;
+    gettimeofday( &time, 0 );
+    string sTime = to_string( time.tv_sec );
 
-      int nSuffix = 0;
-      for ( ; g_oContainerMapByCLUID.find( sMessageId + ':' + to_string(nSuffix) ) != g_oContainerMapByCLUID.end(); nSuffix++ )
-        {
-        if ( g_bVerbose ) cout << sMessageId;
-        }
-        sMessageId += ':' + to_string(nSuffix);
+    string sSender    = poContainer->SenderGet();
+    string sRecipient = poContainer->RecipientGet();
+    int    nSuffix    = 0;
+#define CONSTUCT_ID sSender + ':' + sRecipient + ':' + sTime + ':' + to_string(nSuffix)
+    for ( ; g_oContainerMapByCLUID.find( CONSTUCT_ID ) != g_oContainerMapByCLUID.end(); nSuffix++ )
+      {
+      if ( g_bVerbose ) cout << " -found- " << CONSTUCT_ID << endl;
       }
+    sMessageId = CONSTUCT_ID;
+#undef CONSTUCT_ID
     } // if ( sMessageId.length() == 0 )
 
-  return sSender + ':' + sMessageId;
+  return sMessageId;
   } // string CPartner::MakeMessageKey( CContainer* poContainer )
 
 
