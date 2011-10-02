@@ -115,8 +115,10 @@ const char CContainer::scn_sender           = 'a';
 const char CContainer::scn_recipient        = 'r';
 const char CContainer::scn_content          = 'x';
 const char CContainer::scn_messageid        = 'm';
+const char CContainer::scn_messageid_next   = 'n';
 // message receive parameters
-const char CContainer::scn_command          = 'c';
+const char CContainer::scn_recall           = 'c';
+const char CContainer::scn_list             = 'l';
 
 // e.g. "s:<FP>", "r:<FP>", "x:please read", "x:the manual"
 const string& CContainer::operator += ( const string& rsElement )

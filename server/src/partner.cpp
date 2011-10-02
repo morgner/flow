@@ -193,7 +193,8 @@ void CPartner::Action()
     } while ( !m_bStopRequested && sClientData.rfind(".\r") == string::npos );
 
   if ( (sClientData[1] == ':') &&
-       (sClientData[0] == CContainer::scn_command) )
+      ((sClientData[0] == CContainer::scn_recall) ||
+       (sClientData[0] == CContainer::scn_list)) )
     {
     if (g_bVerbose) cout << " * recall; container: "
                          << g_oContainerMapByCLUID.size() << endl;
@@ -215,38 +216,208 @@ void CPartner::Action()
 size_t CPartner::Recall( const string&  rsClientData,
                                CSocket* poSocket )
   {
-  map<char, string> moQuery;
+  typedef map<string, string> CMapString2String;
+  CMapString2String moQuery;
 
   for (string::size_type p1=0, p2=0;
        string::npos != ( p2 = rsClientData.find('\n', p1) );
        p1 = p2+1)
     {
     string s = rsClientData.substr(p1, p2-p1);
-    if ( (s.length() > 2) && (s[1] == ':') )
+    size_t l = s.length();
+    if ( (l > 2) && (s[1] == ':') )
       {
-      moQuery[ s[0] ] = s.substr(2);
+      if ( l > 4)
+        moQuery[ s.substr(0, 3) ] = s.substr(4);
+        else
+        moQuery[ s.substr(0, 3) ] = "";
       }
     } // for (string::size_type p1=0, p2=0; ...
 
-  for ( CContainerMapByCLUID::iterator it  = g_oContainerMapByCLUID.begin(); 
-                                       it != g_oContainerMapByCLUID.end(); 
-                                     ++it )
+/*
+        client command      | send to server   | receive from server
+        ====================+==================+====================
+        list all            | l:a              |  m:<message-id>
+                            |                  | [...]
+        list partially      | l:p <message-id> |  m:<message-id>
+                            |                  | [...]
+        list mine           | l:m              |  m:<message-id>
+                            |                  | [...]
+        list mine partially | l:y <message-id> |  m:<message-id>
+                            |                  | [...]
+        list senders        | l:s              |  s:<sender-id>
+                            |                  | [...]
+        call all            | c:a              |  m:<message-id>
+                            |                  | [...]
+        call MsgID          | c:m <message-id> |  m:<message-id>
+                            |                  | [<body>]
+                            |                  | [n:<next message-id>]
+        cbsr MsgID          | c:s <message-id> |  m:<message-id>
+                            |                  | [<body>]
+                            |                  | [n:<next message-id>]
+*/
+  for ( CMapString2String::iterator itQuery  = moQuery.begin();
+                                    itQuery != moQuery.end();
+                                  ++itQuery)
     {
-    CContainer* poc = it->second;
-//  if ( poc->isFor(m_poSocket->PeerFingerprintGet()) )
-//  if ( poc->isFor(moQuery['g']) )
+    if ( g_bVerbose)
       {
-      *poSocket << string(1, CContainer::scn_sender)  << ":" << poc->SenderGet() << "\n";
-      *poSocket << it->first                          << "\n";
+      cout << " * " << itQuery->first;
+      if ( itQuery->second.length() > 0 ) cout << " with " << itQuery->second;
+      cout << "\n";
+      }
 
-      for ( CContainer::iterator itc  = poc->begin();
-                                 itc != poc->end();
-                               ++itc )
-        {
-        *poSocket << *itc << "\n";
-        } // for ( CContainer::iterator itc  = poc->begin();
-      } // if ( poc->isFor(m_poSocket->PeerFingerprintGet()) )
-    } // for ( CContainerMapByCLUID::iterator it  = g_oContainerMapByCLUID.begin(); ...
+    CContainerMapByCLUID::iterator it;
+
+    switch ( itQuery->first[0] )
+      {
+      case 'l': // list operations
+        switch ( itQuery->first[2] )
+          {
+          case 'a': // l:a list all
+            if ( g_bVerbose) cout << " * list all \n";
+/*
+              1) get the recipient from the TLS-session
+              2) resend all message ids for this sender
+ */
+            for ( it = g_oContainerMapByCLUID.begin(); it != g_oContainerMapByCLUID.end(); ++it )
+              {
+              *poSocket << it->first << "\n";
+              }
+            break;
+          case 'p': // l:p list part, beginning with message-id
+/*
+              1) get the recipient from the TLS-session
+              2) resend all message ids for this sender starting with the given message-id
+ */
+            if ( g_bVerbose) cout << " * list partial, beginning with '" << itQuery->second << "'\n";
+            for ( it = g_oContainerMapByCLUID.find(itQuery->second); it != g_oContainerMapByCLUID.end(); ++it )
+              {
+              *poSocket << it->first << "\n";
+              }
+            break;
+          case 'm': // l:m list mine (sent by me)
+            if ( g_bVerbose) cout << " * list mine\n";
+/*
+              1) get the recipient from the TLS-session
+              2) resend all message ids from this sender
+ */
+            break;
+          case 'y': // l:y list mine part, beginning with message-id
+            if ( g_bVerbose) cout << " * list mine partial, beginning with '" << itQuery->second << "'\n";
+/*
+              1) get the recipient from the TLS-session
+              2) resend all message ids from this sender starting at the given message-id
+ */
+            break;
+          case 's': // l:s list senders
+            if ( g_bVerbose) cout << " * list senders\n";
+/*
+              1) get the recipient from the TLS-session
+              2) resend all senders with messages for this recipients
+ */
+            typedef map<string, bool> CMapString2Bool;
+            CMapString2Bool omSenders;
+            for ( it = g_oContainerMapByCLUID.begin(); it != g_oContainerMapByCLUID.end(); ++it )
+              {
+              omSenders[ it->second->SenderGet() ] = true;
+              }
+            for ( CMapString2Bool::iterator itSenders = omSenders.begin(); itSenders != omSenders.end(); ++itSenders )
+              {
+              *poSocket << itSenders->first << "\n";
+              }
+            break;
+          } // switch ( itQuery->first[2] )
+        break; // switch ( itQuery->first[0] ) => case 'l'
+
+      case 'c': // call operations
+        CContainer*          poc;
+        CContainer::iterator itc;
+        switch ( itQuery->first[2] )
+          {
+          case 'a': // c:a = call all
+            if ( g_bVerbose) cout << " * recall all for me\n";
+/*
+              1) get the recipient from the TLS-session
+              2) resend all messages for the recipient
+ */
+            for ( it = g_oContainerMapByCLUID.begin(); it != g_oContainerMapByCLUID.end(); ++it )
+              {
+              poc = it->second;
+
+              *poSocket << string(1, CContainer::scn_sender)  << ":" << poc->SenderGet() << "\n";
+              *poSocket << it->first                          << "\n";
+
+              for ( itc  = poc->begin(); itc != poc->end(); ++itc )
+                {
+                *poSocket << *itc << "\n";
+                } // for ( CContainer::iterator itc  = poc->begin();
+              } // for ( it = g_oContainerMapByCLUID.begin(); ...
+            break; // case 'a': // c:a = call all
+
+          case 'm': // c:m = call message
+            if ( g_bVerbose) cout << " * recall message '" << itQuery->second << "'\n";
+/*
+              1) get the recipient from the TLS-session
+              2) resend the queried message if its for the recipient
+              3) resend the next message-id from the same sender (if any)
+ */
+            it = g_oContainerMapByCLUID.find( itQuery->second );
+            if ( it != g_oContainerMapByCLUID.end() )
+              {
+              poc = it->second;
+
+              *poSocket << string(1, CContainer::scn_sender)  << ":" << poc->SenderGet() << "\n";
+              *poSocket << it->first                          << "\n";
+
+              for ( itc  = poc->begin(); itc != poc->end(); ++itc )
+                {
+                *poSocket << *itc << "\n";
+                } // for ( CContainer::iterator itc  = poc->begin();
+
+              // the next message id (has to be filtered for receiver later)
+              if ( ++it != g_oContainerMapByCLUID.end() )
+                {
+                *poSocket << string(1, CContainer::scn_messageid_next) << ":" << it->first << "\n";
+                } // if ( ++it != g_oContainerMapByCLUID.end() )
+              } // if ( it != g_oContainerMapByCLUID.end() )
+            break; // case 'm': // c:m = call message
+
+          case 's': // c:s = call message by sender
+            if ( g_bVerbose) cout << " * recall message '" << itQuery->second << "' by sender\n";
+/*
+              1) get the sender from the message-id
+              2) resend the queried message
+              3) resend the next message-id from the same sender (if any)
+ */
+            string sMsgId = itQuery->second;
+            size_t nCut   = sMsgId.find( ":" );
+            if ( nCut != string::npos )
+              {
+              string sSender = sMsgId.substr(0, nCut);
+              if ( g_bVerbose) cout << " * from sender '" << sSender << "'\n";
+
+              for ( it = g_oContainerMapByCLUID.find( itQuery->second ); it != g_oContainerMapByCLUID.end(); ++it )
+                {
+                poc = it->second;
+                if ( poc->SenderGet() != sSender ) continue;
+
+                *poSocket << string(1, CContainer::scn_sender)  << ":" << poc->SenderGet() << "\n";
+                *poSocket << it->first                          << "\n";
+
+                for ( itc  = poc->begin(); itc != poc->end(); ++itc )
+                  {
+                  *poSocket << *itc << "\n";
+                  } // for ( CContainer::iterator itc  = poc->begin();
+                } // for ( it = g_oContainerMapByCLUID.begin(); ...
+              } // if ( nCut != string:npos )
+            break; // case 's': // c:s = call message by sender
+
+          } // switch ( itQuery->first[2] )
+        break; // switch ( itQuery->first[0] ) => case 'c'
+      } // switch ( itQuery->first[0] )
+    } //   for ( CMapString2String::iterator itQuery  = moQuery.begin();
+
   return 0;
   } // size_t CPartner::Recall( ... )
 

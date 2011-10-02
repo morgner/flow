@@ -79,17 +79,20 @@ int main( int argc, const char* argv[] )
   // Message
   oEnvironment.OptionAppend( "message",     required_argument, 0, 'm', "The message",                                        "" );
   // Container info
-  oEnvironment.OptionAppend( "cluid",       required_argument, 0, 'i', "Client side local ID (numeric) of the message",      "" );
   oEnvironment.OptionAppend( "cert-dir",    required_argument, 0, 'd', "Directory for trusted and client certificates",      CRT_PATH );
   oEnvironment.OptionAppend( "trust-chain", required_argument, 0, 'a', "Trusted CA chain",                                   CA_CHAIN );
   oEnvironment.OptionAppend( "trust-path",  required_argument, 0, 't', "Path to trusted certificates",                       CA_PATH );
   // Calling control
+  oEnvironment.OptionAppend( "msg-id",      required_argument, 0, 'i', "Message-ID",                                         "" );
   oEnvironment.OptionAppend( "list",        required_argument, 0, 'l', "List (all|part|mine|mine-part|senders|msg-id)",      "" );
   oEnvironment.OptionAppend( "call",        required_argument, 0, 'c', "Receive (msg-id)",                                   "" );
   oEnvironment.OptionAppend( "cbsr",        required_argument, 0, 'b', "Receive by sender (msg-id)",                         "" );
 
   // we need to read the command line parameters
   oEnvironment.CommandlineRead();
+  // the level of verbosity
+  g_nVerbosity =  atoi( oEnvironment["verbose"].c_str() );
+  if ( g_nVerbosity ) cout << "Verbosity: " << g_nVerbosity << endl;
 
   // dump all recognized command line parameters including associated values
   if ( g_nVerbosity > 1 )
@@ -101,10 +104,6 @@ int main( int argc, const char* argv[] )
       cout << " >>>>" << it->first << ":"  << it->second << endl;
       }
     } // if ( g_nVerbosity > 1 )
-
-  // the level of verbosity
-  g_nVerbosity =  atoi( oEnvironment["verbose"].c_str() );
-  if ( g_nVerbosity ) cout << "Verbosity: " << g_nVerbosity << endl;
 
   // the real operation starts here
   CDomain oDomain;
@@ -201,34 +200,44 @@ int main( int argc, const char* argv[] )
         string sCall;
         sCall += sCommand[0];
         sCall += ":";
-        if ( sParameter[0] == 'l' )
-          sCall += sParameter[0];
+        if ( sCall[0] == 'l' )
+          {
+          if ( sParameter == "all"       ) sCall += "a";
+          if ( sParameter == "part"      ) sCall += "p " + oEnvironment["msg-id"];
+          if ( sParameter == "mine"      ) sCall += "m";
+          if ( sParameter == "mine-part" ) sCall += "y " + oEnvironment["msg-id"];
+          if ( sParameter == "senders"   ) sCall += "s";
+          }
         else // not list? we expect 'reCall operations'
+          if ( sCommand == "cbsr" )        sCall += "s " + sParameter;
           if ( sCommand == "call" )
-            sCall += "m " + sParameter;
-          else // not 'call', we assume 'cbsr'
-            sCall += "s " + sParameter;
+            if ( sParameter == "all" )
+              sCall += "a";
+            else
+              sCall += "m " + sParameter;
 /*
-        client command   | send to server   | receive from server
-        =================+==================+====================
-        --list all       | l:a              |  m:<message-id>
-                         |                  | [...]
-        --list part      | l:p <message-id> |  m:<message-id>
-                         |                  | [...]
-        --list mine      | l:m              |  m:<message-id>
-                         |                  | [...]
-        --list mine-part | l:y <message-id> |  m:<message-id>
-                         |                  | [...]
-        --list senders   | l:s              |  s:<sender-id>
-                         |                  | [...]
-        --call MsgID     | c:m <message-id> |  m:<message-id>
-                         |                  |  z:<size in bytes>
-                         |                  | [<body>]
-                         |                  | [n:<next message-id>]
-        --cbsr MsgID     | c:s <message-id> |  m:<message-id>
-                         |                  |  z:<size in bytes>
-                         |                  | [<body>]
-                         |                  | [n:<next message-id>]
+        client command      | send to server   | receive from server
+        ====================+==================+====================
+        --list all          | l:a              |  m:<message-id>
+                            |                  | [...]
+        --list part         | l:p <message-id> |  m:<message-id>
+        --msg-id message-id |                  | [...]
+                            |                  | [...]
+        --list mine         | l:m              |  m:<message-id>
+                            |                  | [...]
+        --list mine-part    | l:y <message-id> |  m:<message-id>
+        --msg-id message-id |                  | [...]
+                            |                  | [...]
+        --list senders      | l:s              |  s:<sender-id>
+                            |                  | [...]
+        --call all          | c:a              |  m:<message-id>
+                            |                  | [...]
+        --call MsgID        | c:m <message-id> |  m:<message-id>
+                            |                  | [<body>]
+                            |                  | [n:<next message-id>]
+        --cbsr MsgID        | c:s <message-id> |  m:<message-id>
+                            |                  | [<body>]
+                            |                  | [n:<next message-id>]
 */
         if ( g_nVerbosity > 1 ) cout << "Command: " << sCall << "\n";
         oConnection << sCall << "\n";

@@ -628,16 +628,21 @@ list senders  & \texttt{ c:s}  & \texttt{ s:<sender-id>}  \\
 && \texttt{[s:<sender-id>]}  \\
 \hline
 
+call all  & \texttt{ c:a}  &  \texttt{ m:<message-id>}  \\
+&& \texttt{[<body>]}  \\
+&&  \texttt{[m:<message-id>]}  \\
+&& \texttt{[<body>]}  \\
+&& \texttt{[n:<message id>]} \\
+\hline
+
 call message  & \texttt{ c:m <message-id>}  &  \texttt{ m:<message-id>}  \\
-&& \texttt{ z:size (in bytes)}  \\
-&& \texttt{ <body> | none}  \\
-&& \texttt{ n:<message id> | none} \\
+&& \texttt{[<body>]}  \\
+&&  \texttt{[m:<message-id>]}  \\
 \hline
 
 call message by sender & \texttt{ c:s <message-id>}  & \texttt{ m:<message id>}  \\
-&& \texttt{ z:size (in bytes)}  \\
-&& \texttt{ <body> | none} \\
-&& \texttt{ n:<message-id> | none} \\
+&& \texttt{[<body>]}  \\
+&&  \texttt{[m:<message-id>]}  \\
 \hline
 
 

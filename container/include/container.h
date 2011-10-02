@@ -110,8 +110,10 @@ class CContainer : public CListString
     static const char scn_recipient;
     static const char scn_content;
     static const char scn_messageid;
+    static const char scn_messageid_next;
     // message receive parameters
-    static const char scn_command;
+    static const char scn_recall;
+    static const char scn_list;
 
   }; // class CContainer
 

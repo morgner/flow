@@ -3,6 +3,23 @@ server start
 $ ./flowserver -v
 Waiting for clients...
 
+
+CURRENT EXAMPLES
+
+./flowclient -m Erster
+./flowclient -m Zweiter
+./flowclient -m "This is a Dummy Message" -s dummy
+./flowclient -m Dritter
+./flowclient -m Vierter
+./flowclient -v 2 --list all
+./flowclient -v 2 --list senders
+./flowclient -v 2 --call <message-id>
+./flowclient -v 2 --call all
+./flowclient -v 2 --cbsr <message-id>
+
+
+OLD = OLD = OLD = OLD = OLD = OLD
+
 EXAMPLE A
 
 Requirements: bzip2, openssl (for base64), flow
