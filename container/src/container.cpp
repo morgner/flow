@@ -110,11 +110,13 @@ bool CContainer::isFrom( const string& rsSender )
 
 
 // indicators to be used to transport the pulex
-const char CContainer::scn_command   = 'c';
-const char CContainer::scn_sender    = 'a';
-const char CContainer::scn_recipient = 'r';
-const char CContainer::scn_content   = 'x';
-const char CContainer::scn_messageid = 'm';
+// message send parameters
+const char CContainer::scn_sender           = 'a';
+const char CContainer::scn_recipient        = 'r';
+const char CContainer::scn_content          = 'x';
+const char CContainer::scn_messageid        = 'm';
+// message receive parameters
+const char CContainer::scn_command          = 'c';
 
 // e.g. "s:<FP>", "r:<FP>", "x:please read", "x:the manual"
 const string& CContainer::operator += ( const string& rsElement )

@@ -287,7 +287,7 @@ class CEnvironment : public std::map<std::string, std::string>
             std::cout << m_sProgramName << std::endl;
 #endif // VERSION
             exit(0);
-
+/*
           case 'v':
             if ( !rsData.length() )
               {
@@ -295,11 +295,15 @@ class CEnvironment : public std::map<std::string, std::string>
               break;
               }
             // if not - advance to "default"
-
+*/
           default:
             if ( rsData.length() )
               {
               (*this)[rsName] = rsData;
+              }
+            else
+              {
+              (*this)[rsName] = "1";
               }
             break;
           } // switch ( c )

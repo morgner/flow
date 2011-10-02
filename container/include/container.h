@@ -105,11 +105,13 @@ class CContainer : public CListString
     const std::string& operator += ( const std::string& rsElement );
 
   public:
-    static const char scn_command;
+    // message send parameters
     static const char scn_sender;
     static const char scn_recipient;
     static const char scn_content;
     static const char scn_messageid;
+    // message receive parameters
+    static const char scn_command;
 
   }; // class CContainer
 

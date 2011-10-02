@@ -476,7 +476,7 @@ class CCrypto
 
 
 
-\chapter{Quickstart API description}
+\chapter{Quickstart Interface Description}
 
 \section{No library, no programming dependencies}
 
@@ -581,6 +581,7 @@ x:<multiline data>
 \end{enumerate}
 
 
+
 \begin{table}[htdp]
 \begin{center}
 \begin{tabular}{ | l | l | l |  }
@@ -602,33 +603,40 @@ remove message  & \texttt{ r:<recipient>}  &  \\
 & \texttt{ m:<message id>} &\\
 \hline
 
-list mine  & \texttt{ c:mine}  & \texttt{ m:<message-id>}  \\
+list all for me  & \texttt{ l:a}  & \texttt{ m:<message-id>}  \\
 && \texttt{[m:<message-id>]}  \\
 && \texttt{[m:<message-id>]}  \\
 \hline
 
-list senders  & \texttt{ c:senders}  & \texttt{ s:<sender-id>}  \\
+list partial for me  & \texttt{ l:p <message-id>}  & \texttt{ m:<message-id>}  \\
+&& \texttt{[m:<message-id>]}  \\
+&& \texttt{[m:<message-id>]}  \\
+\hline
+
+list all from me  & \texttt{ l:m}  & \texttt{ m:<message-id>}  \\
+&& \texttt{[m:<message-id>]}  \\
+&& \texttt{[m:<message-id>]}  \\
+\hline
+
+list all from me partial  & \texttt{ l:y <message-id>}  & \texttt{ m:<message-id>}  \\
+&& \texttt{[m:<message-id>]}  \\
+&& \texttt{[m:<message-id>]}  \\
+\hline
+
+list senders  & \texttt{ c:s}  & \texttt{ s:<sender-id>}  \\
 && \texttt{[s:<sender-id>]}  \\
 && \texttt{[s:<sender-id>]}  \\
 \hline
 
-list messages  & \texttt{ c:messages}  & \texttt{ m:<message-id>} \\
-& \texttt{[s:sender-id]}  & \texttt{[m:<message-id>]} \\
-&& \texttt{[m:<message-id>]} \\
-\hline
-
-call message  & \texttt{ c:get}  &  \texttt{ s:<sender-id>}  \\
-& \texttt{[s:<sender-id>]} & \texttt{ m:<message-id>}  \\
-& \texttt{ m:<message-id>} & \texttt{ x:<body> | none}  \\
-& \texttt{[m:<message-id>]} & \texttt{[s:<sender-id>]} \\
-&& \texttt{[m:<messageid>]} \\
-&& \texttt{[x:<body> | none]} \\
+call message  & \texttt{ c:m <message-id>}  &  \texttt{ m:<message-id>}  \\
+&& \texttt{ z:size (in bytes)}  \\
+&& \texttt{ <body> | none}  \\
 && \texttt{ n:<message id> | none} \\
 \hline
 
-call next message  & \texttt{c:next}  & \texttt{ s:<sender-id>}  \\
-& \texttt{r:<message id>}  & \texttt{ m:<message id>} \\
-&& \texttt{ x:<body>} \\
+call message by sender & \texttt{ c:s <message-id>}  & \texttt{ m:<message id>}  \\
+&& \texttt{ z:size (in bytes)}  \\
+&& \texttt{ <body> | none} \\
 && \texttt{ n:<message-id> | none} \\
 \hline
 

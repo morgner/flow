@@ -233,7 +233,8 @@ size_t CPartner::Recall( const string&  rsClientData,
                                      ++it )
     {
     CContainer* poc = it->second;
-//    if ( poc->isFor(m_poSocket->PeerFingerprintGet()) )
+//  if ( poc->isFor(m_poSocket->PeerFingerprintGet()) )
+//  if ( poc->isFor(moQuery['g']) )
       {
       *poSocket << string(1, CContainer::scn_sender)  << ":" << poc->SenderGet() << "\n";
       *poSocket << it->first                          << "\n";
@@ -245,9 +246,9 @@ size_t CPartner::Recall( const string&  rsClientData,
         *poSocket << *itc << "\n";
         } // for ( CContainer::iterator itc  = poc->begin();
       } // if ( poc->isFor(m_poSocket->PeerFingerprintGet()) )
-    } // for ( CContainerMapByCLUID::iterator it  = g_oContainerMapByCLUID.begin(); 
+    } // for ( CContainerMapByCLUID::iterator it  = g_oContainerMapByCLUID.begin(); ...
   return 0;
-  } // size_t CPartner::Recall( const string&  rsClientData, CSocket* poSocket )
+  } // size_t CPartner::Recall( ... )
 
 
 // Seems we were given a new message (or more) so we try to pack them into
@@ -325,4 +326,4 @@ size_t CPartner::BuildContainers( const string& rsClientData )
    }
    */
   return g_oContainerMapByCLUID.size();
-  } // size_t CPartner::BuildContainers( const string& rsClientData )
+  } // size_t CPartner::BuildContainers( ... )

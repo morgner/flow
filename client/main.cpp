@@ -84,16 +84,25 @@ int main( int argc, const char* argv[] )
   oEnvironment.OptionAppend( "trust-chain", required_argument, 0, 'a', "Trusted CA chain",                                   CA_CHAIN );
   oEnvironment.OptionAppend( "trust-path",  required_argument, 0, 't', "Path to trusted certificates",                       CA_PATH );
   // Calling control
-  oEnvironment.OptionAppend( "call",        optional_argument, 0, 'c', "Call message(s) from the server",                    "" );
-  oEnvironment.OptionAppend( "list",        no_argument,       0, 'l', "- list all (your) messages on the server",           "" );
-  oEnvironment.OptionAppend( "start-time",  required_argument, 0, 'b', "- beginning with time as `date +%Y-%m-%d-%H:%M:%S`", "" );
-  oEnvironment.OptionAppend( "start-glid",  required_argument, 0, 'g', "- beginning with ServerID 'n'",                      "" );
-  oEnvironment.OptionAppend( "next",        no_argument,       0, 'n', "- the next message",                                 "" );
-  oEnvironment.OptionAppend( "rest",        no_argument,       0, 'e', "- all new messages (start-time or start-glid)",      "" );
+  oEnvironment.OptionAppend( "list",        required_argument, 0, 'l', "List (all|part|mine|mine-part|senders|msg-id)",      "" );
+  oEnvironment.OptionAppend( "call",        required_argument, 0, 'c', "Receive (msg-id)",                                   "" );
+  oEnvironment.OptionAppend( "cbsr",        required_argument, 0, 'b', "Receive by sender (msg-id)",                         "" );
 
   // we need to read the command line parameters
   oEnvironment.CommandlineRead();
-  // being verbose?
+
+  // dump all recognized command line parameters including associated values
+  if ( g_nVerbosity > 1 )
+    {
+    for ( CEnvironment::iterator it  = oEnvironment.begin();
+                                 it != oEnvironment.end();
+                               ++it )
+      {
+      cout << " >>>>" << it->first << ":"  << it->second << endl;
+      }
+    } // if ( g_nVerbosity > 1 )
+
+  // the level of verbosity
   g_nVerbosity =  atoi( oEnvironment["verbose"].c_str() );
   if ( g_nVerbosity ) cout << "Verbosity: " << g_nVerbosity << endl;
 
@@ -181,10 +190,48 @@ int main( int argc, const char* argv[] )
     string sServerReply;
     try
       {
-      if ( oEnvironment.find("call") != oEnvironment.end() )
+      string sCommand;
+      if ( oEnvironment.count("list") > 0 ) sCommand = "list";
+      if ( oEnvironment.count("call") > 0 ) sCommand = "call";
+      if ( oEnvironment.count("cbsr") > 0 ) sCommand = "cbsr";
+      if ( sCommand.length() )
         {
-        // call them all (the server knows which ones)
-        oConnection << "c:all";
+        string sParameter = oEnvironment[sCommand];
+
+        string sCall;
+        sCall += sCommand[0];
+        sCall += ":";
+        if ( sParameter[0] == 'l' )
+          sCall += sParameter[0];
+        else // not list? we expect 'reCall operations'
+          if ( sCommand == "call" )
+            sCall += "m " + sParameter;
+          else // not 'call', we assume 'cbsr'
+            sCall += "s " + sParameter;
+/*
+        client command   | send to server   | receive from server
+        =================+==================+====================
+        --list all       | l:a              |  m:<message-id>
+                         |                  | [...]
+        --list part      | l:p <message-id> |  m:<message-id>
+                         |                  | [...]
+        --list mine      | l:m              |  m:<message-id>
+                         |                  | [...]
+        --list mine-part | l:y <message-id> |  m:<message-id>
+                         |                  | [...]
+        --list senders   | l:s              |  s:<sender-id>
+                         |                  | [...]
+        --call MsgID     | c:m <message-id> |  m:<message-id>
+                         |                  |  z:<size in bytes>
+                         |                  | [<body>]
+                         |                  | [n:<next message-id>]
+        --cbsr MsgID     | c:s <message-id> |  m:<message-id>
+                         |                  |  z:<size in bytes>
+                         |                  | [<body>]
+                         |                  | [n:<next message-id>]
+*/
+        if ( g_nVerbosity > 1 ) cout << "Command: " << sCall << "\n";
+        oConnection << sCall << "\n";
         }
       else
         {
