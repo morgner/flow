@@ -104,14 +104,18 @@ string CPartner::MakeMessageKey( CContainer* poContainer )
     // generate a first simple version of Message-ID
     timeval time;
     gettimeofday( &time, 0 );
-    string sTime = to_string( time.tv_sec );
+    char pcTime[24];
+    sprintf(pcTime, "%011lu", time.tv_sec);
+    string sTime = pcTime;
 
     string sSender    = poContainer->SenderGet();
     string sRecipient = poContainer->RecipientGet();
-    int    nSuffix    = 0;
-#define CONSTUCT_ID sSender + ':' + sRecipient + ':' + sTime + ':' + to_string(nSuffix)
+    size_t nSuffix    = 0;
+#define CONSTUCT_ID sTime + ':' + pcSuffix + ':' + sSender + ':' + sRecipient
+    char pcSuffix[16] = "00000000";
     for ( ; g_oContainerMapByCLUID.find( CONSTUCT_ID ) != g_oContainerMapByCLUID.end(); nSuffix++ )
       {
+      sprintf(pcSuffix, "%08lu", nSuffix);
       if ( g_bVerbose ) cout << " -found- " << CONSTUCT_ID << endl;
       }
     sMessageId = CONSTUCT_ID;
