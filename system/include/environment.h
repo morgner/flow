@@ -286,6 +286,7 @@ class CEnvironment : public std::map<std::string, std::string>
 #else // VERSION
             std::cout << m_sProgramName << std::endl;
 #endif // VERSION
+			std::cout << "Compile Time: " << __DATE__ << " at " << __TIME__ << std::endl;
             exit(0);
 /*
           case 'v':
