@@ -68,7 +68,7 @@ oEnvironment.OptionCallbackSet( OptionCallback );
 
 #include <getopt.h>
 #include <stdlib.h>
-
+#include <stdio.h>   // EOF
 
 class CEnvironment : public std::map<std::string, std::string>
   {

@@ -29,7 +29,7 @@
 
 
 #include "socketserver.h"
-
+#include <stdlib.h>          // atoi
 
 CSocketServer::CSocketServer( const std::string& rsHost,
                               const std::string& rsPort,

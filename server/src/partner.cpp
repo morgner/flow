@@ -35,6 +35,7 @@
 
 #include <sys/time.h> // gettimeofday()
 #include <errno.h>    // EAGAIN, ...
+#include <stdio.h>    // sprintf
 
 using namespace std;
 
