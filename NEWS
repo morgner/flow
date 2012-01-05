@@ -1,3 +1,17 @@
+== 'change in concept'
+
+[Jan. 06. 2012]
+
+After some painful analysing I decided to stop using SSL in 'flow'. 
+
+This is mainly because SSL is
+
+  1) is too complicated for normal users to deal with
+  2) does not add any good to security to 'flow'
+
+Therefore next I will think about SSH as alternative security base but
+need some time to realy think into such kind of solution.
+
 == 'flow' -- History of versions
 
 Copyright (C) 2010 Manfred Morgner manfred@morgner.com
