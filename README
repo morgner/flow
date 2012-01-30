@@ -1,5 +1,16 @@
 'flow' is a communication system
 
+=
+  Conceptual Change Necessary!
+ 'flow' will no longer use SSL/TLS/Certificates
+  because the whole certificate system is broken to death
+  there is no need to keep it alife after its death.
+
+  'flow' will receive some new security layer based on SSH as
+  discussed at cosin2011. this requires a kind of new concept
+  which is in development since the beginning of 2012.
+=
+
   Copyright (C) 2010 Manfred Morgner manfred@morgner.com
 
   'flow' is free software; you can redistribute it and/or modify it under the
