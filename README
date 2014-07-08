@@ -6,9 +6,15 @@
   because the whole certificate system is broken to death
   there is no need to keep it alife after its death.
 
-  'flow' will receive some new security layer based on SSH as
-  discussed at cosin2011. this requires a kind of new concept
-  which is in development since the beginning of 2012.
+  'flow' will receive some new security layer based on SSH and GnuPG as
+  discussed at cosin2011. this requires a kind of new concept which is
+  in development since the beginning of 2012.
+  
+  2014-07-08
+  There is some new work done for developing a replacement for the SSL
+  bound mechanics. A simple studie using GnuPG and Python is nearly
+  working. As soon as this reaches the level of  simple functionality
+  it will replace the former project to set up a new starting point.
 =
 
   Copyright (C) 2010 Manfred Morgner manfred@morgner.com
