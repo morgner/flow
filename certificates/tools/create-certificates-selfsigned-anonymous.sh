@@ -26,7 +26,7 @@ DES=nodes
 
 for NAME in $*
   do
-  openssl req -new -utf8 -newkey rsa:1024 -${DES} -subj "/CN=John Doe" -keyout ${NAME}.key -out ${NAME}.csr
+  openssl req -new -utf8 -newkey rsa:2048 -${DES} -subj "/CN=John Doe" -keyout ${NAME}.key -out ${NAME}.csr
   openssl x509 -req -days 7300 -in ${NAME}.csr -signkey ${NAME}.key -out ${NAME}.crt
   openssl rsa -pubout -in ${NAME}.key -out ${NAME}.pub
   done
