@@ -6,11 +6,6 @@
 #  manfred@morgner.com
 #
 #  This script creates a bunch of certifictes to work with for 'flow'
-#  ---
-#  This program is free software; you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or
-#  (at your option) any later version.
 # 
 #  The intermediate CAs require a file with the following content:
 # 
