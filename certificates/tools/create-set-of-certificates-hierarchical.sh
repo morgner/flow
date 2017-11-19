@@ -29,6 +29,7 @@
 #  openssl s_client -connect localhost:30000 \
 #                   -cert client/username.crt -key client/username.key -CAfile client/client-CA-chain.pem -tls1 -verify 3
 
+DES=nodes
 
 CART="cert.flow.info"
 SVCA="flow-server-CA"
@@ -59,6 +60,7 @@ SERVER_CA_CHAIN="${DIR_SERVER}/server-ca-chain.pem"
 CLIENT_CA_CHAIN="${DIR_CLIENT}/client-ca-chain.pem"
 
 
+#######################################################################
 #
 # Root CA
 #
@@ -72,11 +74,21 @@ COUNTRY="${SCNTRY}"
 STATE="Bern"
 LOCATION="City of Bern"
 openssl req -new -utf8 -x509 -days 7302 \
-            -newkey rsa:4096 -nodes \
+            -newkey rsa:4096 -${DES} \
             -subj "/CN=${NAME}/O=${ORGANISATION}/C=${COUNTRY}/ST=${STATE}/L=${LOCATION}" \
             -keyout "${DIR_CA}/${NAME}.key" -out "${DIR_CA}/${NAME}.crt"
 echo "CA Root Certificate is: ${DIR_CA}/${NAME}.crt" | tee -a ${HISTORY}
 
+
+# version 3 extensions for IM-CA
+V3_CA_FILENAME="${WORKDIR}/v3_ca.conf"
+echo "[ v3_ca ]
+subjectKeyIdentifier   = hash
+authorityKeyIdentifier = keyid:always,issuer:always
+basicConstraints       = CA:true
+" > "${V3_CA_FILENAME}"
+
+#######################################################################
 #
 # Server CA
 #
@@ -86,19 +98,20 @@ NAME="${SVCA}"
 CN="Server CA"
 ORGANISATION="${SORGAN}"
 openssl req -new -utf8 -days 7301 \
-            -newkey rsa:4096 -nodes \
+            -newkey rsa:4096 -${DES} \
             -subj "/CN=${CN}/O=${ORGANISATION}/C=${COUNTRY}/ST=${STATE}/L=${LOCATION}" \
             -keyout "${DIR_CA}/${NAME}.key" -out "${DIR_CA}/${NAME}".csr
 SERIAL="100"
 CA=${CART}
-openssl x509 -req -days 7300 \
-             -extfile "${WORKDIR}/v3_ca.conf" -extensions v3_ca \
+openssl x509 -req -days 7301 \
+             -extfile "${V3_CA_FILENAME}" -extensions v3_ca \
              -in "${DIR_CA}/${NAME}".csr \
              -CA "${DIR_CA}/${CA}.crt" -CAkey "${DIR_CA}/${CA}.key" -set_serial ${SERIAL} \
              -out "${DIR_CA}/${NAME}.crt"
 echo "SERVER:${SERIAL}:CA Certificate is: ${DIR_CA}/${NAME}.crt" | tee -a ${HISTORY}
 
 
+#######################################################################
 #
 #  Client CA
 #
@@ -109,19 +122,23 @@ CN="Client CA"
 ORGANISATION="${CORGAN}"
 COUNTRY="${CCNTRY}"
 openssl req -new -utf8 -days 7301 \
-            -newkey rsa:4096 -nodes \
+            -newkey rsa:4096 -${DES} \
             -subj "/CN=${CN}/O=${ORGANISATION}/C=${COUNTRY}/ST=${STATE}/L=${LOCATION}" \
             -keyout "${DIR_CA}/${NAME}.key" -out "${DIR_CA}/${NAME}.csr"
 SERIAL="200"
 CA=${CART}
-openssl x509 -req -days 7300 \
-             -extfile "${WORKDIR}/v3_ca.conf" -extensions v3_ca \
+openssl x509 -req -days 7301 \
+             -extfile "${V3_CA_FILENAME}" -extensions v3_ca \
              -in "${DIR_CA}/${NAME}.csr" \
              -CA "${DIR_CA}/${CA}.crt" -CAkey "${DIR_CA}/${CA}.key" -set_serial ${SERIAL} \
              -out "${DIR_CA}/${NAME}.crt"
 echo "CLIENT:${SERIAL}:Client CA Certificate is: ${DIR_CA}/${NAME}.crt" | tee -a ${HISTORY}
 
+# version 3 extensions for IM-CA
+rm "${V3_CA_FILENAME}"
 
+
+#######################################################################
 #
 # Compose the CA Chains
 #
@@ -142,6 +159,7 @@ for i in ${CART}.crt ${CLCA}.crt
 echo "Client CA Chain is: ${CLIENT_CA_CHAIN}" | tee -a ${HISTORY}
 
 
+#######################################################################
 #
 echo "Create Server Certificates for servers: ${SERVERS}"
 #
@@ -157,7 +175,7 @@ for NAME in ${SERVERS}
 # STATE="Bern"
 # LOCATION="City of Bern"
   openssl req  -new -utf8 -days 7300 \
-               -newkey rsa:4096 -nodes \
+               -newkey rsa:4096 -${DES} \
                -subj "/CN=${NAME}/O=${ORGANISATION}/C=${COUNTRY}/ST=${STATE}/L=${LOCATION}" \
                -keyout "${NAME}.key" -out ${NAME}.csr
   CA="${DIR_CA}/${SVCA}"
@@ -168,6 +186,7 @@ for NAME in ${SERVERS}
 cd "${WORKDIR}"
 
 
+#######################################################################
 #
 echo "Create Client Certificates for clients: ${CLIENTS}"
 #
@@ -183,7 +202,7 @@ for NAME in ${CLIENTS}
 # STATE="Bern"
 # LOCATION="City of Bern"
   openssl req -new -utf8 -days 7300 \
-              -newkey rsa:4096 -nodes \
+              -newkey rsa:4096 -${DES} \
               -subj "/CN=${NAME}/O=${ORGANISATION}/C=${COUNTRY}/ST=${STATE}/L=${LOCATION}" \
               -keyout "${NAME}.key" -out "${NAME}.csr"
   CA="${DIR_CA}/${CLCA}"

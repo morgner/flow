@@ -41,7 +41,6 @@ CURVE=secp384r1
 #CURVE=secp521r1
 #CURVE=prime256v1
 
-DES=nodes
 
 CART="cert.flow.info"
 SVCA="server-CA"
@@ -96,7 +95,6 @@ openssl req     -new -utf8 -sha256 \
 echo "CA Root Certificate is: ${DIR_CA}/${NAME}.crt" | tee -a ${HISTORY}
 
 
-
 # version 3 extensions for IM-CA
 V3_CA_FILENAME="${WORKDIR}/v3_ca.conf"
 echo "[ v3_ca ]
@@ -104,7 +102,6 @@ subjectKeyIdentifier   = hash
 authorityKeyIdentifier = keyid:always,issuer:always
 basicConstraints       = CA:true
 " > "${V3_CA_FILENAME}"
-
 
 #######################################################################
 #
@@ -124,7 +121,7 @@ openssl req -new -utf8 -sha256 \
 SERIAL="100"
 CA=${CART}
 openssl x509 -req -days 7301 \
-             -extfile "${WORKDIR}/v3_ca.conf" -extensions v3_ca \
+             -extfile "${V3_CA_FILENAME}" -extensions v3_ca \
              -in "${DIR_CA}/${NAME}.csr" \
              -CA "${DIR_CA}/${CA}.crt" -CAkey "${DIR_CA}/${CA}.key" -set_serial "${SERIAL}" \
              -out "${DIR_CA}/${NAME}.crt"
@@ -150,7 +147,7 @@ openssl req -new -utf8 -sha256 \
 SERIAL="200"
 CA=${CART}
 openssl x509 -req -days 7301 \
-             -extfile "${WORKDIR}/v3_ca.conf" -extensions v3_ca \
+             -extfile "${V3_CA_FILENAME}" -extensions v3_ca \
              -in "${DIR_CA}/${NAME}.csr" \
              -CA "${DIR_CA}/${CA}.crt" -CAkey "${DIR_CA}/${CA}.key" -set_serial "${SERIAL}" \
              -out "${DIR_CA}/${NAME}.crt"
@@ -158,6 +155,27 @@ echo "CLIENT:${SERIAL}:Client CA Certificate is: ${DIR_CA}/${NAME}.crt" | tee -a
 
 # version 3 extensions for IM-CA
 rm "${V3_CA_FILENAME}"
+
+
+#######################################################################
+#
+# Compose the CA Chains
+#
+echo "Compose CA Chains"
+
+rm -f ${SERVER_CA_CHAIN}
+for i in ${CART}.crt ${SVCA}.crt
+  do
+  openssl x509 -in "${DIR_CA}/$i" -text >> "${SERVER_CA_CHAIN}"
+  done
+echo "Server CA Chain is: ${SERVER_CA_CHAIN}" | tee -a ${HISTORY}
+
+rm -f ${CLIENT_CA_CHAIN}
+for i in ${CART}.crt ${CLCA}.crt
+  do
+  openssl x509 -in "${DIR_CA}/$i" -text >> "${CLIENT_CA_CHAIN}"
+  done
+echo "Client CA Chain is: ${CLIENT_CA_CHAIN}" | tee -a ${HISTORY}
 
 
 #######################################################################
@@ -223,21 +241,4 @@ for NAME in ${CLIENTS}
 # openssl verify -CAfile ${CLIENT_CA_CHAIN} ${NAME}.crt
   done
 cd "${WORKDIR}"
-
-
-
-
-
-
-
-
-# openssl req -new -utf8 -newkey rsa:2048 -${DES} -subj "${SUBJECT}" -keyout ${NAME}.key -out ${NAME}.csr
-# openssl x509 -req -days 7300 -in ${NAME}.csr -signkey ${NAME}.key -out ${NAME}.crt
-# openssl rsa -pubout -in ${NAME}.key -out ${NAME}.pub
-
-
-#  openssl ecparam -out ${NAME}.key -name ${CURVE} -genkey
-#  openssl req -new -utf8 -sha256 -key ${NAME}.key -${DES} -out ${NAME}.csr -subj "${SUBJECT}"
-#  openssl x509 -req -days 7300 -in ${NAME}.csr -signkey ${NAME}.key -out ${NAME}.crt
-#  openssl ec -pubout -in ${NAME}.key -out ${NAME}.pub
 
