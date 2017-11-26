@@ -33,12 +33,14 @@ for C in `egrep "^SERVER:" CERTIFICATES | cut -d: -f2`; do SERIAL=${C}; done
 cd "${DIR_SERVER}"
 for NAME in $*
   do
-  SERIAL=$((SERIAL+1))
-
-  CA="${DIR_CA}/${SVCA}"
-  openssl x509 -req -days 6840 -in "${NAME}.csr" -CA "${CA}.crt" -CAkey "${CA}.key" -set_serial ${SERIAL} -out "${NAME}.crt"
-  echo "SERVER:${SERIAL}:Certificate for ${NAME} is: `pwd`/${NAME}.crt" | tee -a ${HISTORY}
-#  openssl rsa -pubout -in "${NAME}.key" -out "${NAME}.pub"
-  openssl verify -CAfile ${SERVER_CA_CHAIN} ${NAME}.crt
+  if [[ -f "${NAME}" && ${NAME##*.} == "csr" ]]
+    then
+    NAME=${NAME%.*}
+    SERIAL=$((SERIAL+1))
+    CA="${DIR_CA}/${SVCA}"
+    openssl x509 -req -days 6840 -in "${NAME}.csr" -CA "${CA}.crt" -CAkey "${CA}.key" -set_serial ${SERIAL} -out "${NAME}.crt"
+    echo "SERVER:${SERIAL}:Certificate for ${NAME##*/} is: ${NAME}.crt" | tee -a ${HISTORY}
+    fi 
   done
 cd "${WORKDIR}"
+
