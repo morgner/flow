@@ -9,12 +9,19 @@
 # 
 #  The intermediate CAs require a file with the following content:
 # 
-#     [ v3_ca ]
+#     [ v3_ext ]
 #     subjectKeyIdentifier   = hash
 #     authorityKeyIdentifier = keyid:always,issuer:always
 #     basicConstraints       = CA:true
-# 
-#  named 'v3_ca.conf' in the execution directory
+#     [alt_names]
+#     DNS.1                  = ${CN}
+#
+#  The server certificates needat least such file:
+#
+#     [alt_names]
+#     DNS.1 = ${CN}
+#
+#  named 'ssl.conf' in the execution directory
 #  ---
 #
 #  Test a certificate
@@ -46,11 +53,11 @@ CART="cert.flow.info"
 SVCA="server-CA"
 CLCA="client-CA"
 
-SERVERS="`hostname` localhost"
+SERVERS="`hostname` `hostname`.localhost.localdomain localhost"
 SORGAN="'flow' Working Group (fwg)"
 SCNTRY="CH"
 
-CLIENTS="username recipient ${LOGNAME}"
+CLIENTS="admin agent user recipient sender ${LOGNAME}"
 CORGAN="'flow' User Group (fug)"
 CCNTRY="CH"
 
@@ -96,12 +103,12 @@ echo "CA Root Certificate is: ${DIR_CA}/${NAME}.crt" | tee -a ${HISTORY}
 
 
 # version 3 extensions for IM-CA
-V3_CA_FILENAME="${WORKDIR}/v3_ca.conf"
-echo "[ v3_ca ]
+SSL_CONFIG="${WORKDIR}/ssl.conf"
+echo "[v3_ext]
 subjectKeyIdentifier   = hash
 authorityKeyIdentifier = keyid:always,issuer:always
 basicConstraints       = CA:true
-" > "${V3_CA_FILENAME}"
+" > "${SSL_CONFIG}"
 
 #######################################################################
 #
@@ -118,10 +125,10 @@ openssl req -new -utf8 -sha256 \
             -subj "/CN=${CN}/O=${ORGANISATION}/C=${COUNTRY}/ST=${STATE}/L=${LOCATION}" \
             -key "${DIR_CA}/${NAME}.key" \
             -out "${DIR_CA}/${NAME}.csr"
-SERIAL="100"
+SERIAL="`od -An -N2 -d < /dev/urandom | sed -e 's/\s//'`"
 CA=${CART}
 openssl x509 -req -days 7301 \
-             -extfile "${V3_CA_FILENAME}" -extensions v3_ca \
+             -extfile "${SSL_CONFIG}" -extensions v3_ext \
              -in "${DIR_CA}/${NAME}.csr" \
              -CA "${DIR_CA}/${CA}.crt" -CAkey "${DIR_CA}/${CA}.key" -set_serial "${SERIAL}" \
              -out "${DIR_CA}/${NAME}.crt"
@@ -144,38 +151,14 @@ openssl req -new -utf8 -sha256 \
             -subj "/CN=${CN}/O=${ORGANISATION}/C=${COUNTRY}/ST=${STATE}/L=${LOCATION}" \
             -key "${DIR_CA}/${NAME}.key" \
             -out "${DIR_CA}/${NAME}.csr"
-SERIAL="200"
+SERIAL="`od -An -N2 -d < /dev/urandom | sed -e 's/\s//'`"
 CA=${CART}
 openssl x509 -req -days 7301 \
-             -extfile "${V3_CA_FILENAME}" -extensions v3_ca \
+             -extfile "${SSL_CONFIG}" -extensions v3_ext \
              -in "${DIR_CA}/${NAME}.csr" \
              -CA "${DIR_CA}/${CA}.crt" -CAkey "${DIR_CA}/${CA}.key" -set_serial "${SERIAL}" \
              -out "${DIR_CA}/${NAME}.crt"
 echo "CLIENT:${SERIAL}:Client CA Certificate is: ${DIR_CA}/${NAME}.crt" | tee -a ${HISTORY}
-
-# version 3 extensions for IM-CA
-rm "${V3_CA_FILENAME}"
-
-
-#######################################################################
-#
-# Compose the CA Chains
-#
-echo "Compose CA Chains"
-
-rm -f ${SERVER_CA_CHAIN}
-for i in ${CART}.crt ${SVCA}.crt
-  do
-  openssl x509 -in "${DIR_CA}/$i" -text >> "${SERVER_CA_CHAIN}"
-  done
-echo "Server CA Chain is: ${SERVER_CA_CHAIN}" | tee -a ${HISTORY}
-
-rm -f ${CLIENT_CA_CHAIN}
-for i in ${CART}.crt ${CLCA}.crt
-  do
-  openssl x509 -in "${DIR_CA}/$i" -text >> "${CLIENT_CA_CHAIN}"
-  done
-echo "Client CA Chain is: ${CLIENT_CA_CHAIN}" | tee -a ${HISTORY}
 
 
 #######################################################################
@@ -189,6 +172,15 @@ for NAME in ${SERVERS}
   do
   SERIAL=$((SERIAL+1))
 
+echo "[v3_ext]
+subjectKeyIdentifier   = hash
+authorityKeyIdentifier = keyid:always,issuer:always
+basicConstraints       = CA:false
+subjectAltName         = @alt_names
+[alt_names]
+DNS.1                  = ${NAME}
+" > "${SSL_CONFIG}"
+
   ORGANISATION="${SORGAN}"
   COUNTRY="${SCNTRY}"
 # STATE="Bern"
@@ -198,9 +190,10 @@ for NAME in ${SERVERS}
               -days 7300 \
               -subj "/CN=${NAME}/O=${ORGANISATION}/C=${COUNTRY}/ST=${STATE}/L=${LOCATION}" \
               -key "${NAME}.key" \
-              -out "${NAME}.csr"
+              -out "${NAME}.csr" 
   CA="${DIR_CA}/${SVCA}"
   openssl x509 -req -days 7300 \
+	       -extfile "${SSL_CONFIG}" -extensions v3_ext \
                -in "${NAME}.csr" \
                -CA "${CA}.crt" -CAkey "${CA}.key" -set_serial "${SERIAL}" \
                -out "${NAME}.crt"
@@ -240,5 +233,8 @@ for NAME in ${CLIENTS}
 # openssl rsa -pubout -in "${NAME}.key" -out "${NAME}.pub"
 # openssl verify -CAfile ${CLIENT_CA_CHAIN} ${NAME}.crt
   done
+
+rm "${SSL_CONFIG}"
+
 cd "${WORKDIR}"
 
