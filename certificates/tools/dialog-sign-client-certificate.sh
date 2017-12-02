@@ -54,7 +54,7 @@ fi
 
 if [[ "${NAME}" > "" ]]
 then
-#	echo "NAME=${NAME}"
+	echo "CSR=${NAME}"
 else
 #	this point can't be reached anymore?
 	error "No file CSR given"
