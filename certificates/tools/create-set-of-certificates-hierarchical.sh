@@ -164,7 +164,7 @@ echo "Client CA Chain is: ${CLIENT_CA_CHAIN}" | tee -a ${HISTORY}
 echo "Create Server Certificates for servers: ${SERVERS}"
 #
 
-for C in `egrep "^SERVER:" CERTIFICATES | cut -d: -f2`; do SERIAL=${C}; done
+for C in `egrep "^SERVER:" ${HISTORY} | cut -d: -f2`; do SERIAL=${C}; done
 cd "${DIR_SERVER}"
 for NAME in ${SERVERS}
   do
@@ -191,7 +191,7 @@ cd "${WORKDIR}"
 echo "Create Client Certificates for clients: ${CLIENTS}"
 #
 
-for C in `egrep "^CLIENT:" CERTIFICATES | cut -d: -f2`; do SERIAL=${C}; done
+for C in `egrep "^CLIENT:" ${HISTORY} | cut -d: -f2`; do SERIAL=${C}; done
 cd ${DIR_CLIENT}
 for NAME in ${CLIENTS}
   do

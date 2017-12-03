@@ -13,7 +13,14 @@
 
 for FNAME in $*
   do
-  openssl x509 -text -noout -in ${FNAME}
+  CMD="openssl x509 -text -noout -in ${FNAME}"
+  if [[ -z `which dialog` ]]
+    then
+    ${CMD}
+    else
+    dialog --title "${FNAME}" --msgbox "`${CMD}`" 0 0
+    clear
+    fi
   done
 
 if [ $# -lt 1 ]

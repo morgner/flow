@@ -125,14 +125,14 @@ openssl req -new -utf8 -sha256 \
             -subj "/CN=${CN}/O=${ORGANISATION}/C=${COUNTRY}/ST=${STATE}/L=${LOCATION}" \
             -key "${DIR_CA}/${NAME}.key" \
             -out "${DIR_CA}/${NAME}.csr"
-SERIAL="`od -An -N2 -d < /dev/urandom | sed -e 's/\s//'`"
+SERIAL="`od -An -N2 -d < /dev/urandom | sed -e 's/\s//g'`"
 CA=${CART}
 openssl x509 -req -days 7301 \
              -extfile "${SSL_CONFIG}" -extensions v3_ext \
              -in "${DIR_CA}/${NAME}.csr" \
              -CA "${DIR_CA}/${CA}.crt" -CAkey "${DIR_CA}/${CA}.key" -set_serial "${SERIAL}" \
              -out "${DIR_CA}/${NAME}.crt"
-echo "SERVER:${SERIAL}:CA Certificate is: ${DIR_CA}/${NAME}.crt" | tee -a ${HISTORY}
+echo "SERVER:${SERIAL}:Server CA Certificate is: ${DIR_CA}/${NAME}.crt" | tee -a ${HISTORY}
 
 
 #######################################################################
@@ -151,7 +151,7 @@ openssl req -new -utf8 -sha256 \
             -subj "/CN=${CN}/O=${ORGANISATION}/C=${COUNTRY}/ST=${STATE}/L=${LOCATION}" \
             -key "${DIR_CA}/${NAME}.key" \
             -out "${DIR_CA}/${NAME}.csr"
-SERIAL="`od -An -N2 -d < /dev/urandom | sed -e 's/\s//'`"
+SERIAL="`od -An -N2 -d < /dev/urandom | sed -e 's/\s//g'`"
 CA=${CART}
 openssl x509 -req -days 7301 \
              -extfile "${SSL_CONFIG}" -extensions v3_ext \
@@ -166,7 +166,7 @@ echo "CLIENT:${SERIAL}:Client CA Certificate is: ${DIR_CA}/${NAME}.crt" | tee -a
 echo "Create Server Certificates for servers: ${SERVERS}"
 #
 
-for C in `egrep "^SERVER:" CERTIFICATES | cut -d: -f2`; do SERIAL=${C}; done
+for C in `egrep "^SERVER:" ${HISTORY} | cut -d: -f2`; do SERIAL=${C}; done
 cd "${DIR_SERVER}"
 for NAME in ${SERVERS}
   do
@@ -192,12 +192,15 @@ DNS.1                  = ${NAME}
               -key "${NAME}.key" \
               -out "${NAME}.csr" 
   CA="${DIR_CA}/${SVCA}"
-  openssl x509 -req -days 7300 \
-	       -extfile "${SSL_CONFIG}" -extensions v3_ext \
+  CATO=`openssl x509 -noout -dates -in "${CA}.crt" | tail -1 | sed -e "s/^.*=\(.*\) ..:..:.. \(....\).*$/\1 \2/"`
+  DAYS=`echo "(\`date -d "${CATO}" +%s\` - \`date +%s\`) / (24*3600) -1" | bc`
+  openssl x509 -req \
+               -days ${DAYS} \
+               -extfile "${SSL_CONFIG}" -extensions v3_ext \
                -in "${NAME}.csr" \
                -CA "${CA}.crt" -CAkey "${CA}.key" -set_serial "${SERIAL}" \
                -out "${NAME}.crt"
-  echo "SERVER:${SERIAL}:Certificate for ${NAME} is: `pwd`/${NAME}.crt" | tee -a ${HISTORY}
+  echo "SERVER:${SERIAL}:Certificate for ${NAME} is: `pwd`/${NAME}.crt (${DAYS} days)" | tee -a ${HISTORY}
 # openssl verify -CAfile ${SERVER_CA_CHAIN} ${NAME}.crt
   done
 cd "${WORKDIR}"
@@ -208,7 +211,7 @@ cd "${WORKDIR}"
 echo "Create Client Certificates for clients: ${CLIENTS}"
 #
 
-for C in `egrep "^CLIENT:" CERTIFICATES | cut -d: -f2`; do SERIAL=${C}; done
+for C in `egrep "^CLIENT:" ${HISTORY} | cut -d: -f2`; do SERIAL=${C}; done
 cd ${DIR_CLIENT}
 for NAME in ${CLIENTS}
   do
@@ -225,13 +228,14 @@ for NAME in ${CLIENTS}
               -key "${NAME}.key" \
               -out "${NAME}.csr"
   CA="${DIR_CA}/${CLCA}"
-  openssl x509 -req -days 7300 \
+  CATO=`openssl x509 -noout -dates -in "${CA}.crt" | tail -1 | sed -e "s/^.*=\(.*\) ..:..:.. \(....\).*$/\1 \2/"`
+  DAYS=`echo "(\`date -d "${CATO}" +%s\` - \`date +%s\`) / (24*3600) -1" | bc`
+  openssl x509 -req \
+               -days ${DAYS} \
                -in "${NAME}.csr" \
                -CA "${CA}.crt" -CAkey "${CA}.key" -set_serial "${SERIAL}" \
                -out "${NAME}.crt"
-  echo "CLIENT:${SERIAL}:Certificate for ${NAME} is: `pwd`/${NAME}.crt" | tee -a ${HISTORY}
-# openssl rsa -pubout -in "${NAME}.key" -out "${NAME}.pub"
-# openssl verify -CAfile ${CLIENT_CA_CHAIN} ${NAME}.crt
+  echo "CLIENT:${SERIAL}:Certificate for ${NAME} is: `pwd`/${NAME}.crt (${DAYS} days)" | tee -a ${HISTORY}
   done
 
 rm "${SSL_CONFIG}"

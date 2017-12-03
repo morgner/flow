@@ -11,7 +11,7 @@
 DES=nodes
 
 CART="cert.flow.info"
-CLCA="flow-client-CA"
+CLCA="client-CA"
 
 CORGAN="'flow' User Group (fug)"
 CCNTRY="CH"
@@ -29,7 +29,7 @@ DIR_CLIENT="${WORKDIR}/client"
 echo "Create Client Certificates for clients: ${CLIENTS}"
 #
 
-for C in `egrep "^CLIENT:" CERTIFICATES | cut -d: -f2`; do SERIAL=${C}; done
+for C in `egrep "^CLIENT:" ${HISTORY} | cut -d: -f2`; do SERIAL=${C}; done
 cd "${DIR_CLIENT}"
 for NAME in $*
   do
