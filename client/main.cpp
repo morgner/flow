@@ -149,7 +149,7 @@ int main( int argc, const char* argv[] )
       *poPulex << pcBuffer;
       } // while ( !feof(stdin) )
     if ( g_nVerbosity > 1 ) cout << "===pipe-end===" << endl << endl;
-    delete pcBuffer;
+    delete[] pcBuffer;
     #undef CBS
     } // if ( !feof(stdin) )
 
@@ -209,12 +209,16 @@ int main( int argc, const char* argv[] )
           if ( sParameter == "senders"   ) sCall += "s";
           }
         else // not list? we expect 'reCall operations'
-          if ( sCommand == "cbsr" )        sCall += "s " + sParameter;
+	  {
+	  if ( sCommand == "cbsr" )        sCall += "s " + sParameter;
           if ( sCommand == "call" )
+            {
             if ( sParameter == "all" )
-              sCall += "a";
+	      { sCall += "a"; }
             else
-              sCall += "m " + sParameter;
+	      { sCall += "m " + sParameter; }
+	    }
+	  }
 /*
         client command      | send to server   | receive from server
         ====================+==================+====================
@@ -245,12 +249,10 @@ int main( int argc, const char* argv[] )
       else
         {
         // iterate over all Pulexes in our Domain and let them jump
-        for ( CDomain::iterator it  = oDomain.begin();
-                                it != oDomain.end();
-                              ++it )
-          {
-          oConnection << **it ;
-          if ( g_nVerbosity > 1 ) cout << **it ;
+        for (auto const & it:oDomain)
+        {
+          oConnection << *it ;
+          if ( g_nVerbosity > 1 ) cout << *it ;
           }
         }
       oConnection << ".\r";

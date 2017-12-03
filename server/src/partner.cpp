@@ -6,28 +6,6 @@
  email                 : manfred@morgner.com
  ***************************************************************************/
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *                                                                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place Suite 330,                                            *
- *   Boston, MA  02111-1307, USA.                                          *
- *                                                                         *
- ***************************************************************************/
-
-
 #include "partner.h"
 #include "socketexception.h"
 
@@ -261,23 +239,21 @@ size_t CPartner::Recall( const string&  rsClientData,
                             |                  | [<body>]
                             |                  | [n:<next message-id>]
 */
-  for ( CMapString2String::iterator itQuery  = moQuery.begin();
-                                    itQuery != moQuery.end();
-                                  ++itQuery)
+  for ( auto const & itQuery:moQuery )
     {
     if ( g_bVerbose)
       {
-      cout << " * " << itQuery->first;
-      if ( itQuery->second.length() > 0 ) cout << " with " << itQuery->second;
+      cout << " * " << itQuery.first;
+      if ( itQuery.second.length() > 0 ) cout << " with " << itQuery.second;
       cout << "\n";
       }
 
     CContainerMapByCLUID::iterator it;
 
-    switch ( itQuery->first[0] )
+    switch ( itQuery.first[0] )
       {
       case 'l': // list operations
-        switch ( itQuery->first[2] )
+        switch ( itQuery.first[2] )
           {
           case 'a': // l:a list all
             if ( g_bVerbose) cout << " * list all \n";
@@ -295,8 +271,8 @@ size_t CPartner::Recall( const string&  rsClientData,
               1) get the recipient from the TLS-session
               2) resend all message ids for this sender starting with the given message-id
  */
-            if ( g_bVerbose) cout << " * list partial, beginning with '" << itQuery->second << "'\n";
-            for ( it = g_oContainerMapByCLUID.find(itQuery->second); it != g_oContainerMapByCLUID.end(); ++it )
+            if ( g_bVerbose) cout << " * list partial, beginning with '" << itQuery.second << "'\n";
+            for ( it = g_oContainerMapByCLUID.find(itQuery.second); it != g_oContainerMapByCLUID.end(); ++it )
               {
               *poSocket << it->first << "\n";
               }
@@ -309,7 +285,7 @@ size_t CPartner::Recall( const string&  rsClientData,
  */
             break;
           case 'y': // l:y list mine part, beginning with message-id
-            if ( g_bVerbose) cout << " * list mine partial, beginning with '" << itQuery->second << "'\n";
+            if ( g_bVerbose) cout << " * list mine partial, beginning with '" << itQuery.second << "'\n";
 /*
               1) get the recipient from the TLS-session
               2) resend all message ids from this sender starting at the given message-id
@@ -327,9 +303,9 @@ size_t CPartner::Recall( const string&  rsClientData,
               {
               omSenders[ it->second->SenderGet() ] = true;
               }
-            for ( CMapString2Bool::iterator itSenders = omSenders.begin(); itSenders != omSenders.end(); ++itSenders )
+            for ( auto const & itSenders:omSenders )
               {
-              *poSocket << itSenders->first << "\n";
+              *poSocket << itSenders.first << "\n";
               }
             break;
           } // switch ( itQuery->first[2] )
@@ -338,7 +314,7 @@ size_t CPartner::Recall( const string&  rsClientData,
       case 'c': // call operations
         CContainer*          poc;
         CContainer::iterator itc;
-        switch ( itQuery->first[2] )
+        switch ( itQuery.first[2] )
           {
           case 'a': // c:a = call all
             if ( g_bVerbose) cout << " * recall all for me\n";
@@ -361,13 +337,13 @@ size_t CPartner::Recall( const string&  rsClientData,
             break; // case 'a': // c:a = call all
 
           case 'm': // c:m = call message
-            if ( g_bVerbose) cout << " * recall message '" << itQuery->second << "'\n";
+            if ( g_bVerbose) cout << " * recall message '" << itQuery.second << "'\n";
 /*
               1) get the recipient from the TLS-session
               2) resend the queried message if its for the recipient
               3) resend the next message-id from the same sender (if any)
  */
-            it = g_oContainerMapByCLUID.find( itQuery->second );
+            it = g_oContainerMapByCLUID.find( itQuery.second );
             if ( it != g_oContainerMapByCLUID.end() )
               {
               poc = it->second;
@@ -389,20 +365,20 @@ size_t CPartner::Recall( const string&  rsClientData,
             break; // case 'm': // c:m = call message
 
           case 's': // c:s = call message by sender
-            if ( g_bVerbose) cout << " * recall message '" << itQuery->second << "' by sender\n";
+            if ( g_bVerbose) cout << " * recall message '" << itQuery.second << "' by sender\n";
 /*
               1) get the sender from the message-id
               2) resend the queried message
               3) resend the next message-id from the same sender (if any)
  */
-            string sMsgId = itQuery->second;
+            string sMsgId = itQuery.second;
             size_t nCut   = sMsgId.find( ":" );
             if ( nCut != string::npos )
               {
               string sSender = sMsgId.substr(0, nCut);
               if ( g_bVerbose) cout << " * from sender '" << sSender << "'\n";
 
-              for ( it = g_oContainerMapByCLUID.find( itQuery->second ); it != g_oContainerMapByCLUID.end(); ++it )
+              for ( it = g_oContainerMapByCLUID.find( itQuery.second ); it != g_oContainerMapByCLUID.end(); ++it )
                 {
                 poc = it->second;
                 if ( poc->SenderGet() != sSender ) continue;
@@ -460,11 +436,9 @@ size_t CPartner::BuildContainers( const string& rsClientData )
     } // for ( string::size_type p1=0, p2=0; ...
 
   pthread_mutex_lock( &m_tMutex );
-  for ( CContainerList::iterator it  = oContainerList.begin();
-                                 it != oContainerList.end();
-                               ++it)
+  for ( auto const & it:oContainerList )
     {
-    string sKey = MakeMessageKey(*it);
+    string sKey = MakeMessageKey(it);
     CContainerMapByCLUID::iterator itf = g_oContainerMapByCLUID.find( sKey );
     if ( itf == g_oContainerMapByCLUID.end() )
       {
@@ -478,7 +452,7 @@ size_t CPartner::BuildContainers( const string& rsClientData )
       itf->second = 0;
       g_oContainerMapByCLUID.erase( itf );
       }
-    g_oContainerMapByCLUID[ sKey ] = *it;
+    g_oContainerMapByCLUID[ sKey ] = it;
 /*
     if ( g_bVerbose )
       {

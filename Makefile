@@ -16,7 +16,7 @@ CLIENT_INC = -I$(CLIENT_PATH)/include -I$(SOCKET_PATH)/include
 SYSTEM_INC = -I$(SYSTEM_PATH)/include -I$(SOCKET_PATH)/include
 CNTAIN_INC = -I$(CNTAIN_PATH)/include -I$(SOCKET_PATH)/include
 
-CFLAGS = -c -mtune=native -Wall -pedantic
+CFLAGS = -c -mtune=native -Wall -pedantic -std=c++14
 
 LDFLAGS  = -L.
 
