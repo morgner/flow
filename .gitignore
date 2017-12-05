@@ -16,3 +16,8 @@ flowserver
 .hgignore
 .DS_Store
 
+certificates/tools/CA/
+certificates/tools/CERTIFICATES
+certificates/tools/client/
+certificates/tools/server/
+
