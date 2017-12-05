@@ -50,12 +50,13 @@ oEnvironment.OptionCallbackSet( OptionCallback );
 #include <stdlib.h>
 #include <stdio.h>   // EOF
 
+/*
 using namespace std::string_literals;
 
 typedef std::tuple<int, std::string, std::string> TOption;
 TOption t(3, "abc"s, "ccc"s);
 
-/*
+**************
 int         o;
 std::string a;
 std::string c;
