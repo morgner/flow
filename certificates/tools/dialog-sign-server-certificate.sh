@@ -8,14 +8,22 @@
 #  This script signs server certificates
 #
 
-if [ -z ${DISPLAY} ]
+DIALOG=""
+
+if [ `which dialog` ]; then DIALOG=dialog; TERM=xterm; fi
+
+if [ ! -z ${DISPLAY} ] && [ `which Xdialog` ]
 then
-        DIALOG=dialog
-else
 	export XDIALOG_HIGH_DIALOG_COMPAT=true
 	export XDIALOG_FORCE_AUTOSIZE=true
 	DIALOG="Xdialog --fixed-font --left --cr-wrap --no-buttons "
 #	DIALOG=dialog
+fi
+
+if [ "${DIALOG}" == "" ]
+then
+	echo "ERROR: No Dialog"
+	exit
 fi
 
 BT="Sign a Server Certificate Signing Request"
@@ -108,8 +116,7 @@ DNS.1                  = ${NAME}
 
     CA="${DIR_CA}/${SVCA}"
     CATO=`openssl x509 -noout -dates -in "${CA}.crt" | tail -1 | sed -e "s/^.*=\(.*\) ..:..:.. \(....\).*$/\1 \2/"`
-    DAYS=`echo "(\`date -d "${CATO}" +%s\` - \`date +%s\`) / (24*3600) -1" | bc`
-
+    DAYS="$((($(date -d "${CATO}" '+%s') - $(date '+%s'))/(24*3600)-1))"
     openssl x509 -req -days ${DAYS} \
                  -extfile "${SSL_CONFIG}" -extensions v3_ext \
                  -in "${NAME}.csr" \

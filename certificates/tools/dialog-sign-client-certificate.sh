@@ -8,14 +8,22 @@
 #  This script signs server certificates
 #
 
-if [ -z ${DISPLAY} ]
+DIALOG=""
+
+if [ `which dialog` ]; then DIALOG=dialog; TERM=xterm; fi
+
+if [ ! -z ${DISPLAY} ] && [ `which Xdialog` ]
 then
-        DIALOG=dialog
-else
 	export XDIALOG_HIGH_DIALOG_COMPAT=true
 	export XDIALOG_FORCE_AUTOSIZE=true
 	DIALOG="Xdialog --fixed-font --left --cr-wrap --no-buttons "
 #	DIALOG=dialog
+fi
+
+if [ "${DIALOG}" == "" ]
+then
+	echo "ERROR: No Dialog"
+	exit
 fi
 
 BT="Sign a Client Certificate Signing Request"
@@ -92,18 +100,17 @@ for C in `egrep "^CLIENT:" ${HISTORY} | cut -d: -f2`; do SERIAL=${C}; done
 
 if [[ -f "${NAME}" && ${NAME##*.} == "csr" ]]
 then
-	NAME="${NAME%.*}"
-	SERIAL=$((SERIAL+1))
-	CA="${DIR_CA}/${CLCA}"
-	CATO=`openssl x509 -noout -dates -in "${CA}.crt" | tail -1 | sed -e "s/^.*=\(.*\) ..:..:.. \(....\).*$/\1 \2/"`
-	DAYS=`echo "(\`date -d "${CATO}" +%s\` - \`date +%s\`) / (24*3600) -1" | bc`
-
-	openssl x509 -req -days "${DAYS}" \
+    NAME="${NAME%.*}"
+    SERIAL=$((SERIAL+1))
+    CA="${DIR_CA}/${CLCA}"
+    CATO=`openssl x509 -noout -dates -in "${CA}.crt" | tail -1 | sed -e "s/^.*=\(.*\) ..:..:.. \(....\).*$/\1 \2/"`
+    DAYS="$((($(date -d "${CATO}" '+%s') - $(date '+%s'))/(24*3600)-1))"
+    openssl x509 -req -days ${DAYS} \
 	             -in "${NAME}.csr" \
 	             -CA "${CA}.crt" -CAkey "${CA}.key" \
 	             -set_serial ${SERIAL} \
 	             -out "${NAME}.crt"
-	echo "CLIENT:${SERIAL}:Certificate for ${NAME##*/} is: ${NAME}.crt (${DAYS} days)" | tee -a ${HISTORY}
+    echo "CLIENT:${SERIAL}:Certificate for ${NAME##*/} is: ${NAME}.crt (${DAYS} days)" | tee -a ${HISTORY}
 fi
 
 cd "${WORKDIR}"

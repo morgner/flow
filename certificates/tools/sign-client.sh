@@ -38,7 +38,9 @@ for NAME in $*
     NAME=${NAME%.*}
     SERIAL=$((SERIAL+1))
     CA="${DIR_CA}/${CLCA}"
-    openssl x509 -req -days 6840 -in "${NAME}.csr" -CA "${CA}.crt" -CAkey "${CA}.key" -set_serial ${SERIAL} -out "${NAME}.crt"
+    CATO=`openssl x509 -noout -dates -in "${CA}.crt" | tail -1 | sed -e "s/^.*=\(.*\) ..:..:.. \(....\).*$/\1 \2/"`
+    DAYS="$((($(date -d "${CATO}" '+%s') - $(date '+%s'))/(24*3600)-1))"
+    openssl x509 -req -days ${DAYS} -in "${NAME}.csr" -CA "${CA}.crt" -CAkey "${CA}.key" -set_serial ${SERIAL} -out "${NAME}.crt"
     echo "CLIENT:${SERIAL}:Certificate for ${NAME##*/} is: ${NAME}.crt" | tee -a ${HISTORY}
     fi
   done

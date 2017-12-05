@@ -51,8 +51,7 @@ DNS.1                  = ${NAME}
 
     CA="${DIR_CA}/${SVCA}"
     CATO=`openssl x509 -noout -dates -in "${CA}.crt" | tail -1 | sed -e "s/^.*=\(.*\) ..:..:.. \(....\).*$/\1 \2/"`
-    DAYS=`echo "(\`date -d "${CATO}" +%s\` - \`date +%s\`) / (24*3600) -1" | bc`
-
+    DAYS="$((($(date -d "${CATO}" '+%s') - $(date '+%s'))/(24*3600)-1))"
     openssl x509 -req -days ${DAYS} \
                  -extfile "${SSL_CONFIG}" -extensions v3_ext \
                  -in "${NAME}.csr" \

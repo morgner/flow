@@ -95,7 +95,7 @@ LOCATION="City of Bern"
 openssl ecparam -genkey -name ${CURVE} -out "${DIR_CA}/${NAME}.key"
 openssl req     -new -utf8 -sha256 \
                 -x509 \
-                -days 7302 \
+                -days 7305 \
                 -subj "/CN=${NAME}/O=${ORGANISATION}/C=${COUNTRY}/ST=${STATE}/L=${LOCATION}" \
                 -key "${DIR_CA}/${NAME}.key" \
                 -out "${DIR_CA}/${NAME}.crt"
@@ -127,12 +127,14 @@ openssl req -new -utf8 -sha256 \
             -out "${DIR_CA}/${NAME}.csr"
 SERIAL="`od -An -N2 -d < /dev/urandom | sed -e 's/\s//g'`"
 CA=${CART}
-openssl x509 -req -days 7301 \
+CATO=`openssl x509 -noout -dates -in "${DIR_CA}/${CA}.crt" | tail -1 | sed -e "s/^.*=\(.*\) ..:..:.. \(....\).*$/\1 \2/"`
+DAYS="$((($(date -d "${CATO}" '+%s') - $(date '+%s'))/(24*3600)-1))"
+openssl x509 -req -days ${DAYS} \
              -extfile "${SSL_CONFIG}" -extensions v3_ext \
              -in "${DIR_CA}/${NAME}.csr" \
              -CA "${DIR_CA}/${CA}.crt" -CAkey "${DIR_CA}/${CA}.key" -set_serial "${SERIAL}" \
              -out "${DIR_CA}/${NAME}.crt"
-echo "SERVER:${SERIAL}:Server CA Certificate is: ${DIR_CA}/${NAME}.crt" | tee -a ${HISTORY}
+echo "SERVER:${SERIAL}:Server CA Certificate is: ${DIR_CA}/${NAME}.crt (${DAYS} days)" | tee -a ${HISTORY}
 
 
 #######################################################################
@@ -153,12 +155,14 @@ openssl req -new -utf8 -sha256 \
             -out "${DIR_CA}/${NAME}.csr"
 SERIAL="`od -An -N2 -d < /dev/urandom | sed -e 's/\s//g'`"
 CA=${CART}
-openssl x509 -req -days 7301 \
+CATO=`openssl x509 -noout -dates -in "${DIR_CA}/${CA}.crt" | tail -1 | sed -e "s/^.*=\(.*\) ..:..:.. \(....\).*$/\1 \2/"`
+DAYS="$((($(date -d "${CATO}" '+%s') - $(date '+%s'))/(24*3600)-1))"
+openssl x509 -req -days ${DAYS} \
              -extfile "${SSL_CONFIG}" -extensions v3_ext \
              -in "${DIR_CA}/${NAME}.csr" \
              -CA "${DIR_CA}/${CA}.crt" -CAkey "${DIR_CA}/${CA}.key" -set_serial "${SERIAL}" \
              -out "${DIR_CA}/${NAME}.crt"
-echo "CLIENT:${SERIAL}:Client CA Certificate is: ${DIR_CA}/${NAME}.crt" | tee -a ${HISTORY}
+echo "CLIENT:${SERIAL}:Client CA Certificate is: ${DIR_CA}/${NAME}.crt (${DAYS} days)" | tee -a ${HISTORY}
 
 
 #######################################################################
@@ -193,7 +197,7 @@ DNS.1                  = ${NAME}
               -out "${NAME}.csr" 
   CA="${DIR_CA}/${SVCA}"
   CATO=`openssl x509 -noout -dates -in "${CA}.crt" | tail -1 | sed -e "s/^.*=\(.*\) ..:..:.. \(....\).*$/\1 \2/"`
-  DAYS=`echo "(\`date -d "${CATO}" +%s\` - \`date +%s\`) / (24*3600) -1" | bc`
+  DAYS="$((($(date -d "${CATO}" '+%s') - $(date '+%s'))/(24*3600)-1))"
   openssl x509 -req \
                -days ${DAYS} \
                -extfile "${SSL_CONFIG}" -extensions v3_ext \
@@ -229,7 +233,7 @@ for NAME in ${CLIENTS}
               -out "${NAME}.csr"
   CA="${DIR_CA}/${CLCA}"
   CATO=`openssl x509 -noout -dates -in "${CA}.crt" | tail -1 | sed -e "s/^.*=\(.*\) ..:..:.. \(....\).*$/\1 \2/"`
-  DAYS=`echo "(\`date -d "${CATO}" +%s\` - \`date +%s\`) / (24*3600) -1" | bc`
+  DAYS="$((($(date -d "${CATO}" '+%s') - $(date '+%s'))/(24*3600)-1))"
   openssl x509 -req \
                -days ${DAYS} \
                -in "${NAME}.csr" \

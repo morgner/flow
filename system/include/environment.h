@@ -15,10 +15,10 @@
                     Interpretation Callback Sample
                     ==============================
 
-bool OptionCallback(           char    c,        // short option (letter)
-                    const std::string& rsName,   // long option (word)
-                    const std::string& rsData,   // parameter data
-                    CEnvironment&      roThis)   // the calling environment
+bool OptionCallback(       char         c,        // short option (letter)
+                    std::string const & rsName,   // long option (word)
+                    std::string const & rsData,   // parameter data
+                    CEnvironment&       roThis)   // the calling environment
   {
   switch ( c )
     {
@@ -44,42 +44,51 @@ oEnvironment.OptionCallbackSet( OptionCallback );
 #include <string>
 #include <vector>
 #include <map>
+#include <tuple>
 
 #include <getopt.h>
 #include <stdlib.h>
 #include <stdio.h>   // EOF
 
+using namespace std::string_literals;
+
+typedef std::tuple<int, std::string, std::string> TOption;
+TOption t(3, "abc"s, "ccc"s);
+
+/*
+int         o;
+std::string a;
+std::string c;
+std::tie (o, a, c) = t;
+std::tie (std::ignore, a, c) = t;
+std::get<0>(t) = 1;
+a = std::get<1>(t);
+*/
 class CEnvironment : public std::map<std::string, std::string>
   {
   public:
-    typedef bool (*TOptionCallback)(            char    c, 
-                                     const std::string& rsName,
-                                     const std::string& rsData,
+    typedef bool (*TOptionCallback)(        char         c, 
+                                     std::string const & rsName,
+                                     std::string const & rsData,
                                      CEnvironment&      roThis);
 
     class COptions : public std::vector<option>
       {
       protected:
-        CEnvironment* m_poEnvironment;
-        option        m_tNullOption;
+        CEnvironment* m_poEnvironment{nullptr};
+        option const  m_tNullOption ={nullptr,0,nullptr,0};
 
         std::vector<std::string> m_vsHelp;
         std::vector<std::string> m_vsDefault;
         std::string              m_sShortOpt;
 
-        size_t m_nLenMaxLongOpt;
-        size_t m_nLenMaxHelp;
-        size_t m_nLenMaxDefault;
+        size_t m_nLenMaxLongOpt{0};
+        size_t m_nLenMaxHelp   {0};
+        size_t m_nLenMaxDefault{0};
 
       public:
         COptions()
-          : m_poEnvironment( 0 ),
-            m_nLenMaxLongOpt( 0 ),
-            m_nLenMaxHelp( 0 ),
-            m_nLenMaxDefault( 0 )
           {
-          option no = { 0, 0, 0, 0 };
-          m_tNullOption = no;
           push_back( m_tNullOption );
           } // COptions()
 
@@ -96,9 +105,9 @@ class CEnvironment : public std::map<std::string, std::string>
           return m_poEnvironment = poEnvironment;
           } // CEnvironment* EnvironmentSet( CEnvironment* poEnvironment )
 
-        void Append (const      option& rtOption,
-                     const std::string& rsHelp,
-                     const std::string& rsDefault )
+        void Append (     option const & rtOption,
+                     std::string const & rsHelp,
+                     std::string const & rsDefault )
           {
           back() = rtOption;
           push_back( m_tNullOption );
@@ -127,21 +136,21 @@ class CEnvironment : public std::map<std::string, std::string>
             {
             m_poEnvironment->OptionSet( rtOption.val, rtOption.name, m_vsDefault.back() );
             } // if ( m_poEnvironment && m_vsD ...
-          } // void Append (const option& rtOption, ...
+          } // void Append (option const & rtOption, ...
 
         operator option* () { return &this->front(); }
         operator option& () { return  this->front(); }
 
-        const std::string& ShortOptionsGet() { return m_sShortOpt; }
+        std::string const & ShortOptionsGet() { return m_sShortOpt; }
 
-        bool hasShortOption( const int c )
+        bool hasShortOption( int const c )
           {
           return ShortOptionsGet().find( (char)c ) != std::string::npos;
           }
         
-        std::string LongOptionByShortOption( const int c )
+        std::string LongOptionByShortOption( int const c )
           {
-          const static std::string sUnknown = "unknown";
+          static std::string const sUnknown = "unknown";
           for ( iterator it=begin(); it != end(); ++it )
             {
             if ( it->val == c )
@@ -179,7 +188,7 @@ class CEnvironment : public std::map<std::string, std::string>
       TOptionCallback m_fOptionsCallback;
 
     public:
-      CEnvironment( int argc, const char** argv )
+      CEnvironment( int argc, char const ** argv )
         : m_nArgumentCount ( argc ),
           m_ppcArguments   ( const_cast<char**>(argv) ),
           m_fOptionsCallback( 0 )
@@ -188,31 +197,31 @@ class CEnvironment : public std::map<std::string, std::string>
         m_sProgramName = m_sProgramName.substr( m_sProgramName.rfind('/')+1 );
 
         m_oOptions.EnvironmentSet( this );
-        } // CEnvironment( int argc, const char** argv )
+        } // CEnvironment( int argc, char const ** argv )
 
-    void OptionAppend ( const std::string&  rsName,
-                              int           nHasFlag,
-                              int*          pnFlag,
-                              int           nVal,
-                        const std::string&  rsHelp,
-                        const std::string&  rsDefault )
+    void OptionAppend ( std::string const &  rsName,
+                             int             nHasFlag,
+                             int*            pnFlag,
+                             int             nVal,
+                        std::string const &  rsHelp,
+                        std::string const &  rsDefault )
       {
       char* pcName = new char[rsName.length()+1];
       strncpy( pcName, rsName.c_str(), rsName.length() );
       pcName[ rsName.length() ] = 0;
       option tOption = { pcName, nHasFlag, pnFlag, nVal } ;
       m_oOptions.Append( tOption, rsHelp, rsDefault);
-      } // void OptionAppend ( const std::string&  rsName,
+      } // void OptionAppend ( std::string const &  rsName,
 
     void OptionCallbackSet( TOptionCallback fOptionsCallback )
       {
       m_fOptionsCallback = fOptionsCallback;
       } // void OptionCallbackSet( TOptionCallback fOptionsCallback )
 
-    const std::string& ProgramNameGet()
+    std::string const & ProgramNameGet()
       {
       return m_sProgramName;
-      } // const std::string& ProgramNameGet()
+      } // std::string const & ProgramNameGet()
 
     void CommandlineRead ()
       {
@@ -247,7 +256,7 @@ class CEnvironment : public std::map<std::string, std::string>
       } // virtual void UsageExit( int nStatus )
 
   protected:
-    void OptionSet( char c, const std::string& rsName, const std::string& rsData )
+    void OptionSet( char c, std::string const & rsName, std::string const & rsData )
       {
       if ( ! ( m_fOptionsCallback != 0 && m_fOptionsCallback(c, rsName, rsData, *this)) )
         {
@@ -288,7 +297,7 @@ class CEnvironment : public std::map<std::string, std::string>
             break;
           } // switch ( c )
         } // if ( ! ( m_fOptionsCallback != 0 && m_fOptionsCallback( …
-      } // void OptionSet( char c, const std::string& rsName, con...
+      } // void OptionSet( char c, std::string const & rsName, con...
 
   }; // class CEnvironment
 
