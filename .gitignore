@@ -21,3 +21,7 @@ certificates/tools/CERTIFICATES
 certificates/tools/client/
 certificates/tools/server/
 
+*.pyc
+__pycache__
+*.db
+*.tbz2
