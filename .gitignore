@@ -25,3 +25,4 @@ certificates/tools/server/
 __pycache__
 *.db
 *.tbz2
+VSS
