@@ -1,6 +1,50 @@
 <!doctype html>
-<title>Flaskr</title>
-<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<title>Flaskr</title>
+		<link rel=icon       type=image/x-icon href="{{ url_for('static', filename='favicon.ico') }}">
+		<link rel=stylesheet type=text/css     href="{{ url_for('static', filename='style.css') }}">
+	</head>
+<!--
+	<header>
+		<nav class="navigation">
+			<ul>
+				<li><a href="#">Home</a></li>
+				<li><a href="#">About</a></li>
+			</ul>
+		</nav>
+		<input type="search">
+		<h2>This is the header.</h2>
+	</header>
+-->
+	<body>
+<!--
+		<section class="Part">
+			section
+		</section>
+
+		<section class="Part">
+			section
+			<form>
+				<input type="submit">
+				<input type="text">
+			</form>
+		</section>
+
+		<aside>
+			aside
+		</aside>
+
+		<figure>
+			<label>my image 1</label>
+			<img src="image1.jpg">
+			<label>my image 2</label>
+			<img src="image2.jpg">
+		</figure>
+-->
+		<article>
+			<p>You know what you are doing?</p>
 <div class=page>
   <h1>Flaskr</h1>
   <div class=metanav>
@@ -11,7 +55,19 @@
   {% endif %}
   </div>
   {% for message in get_flashed_messages() %}
-    <div class=flash>{{ message }}</div>
-  {% endfor %}
+  <div class=flash>{{ message }}</div>{% endfor %}
   {% block body %}{% endblock %}
 </div>
+		</article>
+
+	</body>
+<!--
+	<footer>
+		<ul>
+			<li><a href="#">About</a></li>
+			<li><a href="#">Contact</a></li>
+		</ul>
+		<h5>copyleft clause</h5>
+	</footer>
+-->
+</html>

@@ -17,10 +17,10 @@ user nginx;
 
     server {
         listen       127.0.0.1:80;
-        server_name  lenovum;
+        server_name  localhost;
 
 	location / {
-       		try_files $uri @flaskr;
+            try_files $uri @flaskr;
 	}
 	location @flaskr {
 	    include uwsgi_params;
