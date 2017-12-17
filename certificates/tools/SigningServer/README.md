@@ -5,7 +5,7 @@
 # nginx
 ## nginx.conf (partial)
 
-Ensure the dir is present, writable for the flask user and rw for nginx
+Ensure the directory is present, writable for the flask user and the socket is rw for nginx
 
 ```nginx.conf
 user nginx;
