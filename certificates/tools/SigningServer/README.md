@@ -6,7 +6,7 @@ flask initdb
 # nginx
 ## nginx.conf (partial)
 
-user nginx;
+ user nginx;
 
     server {
         listen       127.0.0.1:80;
@@ -17,8 +17,8 @@ user nginx;
 	}
 	location @flaskr {
 	    include uwsgi_params;
-#           ensure the dir is present, writable for 
-#           the flask user and rw for nginx
+----------- ensure the dir is present, writable for 
+----------- the flask user and rw for nginx
 	    uwsgi_pass unix:/var/run/flaskr/flaskr.sock;
 	}
     }
