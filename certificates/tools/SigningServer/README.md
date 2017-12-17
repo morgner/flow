@@ -1,12 +1,14 @@
 # Setup DB
-flask initdb
 
-#!usermod -a -G uswgi-user-name nginx
+`flask initdb`
 
 # nginx
 ## nginx.conf (partial)
 
- user nginx;
+Ensure the dir is present, writable for the flask user and rw for nginx
+
+```nginx.conf
+user nginx;
 
     server {
         listen       127.0.0.1:80;
@@ -17,31 +19,35 @@ flask initdb
 	}
 	location @flaskr {
 	    include uwsgi_params;
------------ ensure the dir is present, writable for 
------------ the flask user and rw for nginx
 	    uwsgi_pass unix:/var/run/flaskr/flaskr.sock;
 	}
     }
+```
+
 
 ## SE Linux (like fedora)
+
+```bash
 setenforce 0
 grep nginx /var/log/audit/audit.log | audit2allow -m nginx > nginx.te
 grep nginx /var/log/audit/audit.log | audit2allow -M nginx
 semodule -i nginx.pp
 setenforce 1
+#!usermod -a -G uswgi-user-name nginx
+```
 
 # virtualenv (optional)
 
-pip install --editable .
+`pip install --editable .`
 
 # Run
 ## application
 
-./run.sh
+`./run.sh`
 
 ## uwsgi
 
-./urun.sh
+`./urun.sh`
 
 #uwsgi flaskr/flaskr.ini
 
