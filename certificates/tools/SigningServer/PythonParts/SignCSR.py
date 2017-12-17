@@ -18,7 +18,7 @@ with open("localhost.csr", "r") as csr_file:
 #req = crypto.load_certificate_request(crypto.FILETYPE_PEM, open("localhost.csr").read())
 
 cert = crypto.X509()
-#cert.set_subject(req.get_subject())
+cert.set_subject(req.get_subject())
 cert.set_serial_number(1)
 cert.gmtime_adj_notBefore(0)
 cert.set_notAfter(ca_cert.get_notAfter()) # - 1d)
