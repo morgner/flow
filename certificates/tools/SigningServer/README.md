@@ -1,10 +1,10 @@
-= Setup DB
+# Setup DB
 flask initdb
 
 #!usermod -a -G uswgi-user-name nginx
 
-= nginx
-== nginx.conf (partial)
+# nginx
+## nginx.conf (partial)
 
 user nginx;
 
@@ -23,23 +23,23 @@ user nginx;
 	}
     }
 
-== SE Linux (like fedora)
-# setenforce 0
-# grep nginx /var/log/audit/audit.log | audit2allow -m nginx > nginx.te
-# grep nginx /var/log/audit/audit.log | audit2allow -M nginx
-# semodule -i nginx.pp
-# setenforce 1
+## SE Linux (like fedora)
+setenforce 0
+grep nginx /var/log/audit/audit.log | audit2allow -m nginx > nginx.te
+grep nginx /var/log/audit/audit.log | audit2allow -M nginx
+semodule -i nginx.pp
+setenforce 1
 
-= virtualenv (optional)
+# virtualenv (optional)
 
 pip install --editable .
 
-= Run
-== application
+# Run
+## application
 
 ./run.sh
 
-== uwsgi
+## uwsgi
 
 ./urun.sh
 
