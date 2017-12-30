@@ -15,11 +15,11 @@ user nginx;
         server_name  localhost;
 
 	location / {
-            try_files $uri @moca;
+            try_files $uri @flaskr;
 	}
-	location @moca {
+	location @flaskr {
 	    include uwsgi_params;
-	    uwsgi_pass unix:/var/run/moca/moca.sock;
+	    uwsgi_pass unix:/var/run/flaskr/flaskr.sock;
 	}
     }
 ```
@@ -49,5 +49,5 @@ setenforce 1
 
 `./urun.sh`
 
-#uwsgi moca/moca.ini
+#uwsgi flaskr/flaskr.ini
 

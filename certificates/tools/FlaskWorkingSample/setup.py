@@ -1,14 +1,14 @@
 from setuptools import setup , find_packages
 
 setup(
-    name='moca',
-    #packages=['moca'],
+    name='flaskr',
+    #packages=['flaskr'],
 
     description='Simple microblog example using Flask',
     packages=find_packages(),
     entry_points='''
         [flask.commands]
-        initdb=moca.moca:initdb_command
+        initdb=flaskr.flaskr:initdb_command
         ''',
 
     include_package_data=True,

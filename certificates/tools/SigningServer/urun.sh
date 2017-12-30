@@ -1,3 +1,3 @@
 #! /usr/bin/env bash
 
-uwsgi flaskr/flaskr.ini 
+uwsgi moca/moca.ini 
