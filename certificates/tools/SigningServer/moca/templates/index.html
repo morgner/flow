@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+{% block body %}
+    <h2>Certificate Signing Request</h2>
+    <form action="{{ url_for('sign_csr') }}" method=post class=add-entry>
+    <textarea name=csr rows=20 cols=65></textarea>
+    <button name=signer type=submit value=client>Client</button>
+    <button name=signer type=submit value=server>Server</button>
+    </form>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block body %}
+  <ul class=entries>{% for prop in entries.REQS %}
+    <li>{{ prop[0] }} = {{ prop[1] }}</li>
+  {% endfor %}</ul>
+  <h3>Your certificate</h3>
+  <pre>{{ entries.CERT }}</pre>
+  <h3>The signing CA</h3>
+  <pre>{{ entries.CA }}</pre>
+  <h3>The root certificate</h3>
+  <pre>{{ entries.ROOT }}</pre>
+{% endblock %}

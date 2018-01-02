@@ -1,7 +1,3 @@
-# Setup DB
-
-`flask initdb`
-
 # nginx
 ## nginx.conf (partial)
 
@@ -48,6 +44,4 @@ setenforce 1
 ## uwsgi
 
 `./urun.sh`
-
-#uwsgi moca/moca.ini
 
