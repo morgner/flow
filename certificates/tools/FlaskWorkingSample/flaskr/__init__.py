@@ -1,2 +1,0 @@
-from .flaskr import app
-

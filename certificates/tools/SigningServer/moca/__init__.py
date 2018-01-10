@@ -1,2 +1,0 @@
-from .moca import app
-
